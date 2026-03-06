@@ -1,0 +1,141 @@
+{
+  "videos": [
+    {
+      "video_id": "nn001",
+      "title": "Neural Networks Lecture 01",
+      "duration": 4500,
+      "speaker": "Prof. Smith",
+      "url": "https://www.youtube.com/watch?v=aircAruvnKk",
+      "chapters": [
+        {
+          "id": "ch1",
+          "start": 0,
+          "end": 900,
+          "title": "Introduction to Neural Networks",
+          "summary_short": "Basics and history.",
+          "key_concepts": ["perceptron", "activation"]
+        },
+        {
+          "id": "ch2",
+          "start": 900,
+          "end": 1800,
+          "title": "Feedforward Networks",
+          "summary_short": "Architecture and forward pass.",
+          "key_concepts": ["layers", "weights"]
+        },
+        {
+          "id": "ch3",
+          "start": 1800,
+          "end": 2700,
+          "title": "Backpropagation",
+          "summary_short": "Gradient descent explained.",
+          "key_concepts": ["backprop", "loss"]
+        }
+      ],
+      "summaries": {
+        "short": "Intro to neural nets, backprop, optimizers, CNNs.",
+        "medium": "Covers perceptrons, feedforward, training algorithms, and conv nets with examples.",
+        "long": "Detailed lecture on NN fundamentals including math, code snippets, and real-world apps."
+      },
+      "key_concepts": ["backprop", "CNN", "optimizer", "perceptron"],
+      "topics": [
+        {"start": 0, "end": 900, "topic": "Introduction"},
+        {"start": 900, "end": 1800, "topic": "Feedforward Networks"},
+        {"start": 1800, "end": 2700, "topic": "Backpropagation"}
+      ],
+      "transcript": [
+        {"start": 0, "text": "Welcome to Neural Networks Lecture 1. We start with the basics..."},
+        {"start": 950, "text": "Feedforward networks are structured as layers of neurons..."},
+        {"start": 1850, "text": "Backpropagation computes gradients to optimize weights..."}
+      ]
+    },
+    {
+      "video_id": "nn002",
+      "title": "Neural Networks Lecture 02",
+      "duration": 3600,
+      "speaker": "Prof. Smith",
+      "url": "https://www.youtube.com/watch?v=IHZwWFHWa-w",
+      "chapters": [
+        {
+          "id": "ch4",
+          "start": 0,
+          "end": 900,
+          "title": "Optimization Techniques",
+          "summary_short": "Adam, SGD variants.",
+          "key_concepts": ["optimizer", "learning rate"]
+        },
+        {
+          "id": "ch5",
+          "start": 900,
+          "end": 1800,
+          "title": "CNNs and Applications",
+          "summary_short": "ConvNets for vision.",
+          "key_concepts": ["convolution", "pooling"]
+        }
+      ],
+      "summaries": {
+        "short": "Intro to neural nets, backprop, optimizers, CNNs.",
+        "medium": "Covers perceptrons, feedforward, training algorithms, and conv nets with examples.",
+        "long": "Detailed lecture on NN fundamentals including math, code snippets, and real-world apps."
+      },
+      "key_concepts": ["backprop", "CNN", "optimizer", "perceptron"],
+      "topics": [
+        {"start": 0, "end": 900, "topic": "Optimization Techniques"},
+        {"start": 900, "end": 1800, "topic": "CNNs and Applications"}
+      ],
+      "transcript": [
+        {"start": 0, "text": "In this lecture, we focus on optimization techniques such as Adam and SGD."},
+        {"start": 950, "text": "CNNs are powerful for vision tasks. We explore convolution and pooling..."}
+      ]
+    },
+    {
+      "video_id": "nn003",
+      "title": "Neural Networks Lecture 03",
+      "duration": 4500,
+      "speaker": "Prof. Smith",
+      "url": "https://www.youtube.com/watch?v=Ilg3gGewQ5U",
+      "chapters": [
+        {
+          "id": "ch1",
+          "start": 0,
+          "end": 900,
+          "title": "Introduction to Neural Networks",
+          "summary_short": "Basics and history.",
+          "key_concepts": ["perceptron", "activation"]
+        },
+        {
+          "id": "ch2",
+          "start": 900,
+          "end": 1800,
+          "title": "Feedforward Networks",
+          "summary_short": "Architecture and forward pass.",
+          "key_concepts": ["layers", "weights"]
+        }
+      ],
+      "summaries": {
+        "short": "Intro to neural nets, backprop, optimizers, CNNs.",
+        "medium": "Covers perceptrons, feedforward, training algorithms, and conv nets with examples.",
+        "long": "Detailed lecture on NN fundamentals including math, code snippets, and real-world apps."
+      },
+      "key_concepts": ["backprop", "CNN", "optimizer", "perceptron"],
+      "topics": [
+        {"start": 0, "end": 900, "topic": "Introduction"},
+        {"start": 900, "end": 1800, "topic": "Feedforward Networks"}
+      ],
+      "transcript": [
+        {"start": 0, "text": "Welcome back to Neural Networks Lecture 3."},
+        {"start": 950, "text": "We continue with feedforward networks..."}
+      ]
+    }
+  ],
+  "similarities": [
+    [1.0, 0.85, 0.65],
+    [0.85, 1.0, 0.75],
+    [0.65, 0.75, 1.0]
+  ],
+  "shared_topics": {
+    "backprop": [0, 1, 2],
+    "CNN": [0, 2],
+    "optimizer": [1, 2]
+  }
+}
