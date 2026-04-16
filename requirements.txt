@@ -1,7 +1,0 @@
-opencv-python
-openai-whisper
-transformers
-accelerate
-timm
-sentencepiece
-ipykernel
