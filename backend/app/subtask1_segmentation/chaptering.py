@@ -1,6 +1,59 @@
+"""
+chaptering.py  –  Hybrid slide-boundary + LLM chapter detection (v3)
+=====================================================================
+
+CHANGES IN v3
+-------------
+1.  SEMANTIC BOUNDARY DETECTION  (replaces blind LLM clustering)
+    Instead of showing the LLM the entire slide list and asking it to
+    guess chapter breaks, we now:
+
+      Stage A (no LLM)  — compute cosine distance between adjacent slide
+                          embeddings (produced by slide_captioner v4).
+                          High distance = topic shift = boundary candidate.
+                          Pick the top N candidates automatically.
+
+      Stage B (one LLM) — show the LLM only the 6-slide context window
+                          around each candidate and ask it to confirm /
+                          reject + give a title.  Prompt is ~10x shorter
+                          and the task is much easier.
+
+    Falls back to uniform time-based split if no embeddings are present
+    (i.e. if you ran the old slide_captioner).
+
+2.  All other behaviour (transcript aggregation, keyword extraction,
+    output format) is unchanged.
+
+PIPELINE
+--------
+    slide_captions.json  +  transcript.json
+        ↓
+    1. Score every slide transition by cosine distance of embeddings
+    ↓
+    2. Pick top-(N-1) candidates respecting a minimum gap
+    ↓
+    3. LLM validates candidates with compact context-window prompt
+    ↓
+    4. Assemble Chapter objects with transcript + captions per window
+    ↓
+    5. Keyword extraction (one small LLM call per chapter)
+    ↓
+    chapters.json
+
+USAGE
+-----
+python chaptering.py \\
+    --transcript  transcript.json \\
+    --captions    slide_captions.json \\
+    --output      chapters.json \\
+    [--model      llama3.1:8b] \\
+    [--skip-keywords]
+"""
+
 import argparse
 import json
 import logging
+import math
 import re
 import sys
 import time
@@ -17,197 +70,85 @@ logging.basicConfig(
 )
 log = logging.getLogger("chaptering")
 
-# ---------------------------------------------------------------------------
-# Constants
-# ---------------------------------------------------------------------------
 OLLAMA_URL    = "http://localhost:11434/api/generate"
 DEFAULT_MODEL = "llama3.1:8b"
 
 
-# ---------------------------------------------------------------------------
-# Data model
-# ---------------------------------------------------------------------------
+# ── data model ────────────────────────────────────────────────────────────────
 @dataclass
 class Chapter:
     chapter_id:     str
     chapter_index:  int
     title:          str
-    start_time:     float          # seconds
-    end_time:       float          # seconds
-    transcript:     str            # full speech text for this chapter
-    frame_captions: list[str]      # visual captions that fall in this chapter
-    keywords:       list[str]      # key terms extracted by LLM
+    start_time:     float
+    end_time:       float
+    transcript:     str
+    frame_captions: list[str]
+    keywords:       list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return asdict(self)
 
 
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-def seconds_to_hms(seconds: float) -> str:
-    total_s = int(seconds)
-    h = total_s // 3600
-    m = (total_s % 3600) // 60
-    s = total_s % 60
-    return f"{h:02d}:{m:02d}:{s:02d}"
+# ── helpers ───────────────────────────────────────────────────────────────────
+def hms(sec: float) -> str:
+    s = int(sec)
+    return f"{s//3600:02d}:{(s%3600)//60:02d}:{s%60:02d}"
 
 
-def hms_to_seconds(hms: str) -> float:
-    hms = hms.strip()
-    parts = hms.split(":")
-    try:
-        parts = [float(p) for p in parts]
-        if len(parts) == 3:
-            return parts[0] * 3600 + parts[1] * 60 + parts[2]
-        elif len(parts) == 2:
-            return parts[0] * 60 + parts[1]
-        return parts[0]
-    except ValueError:
-        return 0.0
+def from_hms(s: str) -> float:
+    parts = [float(x) for x in s.strip().split(":")]
+    if len(parts) == 3:
+        return parts[0]*3600 + parts[1]*60 + parts[2]
+    if len(parts) == 2:
+        return parts[0]*60 + parts[1]
+    return parts[0]
 
 
-# ---------------------------------------------------------------------------
-# Load inputs
-# ---------------------------------------------------------------------------
+# ── load inputs ───────────────────────────────────────────────────────────────
 def load_transcript(path: Path) -> list[dict]:
-    with open(path, "r", encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         data = json.load(f)
-    if "segments" not in data:
-        log.error(f"No 'segments' key found in {path}")
-        sys.exit(1)
-    log.info(f"Loaded {len(data['segments'])} transcript segments")
-    return data["segments"]
+    segs = data.get("segments", [])
+    log.info(f"Loaded {len(segs)} transcript segments")
+    return segs
 
 
-def load_captions(path: Path) -> list[dict]:
-    with open(path, "r", encoding="utf-8") as f:
+def load_slides(path: Path) -> list[dict]:
+    """
+    Load slide_captioner output.
+    Accepts both the new format (key: 'slides') and old format (key: 'captions').
+    """
+    with open(path, encoding="utf-8") as f:
         data = json.load(f)
-    caps = data["captions"]
-    last_caption = None
-    enriched = []
 
-    for c in caps:
-        text = c["caption"].strip()
-        changed = (text != last_caption and text != "[unchanged slide]")
-        enriched.append({
-            "timestamp": c["timestamp"],
-            "caption": text,
-            "slide_changed": changed
+    slides = data.get("slides") or data.get("captions") or []
+
+    normalised = []
+    for s in slides:
+        normalised.append({
+            "slide_id":   s.get("slide_id", s.get("segment_index", 0)),
+            "start":      s.get("slide_start", s.get("timestamp", 0.0)),
+            "end":        s.get("slide_end",   s.get("segment_end", 0.0)),
+            "caption":    s.get("caption", "").strip(),
+            "transcript": s.get("transcript", s.get("speech_text", "")).strip(),
+            "rep_ts":     s.get("representative_timestamp", s.get("timestamp", 0.0)),
+            "embedding":  s.get("embedding"),   # may be None for old files
         })
-        if changed:
-            last_caption = text
-    return enriched
+
+    normalised = [
+        s for s in normalised
+        if s["caption"] and s["caption"] != "[NO SLIDE]"
+    ]
+
+    log.info(f"Loaded {len(normalised)} slides from captions file")
+    has_emb = sum(1 for s in normalised if s.get("embedding"))
+    log.info(f"  {has_emb}/{len(normalised)} slides have embeddings")
+    return normalised
 
 
-# ---------------------------------------------------------------------------
-# Prompt building  (two-stage: boundaries first, then enrich)
-# ---------------------------------------------------------------------------
-def build_boundary_prompt(
-    transcript_segments: list[dict],
-    captions: list[dict],
-    video_duration: float,
-) -> str:
-    """
-    Stage 1 prompt: ask the LLM only to find chapter boundaries and titles.
-
-    Key improvements over the old single prompt:
-    - Explicitly tells the LLM what a real boundary looks like vs a false one
-    - Shows a worked example so the LLM understands the expected reasoning
-    - Asks it to justify each boundary (chain-of-thought), then emit JSON
-    - Uses a condensed timeline to stay within context limits
-    """
-
-    # Build condensed timeline — group transcript into ~30s windows
-    # to reduce token count while preserving temporal structure
-    timeline_lines = []
-
-    # Add transcript segments
-    for seg in transcript_segments:
-        timeline_lines.append(
-            (seg["start"], "SPEECH", seg["text"].strip())
-        )
-
-    # Add only *distinct* visual captions (skip "[unchanged slide]")
-    for cap in captions:
-        c = cap.get("caption", "").strip()
-        if c and c != "[unchanged slide]":
-            timeline_lines.append((cap["timestamp"], "VISUAL", c))
-
-    timeline_lines.sort(key=lambda x: x[0])
-
-    content_block = "\n".join(
-        f"[{seconds_to_hms(ts)}] [{kind}] {text}"
-        for ts, kind, text in timeline_lines
-    )
-
-    duration_str = seconds_to_hms(video_duration)
-    duration_min = video_duration / 60
-
-    prompt = f"""You are an expert video editor creating chapters for an educational lecture video.
-
-VIDEO DURATION: {duration_str} ({duration_min:.1f} minutes)
-
-YOUR TASK:
-Identify the timestamps where the lecturer genuinely transitions to a NEW topic or concept.
-Then output a JSON array of chapter boundaries.
-
-WHAT IS A REAL BOUNDARY (use these):
-- The speaker explicitly says transition phrases: "Now let's move on to...", "Next we will cover...",
-  "That brings us to...", "Let's now look at...", "Moving on...", "The next topic is..."
-- A new slide appears AND the speech content changes to a clearly different concept
-- The speaker finishes one complete concept and begins another unrelated one
-- A new section heading appears on a slide
-
-WHAT IS NOT A BOUNDARY (ignore these):
-- The speaker is still elaborating or giving examples of the SAME concept
-- A slide changes but the speech continues the same topic
-- Short pauses or filler phrases ("So...", "Um...", "Right...")
-- Questions and answers that stay on the same topic
-
-CONSTRAINTS:
-- First chapter MUST start at 00:00:00
-- Minimum chapter length: 3 minutes (unless it is the last chapter)
-- Maximum chapter length: 15 minutes
-- Aim for {max(3, int(duration_min // 8))} to {min(15, int(duration_min // 4))} chapters total
-- Chapter titles: 4–8 words, specific and descriptive (e.g. "Backpropagation Algorithm and Gradient Flow")
-  NOT generic (e.g. "Introduction", "Part 1", "Overview")
-
-=== TIMESTAMPED CONTENT ===
-{content_block}
-=== END OF CONTENT ===
-
-First, briefly identify the transition phrases or visual changes you found (2–3 sentences).
-Then output ONLY a valid JSON array in exactly this format, with no markdown or code fences:
-[
-  {{"start": "HH:MM:SS", "title": "Specific Chapter Title"}},
-  {{"start": "HH:MM:SS", "title": "Specific Chapter Title"}}
-]"""
-
-    return prompt
-
-
-def build_keywords_prompt(chapter_transcript: str, chapter_title: str) -> str:
-    """
-    Stage 2 prompt: given a chapter's transcript, extract keywords.
-    Kept separate and small so it runs fast and fits in context easily.
-    """
-    return f"""Extract the 5 to 8 most important technical keywords or key phrases from this lecture chapter transcript.
-These should be specific terms a student would search for or highlight in notes.
-
-Chapter title: {chapter_title}
-
-Transcript:
-{chapter_transcript[:3000]}
-
-Respond with ONLY a JSON array of strings. No explanation, no markdown, no code fences.
-Example: ["gradient descent", "learning rate", "loss function"]"""
-
-
-# ---------------------------------------------------------------------------
-# Ollama communication
-# ---------------------------------------------------------------------------
-def check_ollama_running() -> bool:
+# ── Ollama ────────────────────────────────────────────────────────────────────
+def check_ollama() -> bool:
     try:
         urllib.request.urlopen("http://localhost:11434", timeout=3)
         return True
@@ -215,348 +156,542 @@ def check_ollama_running() -> bool:
         return False
 
 
-def check_model_available(model: str) -> bool:
+def check_model(model: str) -> bool:
     try:
-        req = urllib.request.urlopen("http://localhost:11434/api/tags", timeout=5)
-        data = json.loads(req.read().decode())
-        available = [m["name"] for m in data.get("models", [])]
-        return any(model in m for m in available)
+        r = urllib.request.urlopen("http://localhost:11434/api/tags", timeout=5)
+        d = json.loads(r.read().decode())
+        return any(model in m["name"] for m in d.get("models", []))
     except Exception:
         return False
 
 
-def call_ollama(
-    prompt: str,
-    model: str,
-    temperature: float = 0.1,
-    num_predict: int = 2048,
-) -> str:
-    """
-    Send a prompt to Ollama and return the response text.
-
-    num_predict raised from 1024 → 2048 to avoid cut-off responses
-    on longer videos with many chapters.
-    """
+def call_ollama(prompt: str, model: str, temperature: float = 0.1,
+                num_predict: int = 1024) -> str:
     payload = json.dumps({
-        "model":  model,
-        "prompt": prompt,
-        "stream": False,
-        "options": {
-            "temperature": temperature,
-            "num_predict": num_predict,
-            "num_ctx":     32768,
-        },
-    }).encode("utf-8")
+        "model": model, "prompt": prompt, "stream": False,
+        "options": {"temperature": temperature, "num_predict": num_predict, "num_ctx": 16384},
+    }).encode()
 
     req = urllib.request.Request(
-        OLLAMA_URL,
-        data=payload,
-        headers={"Content-Type": "application/json"},
-        method="POST",
+        OLLAMA_URL, data=payload,
+        headers={"Content-Type": "application/json"}, method="POST",
     )
-
-    log.info(f"Calling Ollama ({model}) …")
+    log.info(f"Calling Ollama ({model}) ...")
     t0 = time.time()
-
     try:
         with urllib.request.urlopen(req, timeout=300) as resp:
             result = json.loads(resp.read().decode())
     except urllib.error.URLError as e:
-        log.error(f"Could not reach Ollama: {e}")
-        log.error("Make sure Ollama is running:  ollama serve")
+        log.error(f"Ollama unreachable: {e}\nRun:  ollama serve")
         sys.exit(1)
-
-    elapsed = time.time() - t0
-    log.info(f"Ollama responded in {elapsed:.1f}s")
+    log.info(f"Ollama responded in {time.time()-t0:.1f}s")
     return result.get("response", "")
 
 
-# ---------------------------------------------------------------------------
-# Response parsing
-# ---------------------------------------------------------------------------
-def parse_boundary_response(response: str, video_duration: float) -> list[dict]:
-    """
-    Parse the LLM's boundary response into a list of {start, title} dicts.
-    Three fallback strategies handle imperfect LLM output.
-    """
+# ── STAGE A · cosine-distance boundary scoring ────────────────────────────────
+def cosine_distance(a: list[float], b: list[float]) -> float:
+    """1 − cosine_similarity. Range [0, 2]. 0 = identical, 2 = opposite."""
+    dot = sum(x * y for x, y in zip(a, b))
+    na  = math.sqrt(sum(x * x for x in a))
+    nb  = math.sqrt(sum(y * y for y in b))
+    if na == 0 or nb == 0:
+        return 1.0
+    return 1.0 - dot / (na * nb)
 
-    # Strategy 1: direct JSON parse
+
+def score_boundaries(slides: list[dict]) -> list[dict]:
+    """
+    Compute cosine distance between each pair of adjacent slides and store
+    it as 'boundary_score' (raw) and 'boundary_score_smoothed' (±1 window).
+    A large score means the topic likely changed between those two slides.
+    """
+    embs = [s.get("embedding") for s in slides]
+    n    = len(slides)
+
+    raw = []
+    for i in range(n - 1):
+        if embs[i] and embs[i + 1]:
+            raw.append(cosine_distance(embs[i], embs[i + 1]))
+        else:
+            raw.append(0.0)
+    raw.append(0.0)   # sentinel for last slide
+
+    smoothed = []
+    for i in range(n):
+        vals = [raw[j] for j in range(max(0, i - 1), min(n, i + 2)) if raw[j] > 0]
+        smoothed.append(sum(vals) / len(vals) if vals else 0.0)
+
+    for i, s in enumerate(slides):
+        s["boundary_score"]          = round(raw[i],      4)
+        s["boundary_score_smoothed"] = round(smoothed[i], 4)
+
+    return slides
+
+
+def pick_candidate_boundaries(
+    slides:          list[dict],
+    target_chapters: int,
+    min_gap_sec:     float = 180.0,
+) -> list[int]:
+    """
+    Return slide indices (sorted) that are the best candidate chapter
+    starts, based on semantic boundary scores.  Slide 0 is always the
+    first chapter start and is NOT included in this list (it's added later).
+    """
+    scored = sorted(
+        range(len(slides)),
+        key=lambda i: slides[i].get("boundary_score_smoothed", 0.0),
+        reverse=True,
+    )
+
+    selected: list[int] = []
+    for idx in scored:
+        if len(selected) >= target_chapters - 1:
+            break
+        if idx == 0:
+            continue
+        start = slides[idx].get("start", 0.0)
+        too_close = any(
+            abs(start - slides[s].get("start", 0.0)) < min_gap_sec
+            for s in selected
+        )
+        if not too_close:
+            selected.append(idx)
+
+    selected.sort()
+    log.info(f"Picked {len(selected)} boundary candidates from semantic scores")
+    for idx in selected:
+        s = slides[idx]
+        log.info(
+            f"  slide {s.get('slide_id','?'):>3}  [{hms(s.get('start', 0))}]  "
+            f"score={s.get('boundary_score_smoothed', 0):.3f}  "
+            f"{s.get('caption','')[:60]}"
+        )
+    return selected
+
+
+# ── STAGE B · LLM validates candidates ───────────────────────────────────────
+def build_validation_prompt(
+    slides:          list[dict],
+    candidates:      list[int],
+    video_duration:  float,
+    target_chapters: int,
+) -> str:
+    """
+    Build a short prompt showing only the slides around each candidate
+    boundary (3 before + 3 after).  The LLM confirms/rejects and titles.
+    """
+    n = len(slides)
+
+    context_indices: set[int] = {0}
+    for c in candidates:
+        for offset in range(-3, 4):
+            idx = c + offset
+            if 0 <= idx < n:
+                context_indices.add(idx)
+
+    context_slides = sorted(context_indices)
+
+    lines = []
+    for idx in context_slides:
+        s     = slides[idx]
+        cap   = (s.get("caption") or "").strip()
+        cap   = cap.split("\n")[0][:80] if len(cap) > 80 else cap
+        score = s.get("boundary_score_smoothed", 0.0)
+        marker = "  ◀ CANDIDATE" if idx in candidates else ""
+        lines.append(
+            f"  #{idx:03d}  [{hms(s.get('start', 0))}]  "
+            f"(Δ={score:.2f}) {cap}{marker}"
+        )
+
+    context_block  = "\n".join(lines)
+    candidate_list = ", ".join(f"#{c:03d}" for c in candidates)
+
+    return f"""You are an expert video editor reviewing a lecture for chapter boundaries.
+
+VIDEO: {hms(video_duration)} total  |  Aim for {target_chapters} chapters
+
+Semantic analysis identified these CANDIDATE chapter boundaries: {candidate_list}
+Context slides (3 before/after each candidate) are shown below.
+Δ = topic-shift score (higher = more likely to be a real boundary).
+
+CONTEXT SLIDES:
+{context_block}
+
+YOUR JOB:
+1. Confirm or REJECT each candidate.  Reject if the content before and after
+   is clearly the same topic, sub-topic, or running example.
+2. You may add ONE extra boundary from the context slides if a major topic
+   shift is visible but was missed.
+3. Give each confirmed chapter a specific descriptive title (4-8 words).
+   Chapter 1 MUST start at slide #000.
+
+Respond with ONLY a JSON array.  No markdown, no explanation.  Example:
+[
+  {{"slide": 0,   "title": "Introduction to Information Retrieval"}},
+  {{"slide": 12,  "title": "Boolean vs Vector Space Models"}},
+  {{"slide": 31,  "title": "Evaluation Metrics and Benchmarks"}}
+]"""
+
+
+def build_keywords_prompt(transcript: str, title: str) -> str:
+    return f"""Extract 5-8 important technical keywords from this lecture transcript.
+Chapter: {title}
+Transcript: {transcript[:2500]}
+Respond with ONLY a JSON array of strings. No markdown. Example: ["term1", "term2"]"""
+
+
+# ── response parsing ──────────────────────────────────────────────────────────
+def parse_json_response(response: str) -> Optional[list]:
+    """Try to extract a JSON array from an LLM response."""
     try:
         data = json.loads(response.strip())
-        if isinstance(data, list):
+        if isinstance(data, list) and data:
             return data
     except json.JSONDecodeError:
         pass
-
-    # Strategy 2: extract JSON array from within prose
     match = re.search(r'\[\s*\{.*?\}\s*\]', response, re.DOTALL)
     if match:
         try:
             data = json.loads(match.group())
-            if isinstance(data, list):
+            if isinstance(data, list) and data:
                 return data
         except json.JSONDecodeError:
             pass
+    return None
 
-    # Strategy 3: line-by-line HH:MM:SS - Title pattern
-    log.warning("JSON parse failed — trying line-by-line fallback")
-    pattern = re.compile(r'(\d{1,2}:\d{2}:\d{2})\s*[-–:]\s*(.+)')
-    matches = pattern.findall(response)
-    if matches:
-        return [{"start": m[0], "title": m[1].strip()} for m in matches]
 
-    log.error("Could not parse LLM boundary response.")
-    log.error(f"Raw response:\n{response}")
-    sys.exit(1)
+def uniform_split(slides: list[dict], n_chapters: int = 5) -> list[dict]:
+    """Divide slides into n equal groups as a fallback."""
+    step = max(1, len(slides) // n_chapters)
+    result = []
+    for i in range(0, len(slides), step):
+        result.append({
+            "slide": slides[i]["slide_id"],
+            "title": f"Section {len(result) + 1}"
+        })
+    return result
 
 
 def parse_keywords_response(response: str) -> list[str]:
-    """Parse keyword JSON array from LLM response, with fallback."""
     try:
         data = json.loads(response.strip())
         if isinstance(data, list):
             return [str(k).strip() for k in data if k]
     except json.JSONDecodeError:
         pass
-
-    # Fallback: extract quoted strings
     return re.findall(r'"([^"]+)"', response)
 
 
-# ---------------------------------------------------------------------------
-# Chapter assembly
-# ---------------------------------------------------------------------------
-def assemble_chapters(
-    raw_boundaries: list[dict],
-    transcript_segments: list[dict],
-    captions: list[dict],
+# ── main chapter detection logic ──────────────────────────────────────────────
+def detect_chapters(
+    slides:          list[dict],
+    video_duration:  float,
+    target_chapters: int,
+    model:           str,
+    temperature:     float,
+) -> list[dict]:
+    """
+    Two-stage chapter detection.
+
+    If slides have embeddings (from slide_captioner v4):
+      Stage A — score transitions by cosine distance, pick top candidates
+      Stage B — LLM validates candidates with a compact context-window prompt
+
+    Otherwise falls back to the old single-pass LLM clustering using slide
+    titles only (same behaviour as chaptering v2).
+    """
+    has_embeddings = sum(1 for s in slides if s.get("embedding"))
+
+    if has_embeddings < len(slides) * 0.5:
+        log.warning(
+            f"Only {has_embeddings}/{len(slides)} slides have embeddings. "
+            "Falling back to title-based LLM clustering."
+        )
+        prompt   = _build_fallback_prompt(slides, video_duration, target_chapters)
+        response = call_ollama(prompt, model, temperature, num_predict=1024)
+        clusters = parse_json_response(response)
+        if clusters:
+            return clusters
+        log.warning("Fallback LLM response unparseable — using uniform split")
+        return uniform_split(slides, target_chapters)
+
+    # ── Stage A: score and pick candidates ───────────────────────────────────
+    slides = score_boundaries(slides)
+    candidates = pick_candidate_boundaries(slides, target_chapters)
+
+    if not candidates:
+        return [{"slide": slides[0].get("slide_id", 0), "title": "Full Lecture"}]
+
+    # ── Stage B: LLM validates ───────────────────────────────────────────────
+    prompt = build_validation_prompt(slides, candidates, video_duration, target_chapters)
+    log.info(f"Validation prompt: ~{len(prompt)//4} tokens")
+    response = call_ollama(prompt, model, temperature, num_predict=1024)
+
+    clusters = parse_json_response(response)
+    if clusters:
+        log.info(f"LLM confirmed {len(clusters)} chapters")
+        return clusters
+
+    # LLM failed to parse: use candidates directly with caption-derived titles
+    log.warning("LLM validation unparseable — using scored candidates directly")
+    result = [{"slide": 0, "title": "Introduction"}]
+    for c in candidates:
+        s     = slides[c]
+        cap   = (s.get("caption") or "").strip()
+        title = cap.split("\n")[0][:60].strip() or f"Section at {hms(s.get('start', 0))}"
+        result.append({"slide": s.get("slide_id", c), "title": title})
+    return result
+
+
+def _build_fallback_prompt(
+    slides: list[dict],
     video_duration: float,
-    video_stem: str,
+    target_chapters: int,
+) -> str:
+    """Original v2 prompt used when no embeddings are available."""
+    lines = []
+    for s in slides:
+        cap = s["caption"]
+        if len(cap) > 300:
+            cap = cap.split("\n")[0][:80]
+        else:
+            cap = cap[:80]
+        lines.append(f"  #{s['slide_id']:02d}  [{hms(s['start'])}]  {cap}")
+    slide_index = "\n".join(lines)
+
+    return f"""You are an expert video editor. You have a list of lecture slides with timestamps.
+Your job: group these slides into {target_chapters} chapters by identifying where the topic genuinely changes.
+
+VIDEO: {hms(video_duration)} ({video_duration/60:.0f} min total), {len(slides)} slides
+
+SLIDE LIST (slide number, timestamp, title/content):
+{slide_index}
+
+INSTRUCTIONS:
+- Each chapter starts at the timestamp of its FIRST slide.
+- Chapter 1 MUST start at slide #00.
+- Look for slides where the content clearly shifts to a new topic.
+- Give each chapter a specific descriptive title (4-8 words).
+- Aim for {target_chapters} chapters. Minimum chapter duration: 3 minutes.
+
+Respond with ONLY a JSON array. No markdown, no explanation. Example:
+[
+  {{"slide": 0,  "title": "Course Overview and Learning Objectives"}},
+  {{"slide": 4,  "title": "Definition and Scope of Information Retrieval"}}
+]"""
+
+
+# ── chapter assembly ──────────────────────────────────────────────────────────
+def assemble_chapters(
+    cluster_response:    list[dict],
+    slides:              list[dict],
+    transcript_segments: list[dict],
+    video_duration:      float,
+    video_stem:          str,
 ) -> list[Chapter]:
-    """
-    Convert raw {start, title} boundaries into full Chapter objects by:
-    - Enforcing first chapter at 00:00:00
-    - Sorting and deduplicating boundaries
-    - Collecting transcript text for each chapter window
-    - Collecting frame captions for each chapter window
-    Keywords are filled in later by a second LLM call.
-    """
+    slide_map = {s["slide_id"]: s for s in slides}
 
-    # Ensure chapter 1 starts at 0
-    if not raw_boundaries or hms_to_seconds(raw_boundaries[0]["start"]) > 5.0:
-        raw_boundaries.insert(0, {"start": "00:00:00", "title": "Introduction"})
+    # Ensure chapter 1 starts at slide 0
+    slide_ids_in_response = {item.get("slide", -1) for item in cluster_response}
+    if 0 not in slide_ids_in_response and slides:
+        cluster_response.insert(0, {"slide": slides[0]["slide_id"], "title": "Course Introduction and Overview"})
 
-    # Sort by time
-    raw_boundaries.sort(key=lambda x: hms_to_seconds(x["start"]))
+    def get_start(item):
+        sid = item.get("slide", 0)
+        return slide_map.get(sid, {}).get("start", 0.0)
 
-    # Deduplicate boundaries that are within 60s of each other
-    deduped = [raw_boundaries[0]]
-    for b in raw_boundaries[1:]:
-        if hms_to_seconds(b["start"]) - hms_to_seconds(deduped[-1]["start"]) >= 60:
-            deduped.append(b)
-    raw_boundaries = deduped
+    cluster_response.sort(key=get_start)
+
+    # Deduplicate chapters within 60s of each other
+    deduped = [cluster_response[0]]
+    for item in cluster_response[1:]:
+        if get_start(item) - get_start(deduped[-1]) >= 60:
+            deduped.append(item)
+    cluster_response = deduped
 
     chapters = []
-    for i, item in enumerate(raw_boundaries):
-        start = hms_to_seconds(item["start"])
-        end   = hms_to_seconds(raw_boundaries[i + 1]["start"]) \
-                if i + 1 < len(raw_boundaries) else video_duration
-        title = item.get("title", f"Chapter {i + 1}").strip()
+    for i, item in enumerate(cluster_response):
+        sid   = item.get("slide", 0)
+        slide = slide_map.get(sid, slides[0] if slides else {})
+        start = slide.get("start", 0.0)
+        title = item.get("title", f"Chapter {i+1}").strip()
 
-        # Collect transcript text for this time window
-        speech_parts = [
+        if i + 1 < len(cluster_response):
+            next_sid   = cluster_response[i+1].get("slide", 0)
+            next_slide = slide_map.get(next_sid, {})
+            end = next_slide.get("start", video_duration)
+        else:
+            end = video_duration
+
+        chapter_slides = [s for s in slides if start <= s["start"] < end]
+
+        seen_texts = set()
+        transcript_parts = []
+        for s in chapter_slides:
+            t = s.get("transcript", "").strip()
+            if t and t not in seen_texts:
+                transcript_parts.append(t)
+                seen_texts.add(t)
+
+        slide_covered = set()
+        for s in chapter_slides:
+            for seg in transcript_segments:
+                if seg["start"] >= s["start"] and seg["end"] <= s["end"]:
+                    slide_covered.add(id(seg))
+
+        extra_segs = [
             seg["text"].strip()
             for seg in transcript_segments
-            if seg["start"] >= start and seg["end"] <= end
+            if id(seg) not in slide_covered
+            and seg["start"] >= start and seg["end"] <= end
         ]
-        chapter_transcript = " ".join(speech_parts)
+        if extra_segs:
+            transcript_parts.extend(extra_segs)
 
-        # Collect frame captions for this time window
-        chapter_captions = [
-            cap["caption"].strip()
-            for cap in captions
-            if cap["timestamp"] >= start and cap["timestamp"] <= end
-            and cap["caption"].strip()
-            and cap["caption"].strip() != "[unchanged slide]"
-        ]
+        chapter_transcript = " ".join(transcript_parts)
 
-        # Build a stable chapter_id from the video stem and index
-        chapter_id = f"{video_stem}_ch{i + 1}"
+        frame_captions = []
+        for s in chapter_slides:
+            cap = s.get("caption", "").strip()
+            if cap and cap != "[NO SLIDE]":
+                if len(cap) > 300:
+                    cap = cap.split("\n")[0]
+                frame_captions.append(cap)
 
         chapters.append(Chapter(
-            chapter_id     = chapter_id,
-            chapter_index  = i + 1,
-            title          = title,
-            start_time     = round(start),
-            end_time       = round(end),
-            transcript     = chapter_transcript,
-            frame_captions = chapter_captions,
-            keywords       = [],   # filled in by enrich_keywords()
+            chapter_id    = f"{video_stem}_ch{i+1}",
+            chapter_index = i + 1,
+            title         = title,
+            start_time    = round(start),
+            end_time      = round(end),
+            transcript    = chapter_transcript,
+            frame_captions= frame_captions,
         ))
 
     log.info(f"Assembled {len(chapters)} chapters")
     return chapters
 
 
-def enrich_keywords(
-    chapters: list[Chapter],
-    model: str,
-    temperature: float,
-) -> list[Chapter]:
-    """
-    Second LLM pass: call Ollama once per chapter to extract keywords.
-    Uses a short focused prompt so each call is fast (~2–5s).
-    """
-    log.info("Extracting keywords for each chapter …")
+# ── keyword enrichment ────────────────────────────────────────────────────────
+def enrich_keywords(chapters: list[Chapter], model: str, temperature: float) -> list[Chapter]:
+    log.info("Extracting keywords per chapter ...")
     for ch in chapters:
         if not ch.transcript:
-            ch.keywords = []
             continue
-        prompt   = build_keywords_prompt(ch.transcript, ch.title)
-        response = call_ollama(prompt, model, temperature, num_predict=256)
-        ch.keywords = parse_keywords_response(response)
-        log.info(f"  Ch{ch.chapter_index} keywords: {ch.keywords}")
+        resp = call_ollama(
+            build_keywords_prompt(ch.transcript, ch.title),
+            model, temperature, num_predict=256,
+        )
+        ch.keywords = parse_keywords_response(resp)
+        log.info(f"  Ch{ch.chapter_index} '{ch.title[:40]}': {ch.keywords}")
     return chapters
 
 
-# ---------------------------------------------------------------------------
-# Output
-# ---------------------------------------------------------------------------
-def save_chapters(chapters: list[Chapter], output_path: Path, metadata: dict) -> None:
-    output = {
-        "metadata": metadata,
-        "chapters": [c.to_dict() for c in chapters],
-    }
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(output, f, indent=2, ensure_ascii=False)
-    log.info(f"Chapters saved → {output_path}")
+# ── output ────────────────────────────────────────────────────────────────────
+def save_chapters(chapters: list[Chapter], path: Path, metadata: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump({"metadata": metadata, "chapters": [c.to_dict() for c in chapters]},
+                  f, indent=2, ensure_ascii=False)
+    log.info(f"Saved → {path}")
 
 
 def print_chapters(chapters: list[Chapter]) -> None:
-    print("\n" + "═" * 70)
-    print(f"  {'CHAPTERS':^66}")
-    print("═" * 70)
+    print("\n" + "=" * 72)
+    print(f"  {'CHAPTERS':^68}")
+    print("=" * 72)
     for ch in chapters:
-        duration_min = (ch.end_time - ch.start_time) / 60
-        print(
-            f"  {ch.chapter_index:>2}.  "
-            f"[{seconds_to_hms(ch.start_time)} → {seconds_to_hms(ch.end_time)}]  "
-            f"({duration_min:.1f} min)  {ch.title}"
-        )
+        dur = (ch.end_time - ch.start_time) / 60
+        print(f"  {ch.chapter_index:>2}.  [{hms(ch.start_time)} → {hms(ch.end_time)}]  "
+              f"({dur:.1f} min)  {ch.title}")
         if ch.keywords:
             print(f"        Keywords: {', '.join(ch.keywords)}")
-    print("═" * 70 + "\n")
+    print("=" * 72 + "\n")
 
 
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
+# ── main ──────────────────────────────────────────────────────────────────────
 def run(
     transcript_path: str,
-    captions_path: str,
-    output_path: Optional[str] = None,
-    model: str = DEFAULT_MODEL,
-    temperature: float = 0.1,
-    skip_keywords: bool = False,
+    captions_path:   str,
+    output_path:     Optional[str] = None,
+    model:           str   = DEFAULT_MODEL,
+    temperature:     float = 0.1,
+    skip_keywords:   bool  = False,
+    target_chapters: int   = 0,
 ) -> list[Chapter]:
-    """
-    Full chaptering pipeline:
-      transcript + captions
-        → Stage 1: boundary detection (one LLM call)
-        → Stage 2: keyword extraction (one LLM call per chapter)
-        → enriched Chapter JSON
-    """
 
     transc_path = Path(transcript_path).resolve()
     caps_path   = Path(captions_path).resolve()
-    out         = Path(output_path) if output_path else \
-                  transc_path.parent / (transc_path.stem.replace("_transcript", "") + "_chapters.json")
-    video_stem  = transc_path.stem.replace("_transcript", "")
+    out = Path(output_path) if output_path else \
+          transc_path.parent / (transc_path.stem.replace("_transcript", "") + "_chapters.json")
+    video_stem = transc_path.stem.replace("_transcript", "")
 
     log.info(f"Transcript : {transc_path}")
     log.info(f"Captions   : {caps_path}")
     log.info(f"Output     : {out}")
     log.info(f"Model      : {model}")
 
-    # ---- Check Ollama -----------------------------------------------------------
-    if not check_ollama_running():
-        log.error(
-            "Ollama is not running.\n"
-            "Start it: open a terminal and run  ollama serve\n"
-            "Then try again."
-        )
-        sys.exit(1)
-    log.info("Ollama is running ✓")
+    if not check_ollama():
+        log.error("Ollama not running — run:  ollama serve"); sys.exit(1)
+    if not check_model(model):
+        log.error(f"Model '{model}' not pulled — run:  ollama pull {model}"); sys.exit(1)
+    log.info("Ollama OK")
 
-    if not check_model_available(model):
-        log.error(
-            f"Model '{model}' is not pulled.\n"
-            f"Run:  ollama pull {model}"
-        )
-        sys.exit(1)
-    log.info(f"Model '{model}' is available ✓")
-
-    # ---- Load inputs ------------------------------------------------------------
     transcript_segments = load_transcript(transc_path)
-    captions            = load_captions(caps_path)
+    slides              = load_slides(caps_path)
     video_duration      = transcript_segments[-1]["end"] if transcript_segments else 0.0
-    log.info(f"Video duration: {seconds_to_hms(video_duration)} ({video_duration:.0f}s)")
+    log.info(f"Duration: {hms(video_duration)}  |  Slides: {len(slides)}")
 
-    # ---- Stage 1: boundary detection --------------------------------------------
-    boundary_prompt = build_boundary_prompt(transcript_segments, captions, video_duration)
-    log.info(f"Boundary prompt: ~{len(boundary_prompt) // 4} tokens")
-    boundary_response = call_ollama(boundary_prompt, model, temperature, num_predict=2048)
-    raw_boundaries    = parse_boundary_response(boundary_response, video_duration)
-    log.info(f"LLM found {len(raw_boundaries)} boundaries")
+    if not slides:
+        log.error("No slides found in captions file."); sys.exit(1)
 
-    # ---- Assemble chapters with transcript + captions ---------------------------
-    chapters = assemble_chapters(
-        raw_boundaries, transcript_segments, captions, video_duration, video_stem
+    if target_chapters == 0:
+        target_chapters = max(3, min(12, int(video_duration / 60 / 8)))
+    log.info(f"Target chapters: {target_chapters}")
+
+    # ── detect chapters (semantic + LLM validation) ───────────────────────────
+    clusters = detect_chapters(
+        slides, video_duration, target_chapters, model, temperature
     )
+    log.info(f"Detected {len(clusters)} chapter clusters")
 
-    # ---- Stage 2: keyword extraction --------------------------------------------
+    # ── assemble ──────────────────────────────────────────────────────────────
+    chapters = assemble_chapters(clusters, slides, transcript_segments, video_duration, video_stem)
+
+    # ── keywords ──────────────────────────────────────────────────────────────
     if not skip_keywords:
         chapters = enrich_keywords(chapters, model, temperature)
-    else:
-        log.info("Skipping keyword extraction (--skip-keywords)")
 
-    # ---- Save -------------------------------------------------------------------
-    metadata = {
+    # ── save ──────────────────────────────────────────────────────────────────
+    save_chapters(chapters, out, {
         "transcript":             str(transc_path),
         "captions":               str(caps_path),
         "model":                  model,
         "temperature":            temperature,
         "video_duration_seconds": round(video_duration, 1),
+        "num_slides":             len(slides),
         "num_chapters":           len(chapters),
-    }
-    save_chapters(chapters, out, metadata)
+    })
     print_chapters(chapters)
-
     return chapters
 
 
-# ---------------------------------------------------------------------------
-# CLI
-# ---------------------------------------------------------------------------
+# ── CLI ───────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description="Generate enriched video chapters from transcript and frame captions using a local LLM.",
+    ap = argparse.ArgumentParser(
+        description="Semantic + LLM chapter detection from slide captions.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument("--transcript", required=True,
-                        help="Path to transcript JSON from asr.py")
-    parser.add_argument("--captions",   required=True,
-                        help="Path to captions JSON from frame_captioning.py")
-    parser.add_argument("--output",     default=None,
-                        help="Output JSON path. Defaults to <name>_chapters.json")
-    parser.add_argument("--model",      default=DEFAULT_MODEL,
-                        help="Ollama model name (e.g. llama3.1:8b, llama3.2:latest)")
-    parser.add_argument("--temperature", type=float, default=0.1,
-                        help="LLM sampling temperature. Keep low (0.0–0.2).")
-    parser.add_argument("--skip-keywords", action="store_true",
-                        help="Skip the keyword extraction pass (faster, no keywords in output).")
-    args = parser.parse_args()
+    ap.add_argument("--transcript",      required=True)
+    ap.add_argument("--captions",        required=True)
+    ap.add_argument("--output",          default=None)
+    ap.add_argument("--model",           default=DEFAULT_MODEL)
+    ap.add_argument("--temperature",     type=float, default=0.1)
+    ap.add_argument("--skip-keywords",   action="store_true")
+    ap.add_argument("--target-chapters", type=int, default=0,
+                    help="Number of chapters to aim for. 0 = auto (1 per 8 min).")
+    args = ap.parse_args()
 
     run(
         transcript_path = args.transcript,
@@ -565,4 +700,5 @@ if __name__ == "__main__":
         model           = args.model,
         temperature     = args.temperature,
         skip_keywords   = args.skip_keywords,
+        target_chapters = args.target_chapters,
     )

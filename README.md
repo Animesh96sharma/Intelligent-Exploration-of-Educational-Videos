@@ -1,5 +1,9 @@
 Conda Activate- conda activate myenv
 
+For Subtask 1 
+source venv/bin/activate
+python backend/app/subtask1_segmentation/run_pipeline.py --video data/raw/videos/myvideo.mp4
+
 # Intelligent-Exploration-of-Educational-Videos
 University Project work- will add details about the project
 

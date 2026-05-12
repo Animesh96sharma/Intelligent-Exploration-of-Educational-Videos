@@ -2,23 +2,22 @@
 scripts/run_subtask2.py
 
 Full Subtask 2 pipeline runner.
-Run this after subtask 1 has produced chapter JSON files.
 
 Usage:
-    python scripts/run_subtask2.py                # process all videos
-    python scripts/run_subtask2.py --limit 1      # process only 1 video (for quick testing)
-    python scripts/run_subtask2.py --step chapters # run only one step
-"""
+    python -m scripts.run_subtask2                    # run full pipeline
+    python -m scripts.run_subtask2 --step chapters    # one step only
+    python -m scripts.run_subtask2 --limit 1          # test with 1 video
+    python -m scripts.run_subtask2 --step evaluate    # run evaluation
 
+Steps: chapters → videos → embeddings → collection → evaluate
+"""
 import sys
 import argparse
 import logging
 from pathlib import Path
 
-# Add project root to path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-sys.path.insert(0, str(ROOT / "backend" / "app"))
 
 logging.basicConfig(
     level=logging.INFO,
@@ -27,94 +26,95 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-STEPS = ["chapters", "videos", "embeddings", "collection"]
+STEPS = ["chapters", "videos", "embeddings", "collection", "evaluate", "all"]
 
 
-# def run_step_chapters(limit):
-    # from subtask2_summarization.chapter_level.summarize_chapters import run_all
-    # logger.info("\n" + "="*60)
-    # logger.info("STEP 1: Chapter-Level Summarization")
-    # logger.info("="*60)
-    # results = run_all(limit=limit)
-    # logger.info(f"Chapter summaries generated for {len(results)} videos")
-
-def run_step_chapters(limit):
-    from subtask2_summarization.chapter_level.summarize_chapters import run_all
+def banner(title: str):
     logger.info("\n" + "="*60)
-    logger.info("STEP 1: Chapter-Level Summarization")
+    logger.info(f"  {title}")
     logger.info("="*60)
-    
-    # Make sure limit is passed correctly
-    if limit and limit > 0:
-        logger.info(f"Processing with limit: {limit} videos")
-    else:
-        logger.info("Processing ALL videos")
-    
+
+
+def run_chapters(limit):
+    from backend.app.subtask2_summarization.chapter_level.summarize_chapters import run_all
+    banner("STEP 1 — Chapter-Level Summarization")
     results = run_all(limit=limit)
-    logger.info(f"Chapter summaries generated for {len(results)} videos")
+    logger.info(f"  Chapter summaries done: {len(results)} videos")
 
-def run_step_videos(limit):
-    from subtask2_summarization.video_level.summarize_video import run_all
-    logger.info("\n" + "="*60)
-    logger.info("STEP 2: Video-Level Summarization")
-    logger.info("="*60)
+
+def run_videos(limit):
+    from backend.app.subtask2_summarization.video_level.summarize_video import run_all
+    banner("STEP 2 — Video-Level Summarization")
     results = run_all(limit=limit)
-    logger.info(f"Video summaries generated for {len(results)} videos")
+    logger.info(f"  Video summaries done: {len(results)} videos")
 
 
-def run_step_embeddings():
-    from subtask2_summarization.embeddings.build_embeddings import run_all
-    logger.info("\n" + "="*60)
-    logger.info("STEP 3: Building Semantic Embeddings")
-    logger.info("="*60)
-    run_all()
+def run_embeddings():
+    from backend.app.subtask2_summarization.embeddings.build_embeddings import run_all
+    banner("STEP 3 — Building Semantic Embeddings")
+    result = run_all()
+    logger.info(f"  Embeddings done: {len(result['video_embeddings'])} videos")
 
 
-def run_step_collection():
-    from subtask2_summarization.collection_level.analyze_collection import run_collection_analysis
-    logger.info("\n" + "="*60)
-    logger.info("STEP 4: Collection-Level Analysis")
-    logger.info("="*60)
+def run_collection():
+    from backend.app.subtask2_summarization.collection_level.analyze_collection import run_collection_analysis
+    banner("STEP 4 — Collection-Level Analysis")
     result = run_collection_analysis()
-    logger.info(f"Collection analysis complete. Common concepts: {len(result.get('common_concepts', {}))}")
+    logger.info(f"  Common concepts:  {len(result.get('common_concepts', {}))}")
+    logger.info(f"  Related pairs:    {len(result.get('video_relationships', []))}")
+
+
+def run_evaluate():
+    from backend.app.subtask2_summarization.evaluation.summarization_metrics import evaluate_video_summaries
+    banner("STEP 5 — Evaluation Metrics")
+    result = evaluate_video_summaries()
+    agg = result.get("aggregate", {})
+    logger.info(f"  Videos evaluated:     {agg.get('total_videos_evaluated', 0)}")
+    logger.info(f"  Avg concept coverage: {agg.get('avg_concept_coverage', 0):.1%}")
+    logger.info(f"  Avg coherence score:  {agg.get('avg_coherence_score', 0):.1f}/5")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run Subtask 2: Video Summarization Pipeline")
-    parser.add_argument("--step", choices=STEPS + ["all"], default="all",
-                        help="Which step to run (default: all)")
-    parser.add_argument("--limit", type=int, default=None,
-                        help="Limit number of videos (useful for testing)")
+    parser = argparse.ArgumentParser(description="Subtask 2 — Multi-Level Video Summarization Pipeline")
+    parser.add_argument("--step", choices=STEPS, default="all", help="Which step to run")
+    parser.add_argument("--limit", type=int, default=None, help="Limit number of videos (for testing)")
     args = parser.parse_args()
 
-    logger.info("="*60)
-    logger.info("SUBTASK 2: Multi-Level Video Summarization Pipeline")
+    logger.info("\n" + "="*60)
+    logger.info("  SUBTASK 2: Multi-Level Video Summarization")
     logger.info("="*60)
     if args.limit:
-        logger.info(f"Running with limit: {args.limit} video(s)")
+        logger.info(f"  Running with limit: {args.limit} video(s)")
 
     step = args.step
 
     if step in ("all", "chapters"):
-        run_step_chapters(args.limit)
+        run_chapters(args.limit)
 
     if step in ("all", "videos"):
-        run_step_videos(args.limit)
+        run_videos(args.limit)
 
     if step in ("all", "embeddings"):
-        run_step_embeddings()
+        run_embeddings()
 
     if step in ("all", "collection"):
-        run_step_collection()
+        run_collection()
+
+    if step in ("all", "evaluate"):
+        run_evaluate()
 
     logger.info("\n" + "="*60)
-    logger.info("Pipeline complete!")
+    logger.info("  Pipeline complete!")
     logger.info("="*60)
-    logger.info("Output files:")
+    logger.info("Output locations:")
     logger.info("  data/processed/subtask2_summarization/chapter_summaries/")
     logger.info("  data/processed/subtask2_summarization/video_summaries/")
     logger.info("  data/processed/subtask2_summarization/embeddings/")
     logger.info("  data/processed/subtask2_summarization/collection_analysis/")
+    logger.info("")
+    logger.info("Start API server:")
+    logger.info("  uvicorn backend.app.main:app --reload --port 8000")
+    logger.info("  Then open: http://localhost:8000/docs")
 
 
 if __name__ == "__main__":

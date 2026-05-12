@@ -1,404 +1,770 @@
+"""
+slide_captioner.py  –  Ground-truth slide captioning (v4)
+==========================================================
+
+CHANGES IN v4
+-------------
+1.  pHASH DEDUPLICATION  (new step after merge/split)
+    When a presenter accidentally skips forward and goes back, the pixel-diff
+    detector creates separate SlideRuns for what is really the same visual.
+    pHash detects near-identical frames across the whole run list and merges
+    them into one canonical run, giving chaptering a clean signal.
+
+2.  CAPTION EMBEDDINGS  (new step before saving)
+    Each slide record gets an 'embedding' field — a sentence-transformer
+    vector of (caption + first 200 chars of transcript).  chaptering.py uses
+    these to score topic-shift boundaries without needing extra LLM calls.
+
+PIPELINE
+--------
+1.  Scan video at SAMPLE_INTERVAL -> raw SlideRuns (visual change detection)
+2.  Merge runs shorter than MIN_SLIDE_DURATION (removes flicker)
+3.  Split runs longer than MAX_STATIC_DURATION using transcript boundaries
+4.  [NEW] pHash dedup — merge visually identical runs (revisited slides)
+5.  Caption one representative frame per run with LLaVA-1.6-Mistral-7B
+6.  Attach aggregated transcript text to each run
+7.  [NEW] Embed captions with sentence-transformer
+8.  Save one JSON record per run
+
+INSTALL
+-------
+pip install opencv-python Pillow imagehash sentence-transformers
+pip install transformers torch bitsandbytes accelerate
+
+USAGE
+-----
+python slide_captioner.py \\
+    --video       lecture.mp4 \\
+    --transcript  transcript.json \\
+    --output      slide_captions.json \\
+    [--sample-interval  1.0] \\
+    [--threshold        0.05] \\
+    [--min-duration     5.0] \\
+    [--max-static      300.0] \\
+    [--split-interval  180.0] \\
+    [--batch-size       2] \\
+    [--phash-threshold  8] \\
+    [--skip-embeddings] \\
+    [--save-frames]
+"""
+
 import argparse
+import gc
 import json
 import logging
+import math
+import os
+import queue
 import sys
+import threading
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
+
+os.environ.setdefault("PYTORCH_CUDA_ALLOC_CONF", "expandable_segments:True")
 
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s  %(levelname)-8s  %(message)s",
     datefmt="%H:%M:%S",
 )
-log = logging.getLogger("frame_captioning")
+log = logging.getLogger("slide_captioner")
+
+# ── tuning knobs ──────────────────────────────────────────────────────────────
+SAMPLE_INTERVAL     = 1.0    # seconds between sampled frames during scan
+DIFF_THRESHOLD      = 0.05   # pixel-diff (0-1) that counts as a slide change
+MIN_SLIDE_DURATION  = 5.0    # merge runs shorter than this (removes flicker)
+MAX_STATIC_DURATION = 300.0  # split runs longer than this using transcript (5 min)
+SPLIT_INTERVAL      = 180.0  # target sub-segment length when splitting (3 min)
+BATCH_SIZE          = 2
+PREFETCH_SIZE       = 8
+PHASH_THRESHOLD     = 8      # Hamming distance <= this = "same slide"
+EMBED_MODEL         = "all-MiniLM-L6-v2"
 
 
-# ---------------------------------------------------------------------------
-# Data model
-# ---------------------------------------------------------------------------
-@dataclass
-class FrameCaption:
-    """Caption for one extracted frame."""
-    segment_index: int     # which transcript segment this came from
-    timestamp: float       # seconds — the end point of the segment
-    timestamp_str: str     # human-readable HH:MM:SS.mmm
-    segment_start: float   # original segment start (seconds)
-    segment_end: float     # original segment end (seconds)
-    speech_text: str       # the transcript text for this segment
-    caption: str           # LLaVA generated visual caption
-    frame_path: Optional[str] = None  # path to saved frame image (if --save-frames)
-
-    def to_dict(self) -> dict:
-        return asdict(self)
-
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-def seconds_to_hms(seconds: float) -> str:
-    """Convert float seconds to HH:MM:SS.mmm string."""
-    total_ms = int(round(seconds * 1000))
+# ── helpers ───────────────────────────────────────────────────────────────────
+def fmt(sec: float) -> str:
+    total_ms = int(round(sec * 1000))
     ms = total_ms % 1000
-    total_s = total_ms // 1000
-    h = total_s // 3600
-    m = (total_s % 3600) // 60
-    s = total_s % 60
+    s  = (total_ms // 1000) % 60
+    m  = (total_ms // 60_000) % 60
+    h  =  total_ms // 3_600_000
     return f"{h:02d}:{m:02d}:{s:02d}.{ms:03d}"
 
 
-def load_transcript(transcript_path: Path) -> list[dict]:
-    """
-    Load the transcript JSON produced by asr.py.
-    Returns the list of segment dicts.
-    """
-    with open(transcript_path, "r", encoding="utf-8") as f:
+def load_transcript(path: Path) -> list[dict]:
+    with open(path, encoding="utf-8") as f:
         data = json.load(f)
-
-    # asr.py saves: { "metadata": {...}, "segments": [...] }
-    if "segments" not in data:
-        log.error(
-            f"Unexpected transcript format in '{transcript_path}'.\n"
-            "Expected a JSON with a 'segments' key (output of asr.py)."
-        )
+    segs = data.get("segments") or data
+    if not isinstance(segs, list):
+        log.error("Cannot find 'segments' list in transcript JSON.")
         sys.exit(1)
-
-    segments = data["segments"]
-    log.info(f"Loaded {len(segments)} transcript segments from '{transcript_path.name}'")
-    return segments
+    log.info(f"Loaded {len(segs)} transcript segments.")
+    return segs
 
 
-# ---------------------------------------------------------------------------
-# Frame extraction
-# ---------------------------------------------------------------------------
-def extract_frame_at(video_path: Path, timestamp_seconds: float):
-    """
-    Extract a single frame from the video at the given timestamp.
+# ── frame diffing ─────────────────────────────────────────────────────────────
+def frame_diff(a, b) -> float:
+    import numpy as np
+    sz = (160, 90)
+    aa = np.array(a.convert("L").resize(sz), dtype=np.float32)
+    bb = np.array(b.convert("L").resize(sz), dtype=np.float32)
+    return float(np.mean(np.abs(aa - bb)) / 255.0)
 
-    Uses cv2.CAP_PROP_POS_MSEC to seek to the exact millisecond.
-    Returns a PIL Image (RGB) or None if extraction failed.
-    """
+
+# ── slide run dataclass ───────────────────────────────────────────────────────
+@dataclass
+class SlideRun:
+    slide_id:    int
+    start_sec:   float
+    end_sec:     float
+    rep_sec:     float
+    _transcript: str = field(default="", repr=False)
+    _split_from: int = field(default=-1, repr=False)
+
+
+# ── STEP 1 · scan video ───────────────────────────────────────────────────────
+def scan_video(video_path: Path, duration: float) -> list[SlideRun]:
     try:
         import cv2
         from PIL import Image
-        import numpy as np
     except ImportError:
-        log.error(
-            "Missing packages. Run:\n"
-            "  pip install opencv-python Pillow"
+        log.error("pip install opencv-python Pillow"); sys.exit(1)
+
+    log.info(
+        f"Scanning '{video_path.name}' every {SAMPLE_INTERVAL}s "
+        f"(diff threshold={DIFF_THRESHOLD}) ..."
+    )
+    t0  = time.time()
+    cap = cv2.VideoCapture(str(video_path))
+    if not cap.isOpened():
+        log.error(f"Cannot open video: {video_path}"); sys.exit(1)
+
+    runs: list[SlideRun] = []
+    current_start = 0.0
+    prev_img      = None
+    slide_id      = 0
+    checked       = 0
+    t             = 0.0
+
+    while t <= duration + SAMPLE_INTERVAL:
+        cap.set(cv2.CAP_PROP_POS_MSEC, t * 1000)
+        ret, frame = cap.read()
+        if not ret or frame is None:
+            t = round(t + SAMPLE_INTERVAL, 3)
+            continue
+
+        img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        checked += 1
+
+        if prev_img is None:
+            current_start = t
+            prev_img = img
+            t = round(t + SAMPLE_INTERVAL, 3)
+            continue
+
+        diff = frame_diff(prev_img, img)
+        if diff > DIFF_THRESHOLD:
+            slide_end = round(t, 3)
+            rep       = round((current_start + slide_end) / 2.0, 3)
+            runs.append(SlideRun(slide_id, current_start, slide_end, rep))
+            log.debug(f"  Slide {slide_id}: {fmt(current_start)} -> {fmt(slide_end)} ({slide_end-current_start:.1f}s)")
+            slide_id     += 1
+            current_start = t
+
+        prev_img = img
+        t = round(t + SAMPLE_INTERVAL, 3)
+
+    cap.release()
+
+    if prev_img is not None:
+        slide_end = round(duration, 3)
+        rep       = round((current_start + slide_end) / 2.0, 3)
+        runs.append(SlideRun(slide_id, current_start, slide_end, rep))
+
+    log.info(f"Scan done in {time.time()-t0:.1f}s: {len(runs)} raw runs across {checked} frames.")
+    return runs
+
+
+# ── STEP 2 · merge short runs ─────────────────────────────────────────────────
+def merge_short_runs(runs: list[SlideRun], min_dur: float) -> list[SlideRun]:
+    if not runs:
+        return runs
+    log.info(f"Merging runs < {min_dur}s (before: {len(runs)}) ...")
+
+    changed = True
+    while changed:
+        changed = False
+        merged: list[SlideRun] = []
+        i = 0
+        while i < len(runs):
+            r   = runs[i]
+            dur = r.end_sec - r.start_sec
+            if dur < min_dur:
+                if merged:
+                    prev = merged[-1]
+                    merged[-1] = SlideRun(
+                        prev.slide_id, prev.start_sec, r.end_sec,
+                        round((prev.start_sec + r.end_sec) / 2.0, 3)
+                    )
+                    changed = True
+                elif i + 1 < len(runs):
+                    nxt = runs[i + 1]
+                    merged.append(SlideRun(
+                        r.slide_id, r.start_sec, nxt.end_sec,
+                        round((r.start_sec + nxt.end_sec) / 2.0, 3)
+                    ))
+                    i += 2
+                    changed = True
+                    continue
+                else:
+                    merged.append(r)
+            else:
+                merged.append(r)
+            i += 1
+        runs = merged
+
+    for idx, r in enumerate(runs):
+        r.slide_id = idx
+    log.info(f"After merging: {len(runs)} runs remain.")
+    return runs
+
+
+# ── STEP 3 · split long static runs using transcript ─────────────────────────
+def find_transcript_split_points(
+    segments: list[dict],
+    start_sec: float,
+    end_sec:   float,
+    split_interval: float,
+) -> list[float]:
+    duration = end_sec - start_sec
+    if duration <= split_interval:
+        return []
+
+    window_segs = [s for s in segments if s["start"] >= start_sec and s["end"] <= end_sec]
+
+    if not window_segs:
+        splits, t = [], start_sec + split_interval
+        while t < end_sec - 30:
+            splits.append(round(t, 3))
+            t += split_interval
+        return splits
+
+    sentence_ends = [
+        s["end"] for s in window_segs
+        if s.get("text", "").strip() and s["text"].strip()[-1] in ".?!"
+    ]
+    if not sentence_ends:
+        sentence_ends = [s["end"] for s in window_segs]
+
+    splits       = []
+    target       = start_sec + split_interval
+    search_range = 30.0
+
+    while target < end_sec - split_interval * 0.5:
+        candidates = [t for t in sentence_ends if abs(t - target) <= search_range]
+        if candidates:
+            best = min(candidates, key=lambda t: abs(t - target))
+            if (not splits or best - splits[-1] > 60) and best < end_sec - 60:
+                splits.append(round(best, 3))
+                log.debug(f"    Transcript split at {fmt(best)}")
+        else:
+            if target < end_sec - 60:
+                splits.append(round(target, 3))
+        target += split_interval
+
+    return splits
+
+
+def split_long_runs(
+    runs:           list[SlideRun],
+    segments:       list[dict],
+    max_dur:        float,
+    split_interval: float,
+) -> list[SlideRun]:
+    result: list[SlideRun] = []
+    n_split = 0
+
+    for run in runs:
+        dur = run.end_sec - run.start_sec
+        if dur <= max_dur:
+            result.append(run)
+            continue
+
+        log.info(
+            f"  Long run {run.slide_id}: {fmt(run.start_sec)} -> {fmt(run.end_sec)} "
+            f"({dur/60:.1f} min) — splitting by transcript ..."
         )
-        sys.exit(1)
+        split_points = find_transcript_split_points(segments, run.start_sec, run.end_sec, split_interval)
+
+        if not split_points:
+            result.append(run)
+            continue
+
+        boundaries = [run.start_sec] + split_points + [run.end_sec]
+        for i in range(len(boundaries) - 1):
+            sub_start = boundaries[i]
+            sub_end   = boundaries[i + 1]
+            result.append(SlideRun(
+                slide_id   = len(result),
+                start_sec  = sub_start,
+                end_sec    = sub_end,
+                rep_sec    = round((sub_start + sub_end) / 2.0, 3),
+                _split_from= run.slide_id,
+            ))
+            log.debug(f"    Sub-run: {fmt(sub_start)} -> {fmt(sub_end)} ({(sub_end-sub_start)/60:.1f} min)")
+        n_split += 1
+
+    for idx, r in enumerate(result):
+        r.slide_id = idx
+
+    if n_split:
+        log.info(f"Split {n_split} long run(s) -> {len(result)} total runs.")
+    return result
+
+
+# ── STEP 4 (NEW) · pHash deduplication ───────────────────────────────────────
+def phash_of_frame(video_path: Path, timestamp_sec: float):
+    """Return perceptual hash of the frame at timestamp_sec, or None on failure."""
+    try:
+        import cv2
+        import imagehash
+        from PIL import Image
+    except ImportError:
+        return None
+
+    cap = cv2.VideoCapture(str(video_path))
+    cap.set(cv2.CAP_PROP_POS_MSEC, timestamp_sec * 1000)
+    ret, frame = cap.read()
+    cap.release()
+    if not ret or frame is None:
+        return None
+    img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+    return imagehash.phash(img, hash_size=16)   # 256-bit hash
+
+
+def dedup_runs_by_phash(
+    runs:       list[SlideRun],
+    video_path: Path,
+    threshold:  int = PHASH_THRESHOLD,
+) -> list[SlideRun]:
+    """
+    Merge visually identical SlideRuns.
+
+    Handles:
+      - Presenter accidentally advances and goes back  (A → B → A again)
+      - Same title / agenda slide shown multiple times
+
+    Each run's representative frame is hashed.  If a run's hash is within
+    `threshold` Hamming distance of an earlier run's hash, it is merged into
+    that earlier run (transcript text is appended, end_sec extended if later).
+    """
+    try:
+        import imagehash   # noqa: F401
+    except ImportError:
+        log.warning(
+            "imagehash not installed — skipping pHash dedup.  "
+            "Run:  pip install imagehash"
+        )
+        return runs
+
+    log.info(f"pHash dedup: comparing {len(runs)} runs (threshold={threshold}) ...")
+
+    canonical_hashes: list            = []
+    canonical_runs:   list[SlideRun]  = []
+
+    for run in runs:
+        h = phash_of_frame(video_path, run.rep_sec)
+        if h is None:
+            canonical_hashes.append(None)
+            canonical_runs.append(run)
+            continue
+
+        matched_idx = None
+        for idx, ch in enumerate(canonical_hashes):
+            if ch is not None and (h - ch) <= threshold:
+                matched_idx = idx
+                break
+
+        if matched_idx is not None:
+            canon = canonical_runs[matched_idx]
+            if run.end_sec > canon.end_sec:
+                canon.end_sec = run.end_sec
+            if run._transcript and run._transcript not in canon._transcript:
+                canon._transcript = (canon._transcript + " " + run._transcript).strip()
+            log.info(
+                f"  Merged slide {run.slide_id} [{fmt(run.start_sec)}] "
+                f"→ canonical slide {canon.slide_id} [{fmt(canon.start_sec)}] "
+                f"(hamming={h - canonical_hashes[matched_idx]})"
+            )
+        else:
+            canonical_hashes.append(h)
+            canonical_runs.append(run)
+
+    for idx, r in enumerate(canonical_runs):
+        r.slide_id = idx
+
+    removed = len(runs) - len(canonical_runs)
+    if removed:
+        log.info(f"pHash dedup: removed {removed} duplicate run(s) → {len(canonical_runs)} remain.")
+    else:
+        log.info("pHash dedup: no duplicates found.")
+
+    return canonical_runs
+
+
+# ── STEP 5 · attach transcripts ──────────────────────────────────────────────
+def attach_transcripts(runs: list[SlideRun], segments: list[dict]) -> None:
+    for r in runs:
+        texts = [
+            s["text"].strip()
+            for s in segments
+            if s["start"] < r.end_sec and s["end"] > r.start_sec
+        ]
+        r._transcript = " ".join(texts)
+
+
+# ── STEP 6 · prefetch frames ──────────────────────────────────────────────────
+def prefetch_worker(video_path: Path, runs: list[SlideRun],
+                    out_queue: queue.Queue, fdir: Optional[Path]) -> None:
+    try:
+        import cv2
+        from PIL import Image
+    except ImportError:
+        out_queue.put(None); return
 
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
-        log.error(f"Could not open video: {video_path}")
-        return None
+        log.error("Prefetch: cannot open video.")
+        out_queue.put(None); return
 
-    # Seek to exact timestamp in milliseconds
-    cap.set(cv2.CAP_PROP_POS_MSEC, timestamp_seconds * 1000)
-    ret, frame = cap.read()
+    for r in runs:
+        cap.set(cv2.CAP_PROP_POS_MSEC, r.rep_sec * 1000)
+        ret, frame = cap.read()
+        img = None
+        if ret and frame is not None:
+            img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        frame_path = None
+        if fdir and img:
+            frame_path = str(fdir / f"slide_{r.slide_id:04d}_{r.rep_sec:.1f}s.jpg")
+            img.save(frame_path, quality=85)
+        out_queue.put((r, img, frame_path))
+
     cap.release()
-
-    if not ret or frame is None:
-        log.warning(f"Could not read frame at {seconds_to_hms(timestamp_seconds)}")
-        return None
-
-    # OpenCV loads frames as BGR — convert to RGB for LLaVA / PIL
-    frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    return Image.fromarray(frame_rgb)
+    out_queue.put(None)
 
 
-# ---------------------------------------------------------------------------
-# LLaVA model loading  (replaces load_blip2)
-# ---------------------------------------------------------------------------
+# ── STEP 7 · LLaVA captioning ────────────────────────────────────────────────
 def load_llava(device: str):
-    """
-    Load LLaVA-1.6-Mistral-7B in 4-bit quantization.
-
-    4-bit quantization keeps VRAM usage to ~5-6 GB, which fits comfortably
-    on a 7.6 GB card (e.g. RTX 4060 Ti) while staying fast on GPU.
-
-    First run downloads ~14 GB of model weights — same one-time behaviour
-    as Whisper / BLIP-2.  Subsequent runs load from the local HuggingFace
-    cache in ~30 seconds.
-    """
     try:
         import torch
-        from transformers import (
-            LlavaNextProcessor,
-            LlavaNextForConditionalGeneration,
-            BitsAndBytesConfig,
-        )
+        from transformers import LlavaNextProcessor, LlavaNextForConditionalGeneration, BitsAndBytesConfig
     except ImportError:
-        log.error(
-            "Missing packages. Run:\n"
-            "  pip install transformers torch bitsandbytes accelerate"
-        )
-        sys.exit(1)
+        log.error("pip install transformers torch bitsandbytes accelerate"); sys.exit(1)
 
     model_id = "llava-hf/llava-v1.6-mistral-7b-hf"
-
-    log.info(f"Loading LLaVA '{model_id}' in 4-bit quantization (downloads ~14 GB on first run) …")
+    log.info(f"Loading LLaVA '{model_id}' in 4-bit ...")
     t0 = time.time()
-
     processor = LlavaNextProcessor.from_pretrained(model_id)
+    processor.tokenizer.pad_token = processor.tokenizer.eos_token
 
-    # 4-bit quantization config — keeps VRAM under 6 GB
-    quantization_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_compute_dtype=torch.float16,
-        bnb_4bit_quant_type="nf4",          # NormalFloat4 — best quality/size tradeoff
-        bnb_4bit_use_double_quant=True,      # nested quantization saves a little extra VRAM
+    import torch as _torch
+    quant = BitsAndBytesConfig(
+        load_in_4bit=True, bnb_4bit_compute_dtype=_torch.float16,
+        bnb_4bit_quant_type="nf4", bnb_4bit_use_double_quant=True,
     )
-
     model = LlavaNextForConditionalGeneration.from_pretrained(
-        model_id,
-        quantization_config=quantization_config,
-        device_map="auto",   # splits layers across GPU/CPU as needed
+        model_id, quantization_config=quant, device_map="auto"
     )
-    model.eval()  # inference mode — disables dropout
-
-    log.info(f"LLaVA ready in {time.time() - t0:.1f}s")
+    model.eval()
+    log.info(f"LLaVA ready in {time.time()-t0:.1f}s")
     return processor, model
 
 
-# ---------------------------------------------------------------------------
-# Caption generation  (replaces old caption_image)
-# ---------------------------------------------------------------------------
-def caption_image(image, processor, model, device: str) -> str:
+CAPTION_PROMPT = (
+    "[INST] <image>\n"
+    "You are a content extractor for educational lecture slides.\n\n"
+    "RULES:\n"
+    "1. SLIDE or WHITEBOARD - extract: Title, Key points (condensed), Equations/code (exact).\n"
+    "2. DIAGRAM / CHART / FIGURE - state: Type, Concept, Key components/axes/labels.\n"
+    "3. TALKING HEAD only (no slide) - respond exactly: [NO SLIDE]\n"
+    "4. Person + slide (PiP) - ignore person, extract slide only.\n"
+    "5. Title card / intro screen - extract text only.\n\n"
+    "OUTPUT: 2-4 sentences max. Lead with topic/title. "
+    "No visual aesthetics. Do NOT start with 'This image' or 'The slide'. "
+    "State content directly. [/INST]"
+)
+
+
+def caption_batch(images: list, processor, model, device: str) -> list[str]:
     import torch
 
-    prompt = (
-        "[INST] <image>\n"
-        "You are analyzing a frame from an educational lecture video. "
-        "Describe what you see in detail:\n"
-        "- If there is a slide, read and include ALL visible text (titles, bullet points, labels, equations).\n"
-        "- If there is a diagram or chart, describe its structure and what it represents.\n"
-        "- If code is shown, transcribe it.\n"
-        "- If it is a webcam/talking-head shot with no slide, just say: 'Speaker on camera, no slide visible.'\n"
-        "Be specific and thorough. Do not summarize or skip any text you can read. [/INST]"
-    )
+    def _run(imgs):
+        inputs = processor(
+            text=[CAPTION_PROMPT] * len(imgs), images=imgs,
+            return_tensors="pt", padding=True, padding_side="left",
+        ).to(device)
+        with torch.no_grad():
+            outs = model.generate(
+                **inputs, max_new_tokens=200, do_sample=False,
+                temperature=None, top_p=None, repetition_penalty=1.2,
+            )
+        inlen = inputs["input_ids"].shape[1]
+        caps  = [processor.decode(o[inlen:], skip_special_tokens=True).strip() for o in outs]
+        del inputs, outs
+        torch.cuda.empty_cache(); gc.collect()
+        return caps
 
-    inputs = processor(
-        text=prompt,
-        images=image,
-        return_tensors="pt",
-    ).to(device)
+    try:
+        return _run(images)
+    except torch.cuda.OutOfMemoryError:
+        log.warning(f"OOM on batch={len(images)}, falling back to single-image")
+        torch.cuda.empty_cache(); gc.collect()
+        caps = []
+        for img in images:
+            try:
+                caps.extend(_run([img]))
+            except torch.cuda.OutOfMemoryError:
+                log.error("OOM on single image — skipping")
+                torch.cuda.empty_cache(); gc.collect()
+                caps.append("[caption failed — OOM]")
+        return caps
 
-    with torch.no_grad():
-        output_ids = model.generate(
-            **inputs,
-            max_new_tokens=300,   # was 100 — gives room for full slide content
-            do_sample=False,
-            temperature=None,     # must be None when do_sample=False
-            top_p=None,           # must be None when do_sample=False
-            repetition_penalty=1.2,  # discourages the model from looping/repeating lines
+
+# ── STEP 8 (NEW) · embed captions ────────────────────────────────────────────
+def embed_captions(slides: list[dict], model_name: str = EMBED_MODEL) -> list[dict]:
+    """
+    Add an 'embedding' field to each slide dict.
+
+    The vector is computed from  (caption + first 200 chars of transcript)
+    so it captures both the visual content and the spoken context.
+    chaptering.py uses these to score topic-shift boundaries via cosine
+    similarity without needing any extra LLM calls per slide.
+    """
+    try:
+        from sentence_transformers import SentenceTransformer
+    except ImportError:
+        log.warning(
+            "sentence-transformers not installed — skipping embeddings.  "
+            "Run:  pip install sentence-transformers"
         )
+        return slides
 
-    input_len = inputs["input_ids"].shape[1]
-    caption = processor.decode(
-        output_ids[0][input_len:],
-        skip_special_tokens=True,
-    ).strip()
+    log.info(f"Embedding {len(slides)} slide captions with '{model_name}' ...")
+    model = SentenceTransformer(model_name)
 
-    return caption
+    texts = []
+    for s in slides:
+        cap    = (s.get("caption")    or "").strip()
+        transc = (s.get("transcript") or "").strip()[:200]
+        texts.append(f"{cap}. {transc}".strip(". "))
+
+    vectors = model.encode(texts, batch_size=64, show_progress_bar=False)
+    for s, vec in zip(slides, vectors):
+        s["embedding"] = vec.tolist()
+
+    log.info("Embeddings done.")
+    return slides
 
 
-# ---------------------------------------------------------------------------
-# Main pipeline
-# ---------------------------------------------------------------------------
+# ── MAIN ──────────────────────────────────────────────────────────────────────
 def run(
-    video_path: str,
-    transcript_path: str,
-    output_path: Optional[str] = None,
-    device: str = "auto",
-    save_frames: bool = False,
-    frames_dir: Optional[str] = None,
-) -> list[FrameCaption]:
+    video_path:       str,
+    transcript_path:  str,
+    output_path:      Optional[str] = None,
+    device:           str   = "auto",
+    save_frames:      bool  = False,
+    frames_dir:       Optional[str] = None,
+    batch_size:       int   = BATCH_SIZE,
+    min_duration:     float = MIN_SLIDE_DURATION,
+    max_static:       float = MAX_STATIC_DURATION,
+    split_interval:   float = SPLIT_INTERVAL,
+    phash_threshold:  int   = PHASH_THRESHOLD,
+    skip_embeddings:  bool  = False,
+) -> list[dict]:
 
     import torch
 
-    # ---- Paths ----------------------------------------------------------------
     video  = Path(video_path).resolve()
     transc = Path(transcript_path).resolve()
     out    = Path(output_path) if output_path else \
-             video.parent / (video.stem + "_captions.json")
+             video.parent / (video.stem + "_slide_captions.json")
 
-    if not video.exists():
-        log.error(f"Video not found: {video}")
-        sys.exit(1)
-    if not transc.exists():
-        log.error(f"Transcript not found: {transc}")
-        sys.exit(1)
+    if not video.exists():  log.error(f"Video not found: {video}");      sys.exit(1)
+    if not transc.exists(): log.error(f"Transcript not found: {transc}"); sys.exit(1)
 
-    # Optional frames directory
     fdir = None
     if save_frames:
-        fdir = Path(frames_dir) if frames_dir else \
-               video.parent / (video.stem + "_frames")
+        fdir = Path(frames_dir) if frames_dir else video.parent / (video.stem + "_slide_frames")
         fdir.mkdir(parents=True, exist_ok=True)
-        log.info(f"Frames will be saved to: {fdir}")
 
-    # Auto device
     if device == "auto":
         device = "cuda" if torch.cuda.is_available() else "cpu"
 
-    log.info(f"Video  : {video}")
-    log.info(f"Transc : {transc}")
-    log.info(f"Output : {out}")
-    log.info(f"Device : {device}")
+    log.info(f"Video          : {video}")
+    log.info(f"Transcript     : {transc}")
+    log.info(f"Output         : {out}")
+    log.info(f"Device         : {device}")
+    log.info(f"Min duration   : {min_duration}s")
+    log.info(f"Max static     : {max_static}s")
+    log.info(f"Split interval : {split_interval}s")
+    log.info(f"pHash threshold: {phash_threshold}")
 
-    # ---- Load inputs ----------------------------------------------------------
-    segments = load_transcript(transc)
-    processor, model = load_llava(device)   # ← was load_blip2
+    segments       = load_transcript(transc)
+    video_duration = segments[-1]["end"] if segments else 0.0
+    log.info(f"Duration       : {fmt(video_duration)}")
 
-    # ---- Process each segment -------------------------------------------------
-    results: list[FrameCaption] = []
-    total   = len(segments)
-    t_start = time.time()
+    # ── detection pipeline ────────────────────────────────────────────────────
+    runs = scan_video(video, video_duration)
+    runs = merge_short_runs(runs, min_duration)
+    runs = split_long_runs(runs, segments, max_static, split_interval)
+    runs = dedup_runs_by_phash(runs, video, phash_threshold)   # ← NEW
+    attach_transcripts(runs, segments)
 
-    log.info(f"Captioning {total} frames …")
+    total = len(runs)
+    log.info(f"Captioning {total} slides ...")
 
-    for i, seg in enumerate(segments):
-        seg_start = seg["start"]
-        seg_end   = seg["end"]
-        speech    = seg["text"]
+    processor, model_obj = load_llava(device)
 
-        # -----------------------------------------------------------------------
-        # END POINT CALCULATION
-        # We take a frame just before the end of the segment (0.1s buffer).
-        # By the end of a segment the slide is fully visible and the speaker
-        # has finished discussing it — making it the most informative frame.
-        # The 0.1s buffer avoids the exact boundary frame which OpenCV
-        # occasionally misreads as the first frame of the next segment.
-        #
-        # Example: segment runs from 10.0s → 18.0s
-        #   exact end    = 18.0s  ← risky boundary
-        #   sample point = 18.0 - 0.1 = 17.9s  ← what we use
-        # -----------------------------------------------------------------------
-        BUFFER = 0.1   # seconds to step back from the exact end
-        sample_point = max(seg_start, seg_end - BUFFER)
+    frame_queue: queue.Queue = queue.Queue(maxsize=PREFETCH_SIZE)
+    prefetch_thread = threading.Thread(
+        target=prefetch_worker, args=(video, runs, frame_queue, fdir), daemon=True
+    )
+    prefetch_thread.start()
 
-        # Extract frame at end point
-        image = extract_frame_at(video, sample_point)
-        if image is None:
-            log.warning(f"  [{i+1}/{total}] Skipped — could not extract frame at {seconds_to_hms(sample_point)}")
+    pending_runs:   list[SlideRun] = []
+    pending_imgs:   list           = []
+    pending_fpaths: list[str]      = []
+    results:        list[dict]     = []
+    processed = 0
+    t_start   = time.time()
+
+    def flush():
+        nonlocal processed
+        if not pending_imgs:
+            return
+        captions = caption_batch(pending_imgs, processor, model_obj, device)
+        for r, cap, fp in zip(pending_runs, captions, pending_fpaths):
+            results.append({
+                "slide_id":                     r.slide_id,
+                "slide_start":                  r.start_sec,
+                "slide_end":                    r.end_sec,
+                "slide_start_str":              fmt(r.start_sec),
+                "slide_end_str":                fmt(r.end_sec),
+                "duration_sec":                 round(r.end_sec - r.start_sec, 3),
+                "representative_timestamp":     r.rep_sec,
+                "representative_timestamp_str": fmt(r.rep_sec),
+                "split_from_slide":             r._split_from,
+                "caption":                      cap,
+                "transcript":                   r._transcript,
+                "frame_path":                   fp or "",
+            })
+            processed += 1
+        elapsed = time.time() - t_start
+        rate    = processed / elapsed if elapsed else 1
+        log.info(
+            f"  [{processed:>4}/{total}]  "
+            f"\"{captions[-1][:65]}{'...' if len(captions[-1])>65 else ''}\"  "
+            f"ETA {(total-processed)/rate:.0f}s"
+        )
+        pending_runs.clear(); pending_imgs.clear(); pending_fpaths.clear()
+
+    while True:
+        item = frame_queue.get()
+        if item is None:
+            break
+        run_obj, img, fp = item
+        if img is None:
+            log.warning(f"  Skipped slide {run_obj.slide_id} (frame extraction failed)")
             continue
+        pending_runs.append(run_obj)
+        pending_imgs.append(img)
+        pending_fpaths.append(fp or "")
+        if len(pending_imgs) >= batch_size:
+            flush()
 
-        # Optionally save the frame image
-        frame_path = None
-        if save_frames and fdir is not None:
-            frame_path = str(fdir / f"frame_{i:04d}_{sample_point:.1f}s.jpg")
-            image.save(frame_path, quality=85)
+    flush()
+    prefetch_thread.join()
 
-        # Generate caption
-        caption = caption_image(image, processor, model, device)
+    # ── embed captions ────────────────────────────────────────────────────────
+    if not skip_embeddings:
+        results = embed_captions(results)   # ← NEW
 
-        results.append(FrameCaption(
-            segment_index = i,
-            timestamp     = round(sample_point, 3),
-            timestamp_str = seconds_to_hms(sample_point),
-            segment_start = round(seg_start, 3),
-            segment_end   = round(seg_end, 3),
-            speech_text   = speech,
-            caption       = caption,
-            frame_path    = frame_path,
-        ))
-
-        # Progress every 10 frames
-        if (i + 1) % 10 == 0 or (i + 1) == total:
-            elapsed   = time.time() - t_start
-            rate      = (i + 1) / elapsed
-            remaining = (total - i - 1) / rate if rate > 0 else 0
-            log.info(
-                f"  [{i+1:>4}/{total}]  {seconds_to_hms(sample_point)}  |  "
-                f"\"{caption[:55]}{'…' if len(caption) > 55 else ''}\"  |  "
-                f"ETA {remaining:.0f}s"
-            )
-
-    # ---- Save JSON ------------------------------------------------------------
     elapsed_total = time.time() - t_start
     output_data = {
         "metadata": {
             "video":                    str(video),
             "transcript":               str(transc),
-            "model":                    "llava-hf/llava-v1.6-mistral-7b-hf",  # ← updated
+            "model":                    "llava-hf/llava-v1.6-mistral-7b-hf",
             "device":                   device,
-            "num_segments":             total,
-            "num_captions":             len(results),
-            "processing_time_seconds":  round(elapsed_total, 2),
-            "seconds_per_frame":        round(elapsed_total / max(len(results), 1), 2),
+            "sample_interval_sec":      SAMPLE_INTERVAL,
+            "diff_threshold":           DIFF_THRESHOLD,
+            "min_slide_duration_sec":   min_duration,
+            "max_static_duration_sec":  max_static,
+            "split_interval_sec":       split_interval,
+            "phash_threshold":          phash_threshold,
+            "batch_size":               batch_size,
+            "num_transcript_segments":  len(segments),
+            "num_unique_slides":        len(results),
+            "processing_time_sec":      round(elapsed_total, 2),
         },
-        "captions": [r.to_dict() for r in results],
+        "slides": results,
     }
 
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(out, "w", encoding="utf-8") as f:
         json.dump(output_data, f, indent=2, ensure_ascii=False)
 
-    log.info(f"Saved {len(results)} captions → {out}")
-    log.info(f"Total time: {elapsed_total:.1f}s  "
-             f"({elapsed_total / max(len(results), 1):.1f}s per frame)")
-
-    print_preview(results)
+    log.info(f"Saved {len(results)} slide captions -> {out}")
+    _preview(results)
     return results
 
 
-# ---------------------------------------------------------------------------
-# Preview
-# ---------------------------------------------------------------------------
-def print_preview(results: list[FrameCaption], n: int = 5) -> None:
-    """Print first N results as a sanity check."""
-    print("\n" + "─" * 80)
-    print(f"  PREVIEW — first {min(n, len(results))} captions")
-    print("─" * 80)
+def _preview(results: list[dict], n: int = 5) -> None:
+    sep = "-" * 80
+    print(f"\n{sep}\n  PREVIEW -- first {min(n, len(results))} slides\n{sep}")
     for r in results[:n]:
-        print(f"  [{r.timestamp_str}]  (segment {r.segment_start}s → {r.segment_end}s, end point = {r.timestamp}s)")
-        print(f"    Speech : {r.speech_text[:80]}{'…' if len(r.speech_text) > 80 else ''}")
-        print(f"    Caption: {r.caption}")
+        split_note = f"  [split from slide {r['split_from_slide']}]" if r.get("split_from_slide", -1) >= 0 else ""
+        print(f"  Slide {r['slide_id']:>3}  {r['slide_start_str']} -> {r['slide_end_str']}  "
+              f"({r['duration_sec']:.1f}s)  rep@{r['representative_timestamp_str']}{split_note}")
+        print(f"    Caption   : {r['caption'][:90]}{'...' if len(r['caption'])>90 else ''}")
+        print(f"    Transcript: {r['transcript'][:90]}{'...' if len(r['transcript'])>90 else ''}")
         print()
     if len(results) > n:
-        print(f"  … {len(results) - n} more captions in the JSON file")
-    print("─" * 80 + "\n")
+        print(f"  ... {len(results)-n} more slides in the JSON file")
+    print(f"{sep}\n")
 
 
-# ---------------------------------------------------------------------------
-# CLI
-# ---------------------------------------------------------------------------
+# ── CLI ───────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(
-        description=(
-            "Extract one frame per transcript segment (at the end point) "
-            "and caption each frame using LLaVA-1.6-Mistral-7B (4-bit quantized)."
-        ),
+    ap = argparse.ArgumentParser(
+        description="Slide captioning with pHash dedup, transcript splitting, and caption embeddings.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument(
-        "--video", required=True,
-        help="Path to the video file.",
-    )
-    parser.add_argument(
-        "--transcript", required=True,
-        help="Path to the transcript JSON produced by asr.py.",
-    )
-    parser.add_argument(
-        "--output", default=None,
-        help="Output JSON path. Defaults to <video_name>_captions.json.",
-    )
-    parser.add_argument(
-        "--device", default="auto", choices=["auto", "cuda", "cpu"],
-        help="Inference device. 'auto' picks CUDA if available.",
-    )
-    parser.add_argument(
-        "--save-frames", action="store_true",
-        help="Save the extracted frame images as .jpg files.",
-    )
-    parser.add_argument(
-        "--frames-dir", default=None,
-        help="Directory to save frames (only used with --save-frames).",
-    )
-    args = parser.parse_args()
+    ap.add_argument("--video",            required=True)
+    ap.add_argument("--transcript",       required=True)
+    ap.add_argument("--output",           default=None)
+    ap.add_argument("--device",           default="auto", choices=["auto", "cuda", "cpu"])
+    ap.add_argument("--save-frames",      action="store_true")
+    ap.add_argument("--frames-dir",       default=None)
+    ap.add_argument("--batch-size",       type=int,   default=BATCH_SIZE)
+    ap.add_argument("--sample-interval",  type=float, default=SAMPLE_INTERVAL)
+    ap.add_argument("--threshold",        type=float, default=DIFF_THRESHOLD)
+    ap.add_argument("--min-duration",     type=float, default=MIN_SLIDE_DURATION)
+    ap.add_argument("--max-static",       type=float, default=MAX_STATIC_DURATION)
+    ap.add_argument("--split-interval",   type=float, default=SPLIT_INTERVAL)
+    ap.add_argument("--phash-threshold",  type=int,   default=PHASH_THRESHOLD,
+                    help="Hamming distance threshold for pHash dedup (default 8).")
+    ap.add_argument("--skip-embeddings",  action="store_true",
+                    help="Skip caption embedding step (chaptering will fall back to time-based split).")
+    args = ap.parse_args()
+
+    SAMPLE_INTERVAL     = args.sample_interval
+    DIFF_THRESHOLD      = args.threshold
+    MIN_SLIDE_DURATION  = args.min_duration
+    MAX_STATIC_DURATION = args.max_static
+    SPLIT_INTERVAL      = args.split_interval
 
     run(
         video_path      = args.video,
@@ -407,4 +773,10 @@ if __name__ == "__main__":
         device          = args.device,
         save_frames     = args.save_frames,
         frames_dir      = args.frames_dir,
-    )   
+        batch_size      = args.batch_size,
+        min_duration    = args.min_duration,
+        max_static      = args.max_static,
+        split_interval  = args.split_interval,
+        phash_threshold = args.phash_threshold,
+        skip_embeddings = args.skip_embeddings,
+    )

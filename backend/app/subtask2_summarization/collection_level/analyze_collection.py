@@ -1,106 +1,121 @@
 """
-subtask2_summarization/collection_level/analyze_collection.py
+backend/app/subtask2_summarization/collection_level/analyze_collection.py
 
 Collection-level analysis:
-  - Detects shared topics across videos
-  - Highlights differences / unique content
-  - Maps relationships (prerequisites, difficulty progression)
-  - Generates a collection overview summary via LLM
+  - Common concept detection
+  - Unique concept per video
+  - Similarity-based relationship mapping
+  - Prerequisite / difficulty ordering via LLM
+  - Collection overview summary
+  - Pairwise comparison for related videos
 """
-
 import json
 import re
-import time
 import logging
 import numpy as np
 from pathlib import Path
 from typing import Optional
 
-import ollama
+from backend.app.config import (
+    VIDEO_SUM_DIR, EMBED_DIR, COLLECTION_DIR,
+    SIMILARITY_THRESHOLD, COMMON_CONCEPT_MIN, MAX_PAIRWISE_COMPARE
+)
+from backend.app.common.utils.llm_client import call_llm, parse_json_response
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-MODEL     = "mistral"
-DATA_ROOT = Path(__file__).resolve().parents[4] / "data" / "processed"
-SUMMARIES_DIR   = DATA_ROOT / "subtask2_summarization" / "video_summaries"
-EMBEDDINGS_DIR  = DATA_ROOT / "subtask2_summarization" / "embeddings"
-OUTPUT_DIR      = DATA_ROOT / "subtask2_summarization" / "collection_analysis"
-OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+# ── Prompts ───────────────────────────────────────────────────────────────────
 
-# ✅ FIX 1: Lowered from 0.60 → 0.35 so related videos are actually detected
-SIMILARITY_THRESHOLD = 0.35
+COLLECTION_OVERVIEW_PROMPT = """You are an expert educational content curator.
+
+You have a collection of {num_videos} educational lecture videos:
+
+{video_overviews}
+
+Common concepts shared across multiple videos: {common_concepts}
+
+Return ONLY JSON with no markdown:
+{{
+  "collection_summary": "3-4 sentence overview of what this collection covers",
+  "main_themes": ["3-5 overarching themes across the collection"],
+  "suggested_viewing_order": [
+    {{"video_id": "...", "reason": "..."}}
+  ],
+  "difficulty_progression": "How difficulty progresses across the collection",
+  "knowledge_gaps": ["Topics mentioned but not deeply covered"],
+  "target_audience": "Who benefits most from this collection"
+}}"""
+
+COMPARISON_PROMPT = """Compare these two educational lecture videos:
+
+VIDEO A: {title_a}
+Summary: {summary_a}
+Key Concepts: {concepts_a}
+
+VIDEO B: {title_b}
+Summary: {summary_b}
+Key Concepts: {concepts_b}
+
+Return ONLY JSON:
+{{
+  "shared_topics": ["topics covered in both videos"],
+  "unique_to_a": ["important topics only in video A"],
+  "unique_to_b": ["important topics only in video B"],
+  "perspective_differences": "How the two videos approach overlapping topics differently",
+  "complementarity": "How watching both videos together is more valuable than either alone",
+  "recommendation": "Which to watch first and why"
+}}"""
+
+PREREQUISITE_PROMPT = """You are an educational curriculum expert.
+
+Given these lecture videos, determine the recommended viewing order and prerequisite relationships.
+
+Videos:
+{video_list}
+
+Return ONLY JSON:
+{{
+  "ordered_curriculum": [
+    {{"video_id": "...", "position": 1, "reason": "why this order"}}
+  ],
+  "prerequisite_pairs": [
+    {{"prerequisite": "video_id", "requires_first": "video_id", "reason": "..."}}
+  ],
+  "difficulty_ranking": [
+    {{"video_id": "...", "rank": 1, "level": "beginner"}}
+  ]
+}}
+position 1 = watch first. difficulty rank 1 = easiest."""
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def call_llm(prompt: str, retries: int = 3) -> Optional[str]:
-    for attempt in range(retries):
-        try:
-            response = ollama.chat(
-                model=MODEL,
-                messages=[{"role": "user", "content": prompt}]
-            )
-            return response["message"]["content"].strip()
-        except Exception as e:
-            logger.warning(f"LLM attempt {attempt + 1} failed: {e}")
-            time.sleep(2 ** attempt)
-    return None
-
-
-def parse_json_response(raw: str) -> Optional[dict]:
-    try:
-        return json.loads(raw)
-    except json.JSONDecodeError:
-        match = re.search(r"\{.*\}", raw, re.DOTALL)
-        if match:
-            try:
-                return json.loads(match.group())
-            except json.JSONDecodeError:
-                pass
-    return None
-
-
-def cosine_similarity(a: list, b: list) -> float:
-    va, vb = np.array(a), np.array(b)
-    return float(np.dot(va, vb) / (np.linalg.norm(va) * np.linalg.norm(vb) + 1e-10))
-
-
-# ✅ FIX 2: Robust concept extractor handles both list and comma-string formats
-def extract_concepts(raw_concepts) -> list[str]:
-    """
-    LLMs sometimes return concepts as:
-      - a proper list: ["machine learning", "bias"]
-      - a single comma-separated string: "machine learning, bias, loss function"
-      - a list with one giant string: ["machine learning, bias, loss function"]
-
-    This function normalises all three into a clean lowercase list.
-    """
-    if not raw_concepts:
+def extract_concepts(raw) -> list[str]:
+    """Normalize concept lists — handles string, list, or list-of-comma-strings."""
+    if not raw:
         return []
-
-    # If it's a list, flatten any comma-joined elements inside it
-    if isinstance(raw_concepts, list):
+    if isinstance(raw, list):
         concepts = []
-        for item in raw_concepts:
+        for item in raw:
             if isinstance(item, str) and "," in item:
-                # e.g. ["machine learning, bias, loss function"]
                 concepts.extend([c.strip() for c in item.split(",")])
             else:
                 concepts.append(str(item).strip())
-        return [c.lower() for c in concepts if c]
-
-    # If it's already a plain string
-    if isinstance(raw_concepts, str):
-        return [c.strip().lower() for c in raw_concepts.split(",") if c.strip()]
-
+        return [c.lower() for c in concepts if c.strip()]
+    if isinstance(raw, str):
+        return [c.strip().lower() for c in raw.split(",") if c.strip()]
     return []
 
 
-# ── Step 1: Load all video summaries ─────────────────────────────────────────
+def cosine_similarity(a: list, b: list) -> float:
+    va, vb = np.array(a, dtype=np.float32), np.array(b, dtype=np.float32)
+    return float(np.dot(va, vb) / (np.linalg.norm(va) * np.linalg.norm(vb) + 1e-10))
+
+
+# ── Step 1: Load video summaries ──────────────────────────────────────────────
 
 def load_all_video_summaries() -> list[dict]:
-    files = sorted(SUMMARIES_DIR.glob("*_video_summary.json"))
+    files = sorted(VIDEO_SUM_DIR.glob("*_video_summary.json"))
     videos = []
     for path in files:
         with open(path, "r", encoding="utf-8") as f:
@@ -109,61 +124,46 @@ def load_all_video_summaries() -> list[dict]:
     return videos
 
 
-# ── Step 2: Find common concepts across videos ────────────────────────────────
+# ── Step 2: Common concepts ───────────────────────────────────────────────────
 
 def find_common_concepts(videos: list[dict]) -> dict:
-    """
-    Count concept frequency across all videos.
-    Concepts appearing in 2+ videos are 'common'.
-    """
-    concept_to_videos = {}
-
+    concept_to_videos: dict[str, list[str]] = {}
     for video in videos:
         vid_id = video["video_id"]
-        # ✅ Use robust extractor instead of simple list cast
-        concepts = extract_concepts(video.get("key_concepts", []))
-        for concept in concepts:
+        for concept in extract_concepts(video.get("key_concepts", [])):
             concept_to_videos.setdefault(concept, [])
             if vid_id not in concept_to_videos[concept]:
                 concept_to_videos[concept].append(vid_id)
 
     common = {
-        concept: video_ids
-        for concept, video_ids in concept_to_videos.items()
-        if len(video_ids) >= 2
+        c: vids for c, vids in concept_to_videos.items()
+        if len(vids) >= COMMON_CONCEPT_MIN
     }
-
-    common_sorted = dict(
-        sorted(common.items(), key=lambda x: len(x[1]), reverse=True)
-    )
-
-    logger.info(f"Found {len(common_sorted)} common concepts across videos")
+    common_sorted = dict(sorted(common.items(), key=lambda x: len(x[1]), reverse=True))
+    logger.info(f"Found {len(common_sorted)} common concepts")
     return common_sorted
 
 
-# ── Step 3: Find unique content per video ─────────────────────────────────────
+# ── Step 3: Unique concepts ───────────────────────────────────────────────────
 
 def find_unique_concepts(videos: list[dict], common_concepts: dict) -> dict:
-    """Concepts that appear in only one video."""
     unique = {}
     for video in videos:
         vid_id = video["video_id"]
-        # ✅ Use robust extractor here too
-        all_concepts = extract_concepts(video.get("key_concepts", []))
-        unique_for_this = [c for c in all_concepts if c not in common_concepts]
+        all_c  = extract_concepts(video.get("key_concepts", []))
         unique[vid_id] = {
             "video_title":     video["video_title"],
-            "unique_concepts": unique_for_this
+            "unique_concepts": [c for c in all_c if c not in common_concepts]
         }
     return unique
 
 
-# ── Step 4: Similarity-based relationship mapping ─────────────────────────────
+# ── Step 4: Relationship map from embeddings ──────────────────────────────────
 
 def build_relationship_map(videos: list[dict]) -> list[dict]:
-    emb_path = EMBEDDINGS_DIR / "video_embeddings.json"
+    emb_path = EMBED_DIR / "video_embeddings.json"
     if not emb_path.exists():
-        logger.warning("Video embeddings not found. Run build_embeddings.py first.")
+        logger.warning("Video embeddings not found — run build_embeddings.py first.")
         return []
 
     with open(emb_path) as f:
@@ -179,7 +179,6 @@ def build_relationship_map(videos: list[dict]) -> list[dict]:
                 embeddings[vid_a]["embedding"],
                 embeddings[vid_b]["embedding"]
             )
-            # ✅ Now uses 0.35 threshold — will catch ML↔Neural Networks (0.446)
             if sim >= SIMILARITY_THRESHOLD:
                 relationships.append({
                     "video_a":    vid_a,
@@ -191,85 +190,52 @@ def build_relationship_map(videos: list[dict]) -> list[dict]:
                 })
 
     relationships.sort(key=lambda x: x["similarity"], reverse=True)
-    logger.info(f"Found {len(relationships)} related video pairs (threshold={SIMILARITY_THRESHOLD})")
+    logger.info(f"Found {len(relationships)} related pairs (threshold={SIMILARITY_THRESHOLD})")
     return relationships
 
 
-# ── Step 5: LLM-powered collection overview ───────────────────────────────────
+# ── Step 5: Prerequisite & difficulty ordering ────────────────────────────────
 
-COLLECTION_OVERVIEW_PROMPT = """You are an expert educational content curator.
+def detect_prerequisites(videos: list[dict]) -> dict:
+    video_list = "\n".join(
+        f"- {v['video_id']}: {v['video_title']} | Domain: {v.get('domain','?')} | "
+        f"Difficulty: {v.get('difficulty_level','?')} | "
+        f"Concepts: {', '.join(extract_concepts(v.get('key_concepts',[]))[:5])}"
+        for v in videos
+    )
+    prompt = PREREQUISITE_PROMPT.format(video_list=video_list)
+    logger.info("Detecting prerequisites and difficulty ordering...")
+    raw = call_llm(prompt)
+    if raw is None:
+        return {"error": "LLM call failed"}
+    parsed = parse_json_response(raw)
+    return parsed or {"error": "JSON parse failed"}
 
-You have a collection of {num_videos} educational lecture videos.
-Here is a brief overview of each:
 
-{video_overviews}
-
-Common concepts appearing across multiple videos:
-{common_concepts}
-
-Generate a comprehensive collection-level analysis. Return ONLY JSON with no markdown:
-{{
-  "collection_summary": "3-4 sentence overview of what this video collection covers as a whole",
-  "main_themes": ["3-5 overarching themes across the collection"],
-  "suggested_viewing_order": [
-    {{"video_id": "...", "reason": "why to watch this first/next"}}
-  ],
-  "difficulty_progression": "Description of how difficulty progresses across the collection",
-  "knowledge_gaps": ["Topics that are mentioned but not deeply covered in any video"],
-  "target_audience": "Who would benefit most from this collection"
-}}"""
-
+# ── Step 6: Collection overview ───────────────────────────────────────────────
 
 def generate_collection_overview(videos: list[dict], common_concepts: dict) -> dict:
     overviews = "\n\n".join(
-        f"Video ID: {v['video_id']}\n"
-        f"Title: {v['video_title']}\n"
-        f"Domain: {v.get('domain', 'N/A')}\n"
-        f"Summary: {v.get('summary_short', 'N/A')}\n"
-        f"Key Concepts: {', '.join(extract_concepts(v.get('key_concepts', [])))}"
+        f"ID: {v['video_id']} | Title: {v['video_title']}\n"
+        f"Domain: {v.get('domain','?')} | Duration: {v.get('duration',0)//60}min\n"
+        f"Summary: {v.get('summary_short','N/A')}\n"
+        f"Key concepts: {', '.join(extract_concepts(v.get('key_concepts',[]))[:6])}"
         for v in videos
     )
-
     top_common = list(common_concepts.keys())[:15]
-
     prompt = COLLECTION_OVERVIEW_PROMPT.format(
         num_videos=len(videos),
         video_overviews=overviews,
         common_concepts=", ".join(top_common) if top_common else "None detected"
     )
-
-    logger.info("Generating collection overview via LLM...")
+    logger.info("Generating collection overview...")
     raw = call_llm(prompt)
     if raw is None:
         return {"error": "LLM call failed"}
-    parsed = parse_json_response(raw)
-    return parsed or {"error": "JSON parse failed", "raw": raw}
+    return parse_json_response(raw) or {"error": "JSON parse failed"}
 
 
-# ── Step 6: Compare two specific videos ───────────────────────────────────────
-
-COMPARISON_PROMPT = """You are an expert educational content analyst.
-
-Compare these two lecture videos:
-
-VIDEO A: {title_a}
-Summary: {summary_a}
-Key Concepts: {concepts_a}
-
-VIDEO B: {title_b}
-Summary: {summary_b}
-Key Concepts: {concepts_b}
-
-Return ONLY JSON:
-{{
-  "shared_topics": ["topics covered in both videos"],
-  "unique_to_a": ["topics only in video A"],
-  "unique_to_b": ["topics only in video B"],
-  "perspective_differences": "How the two videos approach similar topics differently",
-  "complementarity": "How these videos complement each other",
-  "recommendation": "Which to watch first and why"
-}}"""
-
+# ── Step 7: Pairwise comparisons ──────────────────────────────────────────────
 
 def compare_two_videos(video_a: dict, video_b: dict) -> dict:
     prompt = COMPARISON_PROMPT.format(
@@ -280,30 +246,27 @@ def compare_two_videos(video_a: dict, video_b: dict) -> dict:
         summary_b=video_b.get("summary_medium", video_b.get("summary_short", "")),
         concepts_b=", ".join(extract_concepts(video_b.get("key_concepts", [])))
     )
-
     raw = call_llm(prompt)
     if raw is None:
         return {"error": "LLM call failed"}
     return parse_json_response(raw) or {"error": "JSON parse failed"}
 
 
-# ── Main Runner ───────────────────────────────────────────────────────────────
+# ── Main runner ───────────────────────────────────────────────────────────────
 
 def run_collection_analysis() -> dict:
     videos          = load_all_video_summaries()
     common_concepts = find_common_concepts(videos)
     unique_concepts = find_unique_concepts(videos, common_concepts)
     relationships   = build_relationship_map(videos)
+    prerequisites   = detect_prerequisites(videos)
     overview        = generate_collection_overview(videos, common_concepts)
 
-    video_map   = {v["video_id"]: v for v in videos}
+    video_map = {v["video_id"]: v for v in videos}
     comparisons = []
-    for rel in relationships[:5]:
-        logger.info(f"Comparing: {rel['title_a']} vs {rel['title_b']}")
-        comp = compare_two_videos(
-            video_map[rel["video_a"]],
-            video_map[rel["video_b"]]
-        )
+    for rel in relationships[:MAX_PAIRWISE_COMPARE]:
+        logger.info(f"Comparing: {rel['title_a']} ↔ {rel['title_b']}")
+        comp = compare_two_videos(video_map[rel["video_a"]], video_map[rel["video_b"]])
         comparisons.append({
             "video_a":    rel["video_a"],
             "video_b":    rel["video_b"],
@@ -319,20 +282,21 @@ def run_collection_analysis() -> dict:
         "common_concepts":      common_concepts,
         "unique_concepts":      unique_concepts,
         "video_relationships":  relationships,
+        "prerequisites":        prerequisites,
         "pairwise_comparisons": comparisons
     }
 
-    out_path = OUTPUT_DIR / "collection_analysis.json"
+    out_path = COLLECTION_DIR / "collection_analysis.json"
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
 
     logger.info(f"\nCollection analysis saved → {out_path}")
+    logger.info(f"  Common concepts:  {len(common_concepts)}")
+    logger.info(f"  Related pairs:    {len(relationships)}")
+    logger.info(f"  Comparisons done: {len(comparisons)}")
     return result
 
 
 if __name__ == "__main__":
-    result = run_collection_analysis()
-    print(f"\nAnalysis complete:")
-    print(f"  Common concepts found: {len(result['common_concepts'])}")
-    print(f"  Related video pairs:   {len(result['video_relationships'])}")
-    print(f"  Pairwise comparisons:  {len(result['pairwise_comparisons'])}")
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
+    run_collection_analysis()
