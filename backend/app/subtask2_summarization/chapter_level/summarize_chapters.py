@@ -40,7 +40,7 @@ Return exactly this JSON structure:
   "estimated_read_time_seconds": 90
 }}
 
-difficulty_level must be one of: beginner, intermediate, advanced"""
+"""
 
 
 # ── Core functions ────────────────────────────────────────────────────────────
@@ -96,11 +96,119 @@ def _base_fields(chapter: dict) -> dict:
         "duration_seconds": chapter["end_time"] - chapter["start_time"],
     }
 
+# For the first structure of code uncomment below function and remove "normalize_video_json"
+
+# def process_video_file(json_path: Path) -> dict:
+#     """Load a video JSON, summarize all chapters, save output."""
+#     with open(json_path, "r", encoding="utf-8") as f:
+#         video_data = json.load(f)
+
+#     video_id = video_data["video_id"]
+#     chapters  = video_data["chapters"]
+
+#     logger.info(f"\n{'='*60}")
+#     logger.info(f"Video: {video_id} — {video_data['video_title']}")
+#     logger.info(f"Chapters: {len(chapters)} | Duration: {video_data['duration']//60} min")
+#     logger.info(f"{'='*60}")
+
+#     summaries = [summarize_chapter(ch) for ch in chapters]
+
+#     output = {
+#         "video_id":          video_id,
+#         "video_title":       video_data["video_title"],
+#         "speaker":           video_data.get("speaker", "Unknown"),
+#         "domain":            video_data.get("domain", "Unknown"),
+#         "duration":          video_data["duration"],
+#         "total_chapters":    len(summaries),
+#         "chapter_summaries": summaries
+#     }
+
+#     out_path = CHAPTER_SUM_DIR / f"{video_id}_chapter_summaries.json"
+#     with open(out_path, "w", encoding="utf-8") as f:
+#         json.dump(output, f, indent=2, ensure_ascii=False)
+
+#     logger.info(f"Saved → {out_path}")
+#     return output
+
+def normalize_video_json(json_path: Path, raw_data: dict) -> dict:
+    """
+    Converts any input JSON format into the standard internal format.
+    
+    Supports:
+      1. Mock format  — has top-level video_id, video_title, chapters
+      2. Student A format — has metadata{} + chapters[]
+      3. Partial format — has some fields missing, fills defaults
+    """
+
+    # ── Format 1: already has top-level video_id ──────────────────────────
+    if "video_id" in raw_data and "chapters" in raw_data:
+        return raw_data   # already correct format, return as-is
+
+    # ── Format 2: Student A format with metadata block ────────────────────
+    if "metadata" in raw_data and "chapters" in raw_data:
+        meta = raw_data["metadata"]
+
+        # Derive video_id from the filename (e.g. tib_av_00000_720p → tib_av_00000)
+        stem = json_path.stem                          # e.g. tib_av_00000_720p_chapters
+        video_id = stem.split("_chapters")[0]          # strip trailing _chapters if present
+        video_id = video_id.replace("_transcripts", "").replace("_captions", "")
+
+        # Try to get duration from metadata
+        duration = int(meta.get("video_duration_seconds", 0))
+
+        # Normalize each chapter — Student A chapters already have
+        # chapter_id, chapter_index, title, start_time, end_time,
+        # transcript, frame_captions, keywords
+        chapters = raw_data["chapters"]
+
+        return {
+            "video_id":    video_id,
+            "video_title": _title_from_path(json_path),
+            "video_url":   f"https://av.tib.eu/media/{video_id}",
+            "duration":    duration if duration > 0 else _estimate_duration(chapters),
+            "language":    meta.get("language", "en"),
+            "speaker":     meta.get("speaker", "Unknown"),
+            "domain":      meta.get("domain", "Unknown"),
+            "chapters":    chapters
+        }
+
+    # ── Format 3: Unknown — log warning and skip ──────────────────────────
+    logger.error(
+        f"Unrecognized JSON format in {json_path.name}. "
+        f"Expected 'video_id'+'chapters' or 'metadata'+'chapters' at top level. "
+        f"Top-level keys found: {list(raw_data.keys())}"
+    )
+    raise ValueError(f"Cannot parse {json_path.name} — unrecognized format")
+
+
+def _title_from_path(json_path: Path) -> str:
+    """Generate a human-readable title from the filename."""
+    stem = json_path.stem
+    # Remove common suffixes
+    for suffix in ["_chapters", "_transcripts", "_captions", "_720p", "_1080p"]:
+        stem = stem.replace(suffix, "")
+    # Convert underscores to spaces and title-case
+    return stem.replace("_", " ").title()
+
+
+def _estimate_duration(chapters: list) -> int:
+    """Estimate video duration from the last chapter's end_time."""
+    if not chapters:
+        return 0
+    return max(ch.get("end_time", 0) for ch in chapters)
 
 def process_video_file(json_path: Path) -> dict:
-    """Load a video JSON, summarize all chapters, save output."""
+    """
+    Load a video JSON, summarize chapters, save output.
+    Handles both formats:
+      - Mock format: {"video_id": "...", "video_title": "...", "chapters": [...]}
+      - Student A format: {"metadata": {...}, "chapters": [...]}
+    """
     with open(json_path, "r", encoding="utf-8") as f:
-        video_data = json.load(f)
+        raw_data = json.load(f)
+
+    # ── Normalize to a common structure ──────────────────────────────────────
+    video_data = normalize_video_json(json_path, raw_data)
 
     video_id = video_data["video_id"]
     chapters  = video_data["chapters"]
@@ -128,7 +236,6 @@ def process_video_file(json_path: Path) -> dict:
 
     logger.info(f"Saved → {out_path}")
     return output
-
 
 def run_all(limit: Optional[int] = None) -> list[dict]:
     """Process all video JSON files in INPUT_DIR."""
