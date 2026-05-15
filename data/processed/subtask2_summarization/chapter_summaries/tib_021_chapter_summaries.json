@@ -1,0 +1,142 @@
+{
+  "video_id": "tib_021",
+  "video_title": "Introduction to Quantum Mechanics",
+  "speaker": "Prof. Richard Feynman (archive)",
+  "domain": "physics",
+  "duration": 5400,
+  "total_chapters": 5,
+  "chapter_summaries": [
+    {
+      "chapter_id": "tib_021_ch1",
+      "chapter_index": 1,
+      "title": "Wave-Particle Duality",
+      "start_time": 0,
+      "end_time": 1000,
+      "duration_seconds": 1000,
+      "summary_short": "The lecture discusses wave-particle duality, demonstrating how particles like photons and electrons can exhibit both wavelike and particle-like behavior.",
+      "summary_medium": "In this chapter, students learn about the double-slit experiment, a renowned demonstration of wave-particle duality. It shows that when photons or electrons pass through two slits, they display an interference pattern typical of waves, despite behaving as particles under other circumstances. This phenomenon is known as complementarity, suggesting that particles can exist in multiple states simultaneously.",
+      "summary_long": "The double-slit experiment reveals the fascinating concept of wave-particle duality. In this experiment, when photons or electrons pass through two slits, they form an interference pattern consistent with waves, even though they appear as particles under most conditions. This intriguing behavior is referred to as complementarity, suggesting that particles can exhibit both wave and particle properties simultaneously. The chapter further explores the implications of this concept and its role in understanding the complex nature of matter.",
+      "key_concepts": [
+        "wave-particle duality",
+        "double-slit experiment",
+        "complementarity"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the double-slit experiment and its significance in understanding wave-particle duality.",
+        "After this chapter, students will understand the concept of complementarity and its implications for particle behavior."
+      ],
+      "has_visuals": true,
+      "visual_description": "Visual content includes diagrams depicting the double-slit pattern and electron interference.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_021_ch2",
+      "chapter_index": 2,
+      "title": "Schrödinger Equation",
+      "start_time": 1000,
+      "end_time": 2400,
+      "duration_seconds": 1400,
+      "summary_short": "This lecture focuses on the Schrödinger Equation, introducing the concept and visualizing its application in a particle in a box scenario.",
+      "summary_medium": "The Schrödinger Equation is a fundamental equation in quantum mechanics that describes the time evolution of a quantum system. The lecture covers both time-dependent and time-independent wavefunctions, as well as the concept of probability density. A visual representation of wavefunction plot and box energy levels was provided for better understanding.",
+      "summary_long": "The Schrödinger Equation is a crucial equation in quantum mechanics, providing a framework to predict the behavior of quantum particles. The lecture began by introducing the equation itself and discussing its significance. Further, the lecture delved into two categories: time-dependent and time-independent wavefunctions. Time-dependent wavefunctions describe the evolution of a quantum system over time, whereas time-independent wavefunctions focus on the stationary states of a system. The connection between these concepts was demonstrated using a particle in a box scenario, which showed how energy levels could be derived from the wavefunction.",
+      "key_concepts": [
+        "Schrödinger Equation",
+        "Wavefunctions",
+        "Probability density",
+        "Particle in a box"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the Schrödinger Equation and its significance in quantum mechanics.",
+        "Students will also be able to differentiate between time-dependent and time-independent wavefunctions.",
+        "Upon visualizing a particle in a box, students should be able to interpret energy levels derived from the wavefunction."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes diagrams depicting the Schrödinger equation, wavefunction plots, and box energy level representations.",
+      "difficulty_level": "intermediate",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_021_ch3",
+      "chapter_index": 3,
+      "title": "Quantum Operators",
+      "start_time": 2400,
+      "end_time": 3600,
+      "duration_seconds": 1200,
+      "summary_short": "This chapter discusses Quantum Operators, focusing on observables as Hermitian operators, their eigenvalues and eigenstates, and the concepts of position and momentum.",
+      "summary_medium": "The lecture introduces the concept of observables in quantum mechanics being represented by Hermitian operators. It explains that these operators have real eigenvalues and orthonormal eigenstates. The specific examples given are position and momentum, which play crucial roles in quantum theory.",
+      "summary_long": "In this chapter, students learn about Quantum Operators and their significance in quantum mechanics. The lecture begins by discussing observables as Hermitian operators, emphasizing that they possess real eigenvalues and orthonormal eigenstates. As examples, the position and momentum operators are introduced, highlighting their importance in understanding the behavior of quantum systems. The chapter concludes with a brief overview of how these concepts are applied in quantum theory.",
+      "key_concepts": [
+        "Quantum Operators",
+        "Hermitian Operators",
+        "Eigenvalues",
+        "Eigenstates",
+        "Position operator",
+        "Momentum operator"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to understand the role of Hermitian operators as observables in quantum mechanics.",
+        "Students will learn about eigenvalues and eigenstates of Hermitian operators.",
+        "Students will become familiar with position and momentum operators."
+      ],
+      "has_visuals": true,
+      "visual_description": "Diagrams illustrating operator action, Hermitian definition, and momentum eigenstate are shown.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_021_ch4",
+      "chapter_index": 4,
+      "title": "Heisenberg Uncertainty Principle",
+      "start_time": 3600,
+      "end_time": 4500,
+      "duration_seconds": 900,
+      "summary_short": "The Heisenberg Uncertainty Principle states that the position (Δx) and momentum (Δp) of a particle cannot both be measured exactly; they are inversely related as indicated by Δx Delta p >= hbar/2.",
+      "summary_medium": "Heisenberg's Uncertainty Principle is a fundamental concept in quantum mechanics that establishes a limit on the precision of simultaneously measuring two complementary properties, such as position and momentum. The principle is mathematically represented by the uncertainty relation: Delta x Delta p >= hbar/2. This principle has significant implications for measurement, as it prevents the simultaneous precise measurement of both the position and momentum of a particle.",
+      "summary_long": "The Uncertainty Principle was proposed by Werner Heisenberg in 1927 and is a cornerstone of quantum mechanics. It states that the more precisely one measures the position (Δx) of a particle, the less precisely its momentum (Δp) can be known, and vice versa. This principle has been demonstrated through the Gaussian wavepacket, which shows a minimum uncertainty product of Delta x Delta p = hbar/2 for a given quantum state. The Uncertainty Principle has far-reaching implications for the nature of measurement in quantum mechanics and sets boundaries on what can be known about subatomic particles.",
+      "key_concepts": [
+        "Heisenberg Uncertainty Principle",
+        "Simultaneous measurements",
+        "Complementary properties",
+        "Position",
+        "Momentum",
+        "Quantum mechanics",
+        "Minimum uncertainty"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the Heisenberg Uncertainty Principle and its implications for measurement.",
+        "Students will be able to describe the relationship between a particle's position and momentum as established by the Uncertainty Principle."
+      ],
+      "has_visuals": true,
+      "visual_description": "Diagram showing Uncertainty relation and Gaussian wavepacket",
+      "difficulty_level": "intermediate",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_021_ch5",
+      "chapter_index": 5,
+      "title": "Quantum Entanglement",
+      "start_time": 4500,
+      "end_time": 5400,
+      "duration_seconds": 900,
+      "summary_short": "Learns about Quantum Entanglement, Bell's Inequality Test, and Quantum Teleportation",
+      "summary_medium": "Quantum Entanglement refers to a phenomenon where particles become instantaneously connected, regardless of distance. The EPR paradox and Bell's inequality test were developed as challenges to classical physics. These tests led to the proof of quantum entanglement. Quantum teleportation is another application of this principle, demonstrating the transfer of an unknown quantum state from one particle to another.",
+      "summary_long": "Quantum Entanglement is a fascinating phenomenon where two or more particles can become instantaneously connected, regardless of the distance between them. This connection holds even if the particles are on opposite ends of the universe. The EPR paradox and Bell's inequality test were developed as challenges to classical physics theories that could not explain such behavior. In 1964, John Bell formulated the Bell's Inequality, a mathematical formula designed to differentiate between quantum mechanics and local hidden variable theories. The famous experiments conducted by John Clauser, Alain Aspect, and others in the 1970s and 80s demonstrated that quantum mechanics violates Bell's inequality, thus proving entanglement. Another intriguing application of quantum entanglement is Quantum Teleportation, which involves transferring an unknown quantum state from one particle to another without physically moving it. This technology could potentially revolutionize communication and computing.",
+      "key_concepts": [
+        "Quantum Entanglement",
+        "Bell's Inequality Test",
+        "EPR Paradox",
+        "Quantum Teleportation"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the concept of Quantum Entanglement and its implications.",
+        "Students will understand the EPR paradox and Bell's inequality test as challenges to classical physics.",
+        "Students will learn about quantum teleportation as an application of entanglement."
+      ],
+      "has_visuals": true,
+      "visual_description": "Shown are diagrams of entangled particles, a depiction of the Bell inequality test, and a teleportation circuit.",
+      "difficulty_level": "intermediate",
+      "estimated_read_time_seconds": 90
+    }
+  ]
+}

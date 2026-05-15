@@ -1,0 +1,154 @@
+{
+  "video_id": "tib_025",
+  "video_title": "Particle Physics and the Standard Model",
+  "speaker": "Prof. Fabiola Gianotti",
+  "domain": "physics",
+  "duration": 5400,
+  "total_chapters": 5,
+  "chapter_summaries": [
+    {
+      "chapter_id": "tib_025_ch1",
+      "chapter_index": 1,
+      "title": "Elementary Particles",
+      "start_time": 0,
+      "end_time": 1000,
+      "duration_seconds": 1000,
+      "summary_short": "Overview of elementary particles and their classifications within the Standard Model",
+      "summary_medium": "The lecture focuses on the basic building blocks of matter, specifically quarks (up, down, charm, strange, top, bottom) and leptons (electron, muon, tau, neutrinos). These particles are crucial to understanding the Standard Model chart.",
+      "summary_long": "This chapter introduces students to elementary particles that make up the fabric of our universe. The primary focus is on quarks and leptons, which are categorized by their properties such as flavor (up, down, charm, strange, top, bottom) for quarks and generation (electron, muon, tau, neutrinos) for leptons.",
+      "key_concepts": [
+        "elementary particles",
+        "Standard Model",
+        "quarks",
+        "leptons",
+        "flavor",
+        "generation"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to identify the main types of elementary particles and their classifications.",
+        "Students will understand the role of quarks and leptons in the Standard Model chart."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes diagrams displaying the Standard Model chart, quark flavors, and lepton generations.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_025_ch2",
+      "chapter_index": 2,
+      "title": "Forces and Bosons",
+      "start_time": 1000,
+      "end_time": 2200,
+      "duration_seconds": 1200,
+      "summary_short": "Explores force carriers including photons, gluons, W/Z bosons, and the hypothetical graviton, using Feynman diagrams for illustration.",
+      "summary_medium": "This chapter delves into the fundamental particles responsible for various forces. The discussion includes photons (Electromagnetic force), gluons (Strong nuclear force), W/Z bosons (Weak nuclear force), and the hypothetical graviton (Gravity). Feynman diagrams are used to illustrate electron scattering and gluon exchange, two important mechanisms of these forces.",
+      "summary_long": "The chapter begins by introducing students to four primary force carriers: photons (EM), gluons (strong), W/Z bosons (weak), and gravitons (hypothetical). Photons are responsible for the Electromagnetic force, while gluons mediate the Strong nuclear force that binds protons and neutrons together within atomic nuclei. W/Z bosons act as intermediaries in the Weak nuclear force, which is essential for radioactive decay and certain types of particle interactions. The hypothetical graviton is a predicted carrier of gravity but has yet to be directly observed.",
+      "key_concepts": [
+        "photon",
+        "gluon",
+        "W boson",
+        "Z boson",
+        "graviton",
+        "Force carriers",
+        "Feynman diagram",
+        "Electromagnetic force",
+        "Strong nuclear force",
+        "Weak nuclear force",
+        "Gravity"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to identify the four primary force carriers and their corresponding forces.",
+        "Students will understand the role of Feynman diagrams in illustrating particle interactions.",
+        "Students will gain a basic understanding of how gluon exchange and electron scattering work."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes diagrams depicting Feynman diagrams for electron scattering and gluon exchange.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_025_ch3",
+      "chapter_index": 3,
+      "title": "Quantum Chromodynamics",
+      "start_time": 2200,
+      "end_time": 3400,
+      "duration_seconds": 1200,
+      "summary_short": "This lecture discusses Quantum Chromodynamics, focusing on color charge, confinement, and asymptotic freedom. It introduces hadrons, categorized as baryons and mesons.",
+      "summary_medium": "Quantum Chromodynamics (QCD) is a theory describing the strong interaction between quarks and gluons that make up protons and neutrons. In this lecture, we learn about three key aspects: color charge, confinement, and asymptotic freedom. Color charge is a theoretical concept used to describe the internal properties of quarks that mediate their interactions through the exchange of gluons. Confinement refers to the phenomenon where quarks and gluons are always found bound in protons, neutrons, and other particles called hadrons. Asymptotic freedom means that the strong force between quarks weakens at high energies, allowing them to behave almost independently. Hadrons can be classified into two types: baryons (particles containing three quarks) and mesons (particles containing one quark and one antiquark).",
+      "summary_long": "Quantum Chromodynamics (QCD) is a fundamental theory that describes the strong interaction between quarks and gluons. The strong force, which binds protons and neutrons together in atomic nuclei, is mediated by the exchange of gluons among the quarks. In QCD, color charge is used to explain the interactions between quarks; it is a theoretical property that allows quarks to interact through the exchange of gluons. This property gives rise to confinement, the phenomenon where quarks and gluons are always found bound in hadrons. Despite being confined, quarks and gluons can behave almost independently at high energies due to asymptotic freedom, a feature of QCD that makes the strong force weaker at higher energies. Hadrons are classified into two categories: baryons (containing three quarks) and mesons (composed of one quark and one antiquark).",
+      "key_concepts": [
+        "Quantum Chromodynamics",
+        "Color charge",
+        "Confinement",
+        "Asymptotic freedom",
+        "Hadrons",
+        "Baryons",
+        "Mesons"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the concept of color charge and its role in quark interactions.",
+        "Students will understand the phenomenon of confinement and its implications for understanding hadrons.",
+        "Students will learn about asymptotic freedom and its significance in QCD.",
+        "Students will be able to identify different types of hadrons, including baryons and mesons."
+      ],
+      "has_visuals": true,
+      "visual_description": "The visual content includes diagrams illustrating color charge, the QCD potential, and a representation of the Hadron zoo.",
+      "difficulty_level": "intermediate",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_025_ch4",
+      "chapter_index": 4,
+      "title": "Electroweak Unification",
+      "start_time": 3400,
+      "end_time": 4500,
+      "duration_seconds": 1100,
+      "summary_short": "The lecture discusses the Glashow-Weinberg-Salam model, Higgs mechanism, and neutrino oscillations in the context of electroweak unification.",
+      "summary_medium": "The Glashow-Weinberg-Salam model is a theoretical framework that explains the electromagnetic and weak nuclear forces. It utilizes the Higgs mechanism to generate mass for particles. Neutrino oscillations, a phenomenon where neutrinos change types during flight, are also covered as they provide evidence for the existence of the Higgs boson.",
+      "summary_long": "The Glashow-Weinberg-Salam model is a unified theory of electromagnetic and weak nuclear forces. It was developed to resolve inconsistencies between these two forces in the Standard Model of particle physics. The Higgs mechanism, an essential part of this model, generates mass for particles by giving them expectation values of the Higgs field. In this lecture, we also explore neutrino oscillations, a phenomenon where neutrinos change types during flight. This transformation provides empirical evidence for the existence of the Higgs boson.",
+      "key_concepts": [
+        "Glashow-Weinberg-Salam model",
+        "Higgs mechanism",
+        "Neutrino oscillation",
+        "Electroweak unification",
+        "Higgs boson"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the Glashow-Weinberg-Salam model and its significance in electroweak unification.",
+        "After this chapter, students will be able to describe the Higgs mechanism and how it generates particle mass.",
+        "After this chapter, students will be able to discuss neutrino oscillations as evidence for the existence of the Higgs boson."
+      ],
+      "has_visuals": true,
+      "visual_description": "The visual content includes diagrams depicting electroweak symmetry, the Higgs potential, and neutrino oscillation.",
+      "difficulty_level": "intermediate",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_025_ch5",
+      "chapter_index": 5,
+      "title": "Particle Accelerators",
+      "start_time": 4500,
+      "end_time": 5400,
+      "duration_seconds": 900,
+      "summary_short": "The lecture discusses the Large Hadron Collider (LHC), its detectors like CMS and ATLAS, and the discovery of the Higgs boson in 2012.",
+      "summary_medium": "The LHC is a powerful particle accelerator that collides protons at high energies. The CMS and ATLAS are detectors used in the LHC to observe and study these collisions. In 2012, scientists discovered the Higgs boson, a fundamental particle associated with mass in the universe, using data from these detectors.",
+      "summary_long": "The Large Hadron Collider (LHC) is a cutting-edge particle accelerator that allows scientists to study the behavior of subatomic particles at extreme energies. Two main detectors used in the LHC are CMS and ATLAS, which help observe and record data from high-energy collisions. In 2012, one of the major breakthroughs in physics was the discovery of the Higgs boson using data collected by these detectors.",
+      "key_concepts": [
+        "Particle accelerators",
+        "LHC",
+        "CMS detector",
+        "ATLAS",
+        "Higgs boson",
+        "Subatomic particles"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the function of the Large Hadron Collider (LHC) and its main detectors, CMS and ATLAS.",
+        "Students should understand the significance of the discovery of the Higgs boson and its association with mass in the universe."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes visuals such as diagrams depicting the LHC tunnel, the CMS detector, and illustrations related to Higgs decay channels.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    }
+  ]
+}

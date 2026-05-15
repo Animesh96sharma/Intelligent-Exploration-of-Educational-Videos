@@ -1,0 +1,123 @@
+{
+  "video_id": "tib_006.1",
+  "video_title": "Linear Algebra Foundations for Machine Learning",
+  "speaker": "Dr. Markus Weber",
+  "domain": "mathematics",
+  "duration": 4800,
+  "total_chapters": 5,
+  "chapter_summaries": [
+    {
+      "chapter_id": "tib_006.1_ch1",
+      "chapter_index": 1,
+      "title": "Vectors and Vector Spaces",
+      "start_time": 0,
+      "end_time": 600,
+      "duration_seconds": 600,
+      "summary_short": "This chapter introduces the basics of vectors and vector spaces, focusing on vector addition, scalar multiplication, and linear combinations. Each data point in machine learning is represented as a vector.",
+      "summary_medium": "Vectors are fundamental units used to represent data in machine learning. In this chapter, the concepts of vector addition, scalar multiplication, and linear combinations will be discussed. Vectors can be visualized as ordered lists of numbers and are essential for understanding various mathematical operations in machine learning.",
+      "summary_long": "In this lecture titled 'Vectors and Vector Spaces', we delve into the fundamental building blocks of vectors and their applications in machine learning. A vector is an ordered list of numbers, where each element represents a dimension. The main topics covered include vector addition, scalar multiplication, and linear combinations. Vector addition involves combining two or more vectors to obtain a resultant vector that represents the net displacement. Scalar multiplication refers to multiplying a vector by a real number, altering its magnitude but preserving its direction. Linear combinations describe the process of forming new vectors as weighted sums of existing vectors.",
+      "key_concepts": [
+        "vectors",
+        "vector addition",
+        "scalar multiplication",
+        "linear combination",
+        "machine learning"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to understand the concept of vectors and their importance in machine learning. They will learn how to perform vector addition and scalar multiplication, as well as create linear combinations using vectors."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes visual content such as diagrams illustrating vector arrows in two dimensions, the parallelogram rule for vector addition, and examples of linear combinations.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_006.1_ch2",
+      "chapter_index": 2,
+      "title": "Matrices and Linear Transformations",
+      "start_time": 600,
+      "end_time": 1500,
+      "duration_seconds": 900,
+      "summary_short": "This lecture introduces matrices as linear transformations and demonstrates matrix-vector multiplication. Key concepts include associativity, inverse, identity, and non-commutativity.",
+      "summary_medium": "Matrices are used to represent linear transformations in mathematics. In this chapter, the concept of multiplying a matrix by a vector is explained as it transforms the vector. The multiplication operation is associative but not commutative. Other concepts covered include identity matrices, inverse matrices, and their importance in reversing transformations.",
+      "summary_long": "The lecture commences with an introduction to matrices as linear transformations. Matrices are used to change coordinates or map one geometric figure into another. A key operation demonstrated is matrix-vector multiplication, which transforms the vector by performing specific operations on its elements. This process is shown through an animation for better understanding.",
+      "key_concepts": [
+        "Matrices",
+        "Linear Transformations",
+        "Matrix-Vector Multiplication",
+        "Associativity",
+        "Inverse Matrices",
+        "Identity Matrices"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to understand matrices as linear transformations.",
+        "They will learn how to perform matrix-vector multiplication and understand the associative property.",
+        "Students will also be introduced to inverse and identity matrices."
+      ],
+      "has_visuals": true,
+      "visual_description": "The visual content includes a 2x3 matrix grid for demonstrating linear transformations, an animation showing matrix-vector multiplication, and a formula for calculating the inverse of a matrix.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_006.1_ch3",
+      "chapter_index": 3,
+      "title": "Eigenvalues and Eigenvectors",
+      "start_time": 1500,
+      "end_time": 2700,
+      "duration_seconds": 1200,
+      "summary_short": "This chapter discusses eigenvectors, their property of being unchanged under a transformation, and their role in Principal Component Analysis (PCA).",
+      "summary_medium": "Eigenvectors are unique directions that remain constant when subjected to a linear transformation. They only scale by factors known as eigenvalues. The concept of eigenvectors is crucial in Principal Component Analysis (PCA) which uses eigendecomposition for dimensionality reduction and data visualization.",
+      "summary_long": "Eigenvectors are special directions that do not change under a linear transformation, scaling only by the eigenvalue associated with them. This unique property makes them useful in various areas of mathematics and physics. In this chapter, we focus on their role in Principal Component Analysis (PCA). PCA is a statistical procedure that uses eigendecomposition for dimensionality reduction and data visualization. By decomposing the covariance matrix into its eigenvalues and eigenvectors, PCA identifies directions in which the data varies most significantly, allowing for better understanding and interpretation of complex datasets.",
+      "key_concepts": [
+        "eigenvectors",
+        "eigenvalues",
+        "linear transformation",
+        "Principal Component Analysis (PCA)",
+        "dimensionality reduction"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to understand the concept of eigenvectors and their role in linear transformations.",
+        "After this chapter, students will be able to explain the role of eigenvectors in Principal Component Analysis."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes visual content such as diagrams illustrating eigenvector direction unchanged and a PCA scatter plot.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_006.1_ch4",
+      "chapter_index": 4,
+      "title": "Norms and Inner Products",
+      "start_time": 2700,
+      "end_time": 3900,
+      "duration_seconds": 1200,
+      "summary_short": "The lecture focuses on measuring vector length with L1 and L2 norms, similarity via dot products, and the Cauchy-Schwarz inequality.",
+      "summary_medium": "In this chapter, students will learn about two common norms: L1 and L2. Norms are used to measure the length of a vector, while dot products determine similarity between vectors. A key concept discussed is the Cauchy-Schwarz inequality, which provides a lower bound for the product of the magnitudes of two vectors. Understanding these concepts helps in analyzing and comparing vectors.",
+      "summary_long": "The lecture delves into two common methods for measuring vector length: L1 (Manhattan distance) and L2 (Euclidean distance) norms. L1 norm calculates the absolute sum of a vector's components, while L2 norm determines the square root of the sum of the squares of its components. Dot products are introduced as a means to measure similarity between two vectors by finding the product of their corresponding components and then summing them up. The Cauchy-Schwarz inequality ensures that the dot product of two vectors is never larger than the product of their magnitudes, thus helping set boundaries when comparing vectors.",
+      "key_concepts": [
+        "L1 norm",
+        "L2 norm",
+        "Dot product",
+        "Cauchy-Schwarz inequality"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to calculate the L1 and L2 norm of a vector, understand the concept of dot product, and apply the Cauchy-Schwarz inequality in analyzing vectors."
+      ],
+      "has_visuals": true,
+      "visual_description": "Diagrams showing the difference between L1 and L2 balls and a visual representation of dot product projection.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_006.1_ch5",
+      "chapter_index": 5,
+      "title": "Applications in ML",
+      "start_time": 3900,
+      "end_time": 4800,
+      "duration_seconds": 900,
+      "error": "JSON parse failed",
+      "raw_llm_output": "{\n  \"summary_short\": \"This chapter discusses the use of linear algebra in various machine learning applications such as linear regression, PCA, neural networks, and SVD for dimensionality reduction.\",\n  \"summary_medium\": \"The lecture focuses on four primary topics that rely on linear algebra: linear regression, Principal Component Analysis (PCA), neural network weight matrices, and Singular Value Decomposition (SVD) for dimensionality reduction. These techniques are essential in machine learning"
+    }
+  ]
+}

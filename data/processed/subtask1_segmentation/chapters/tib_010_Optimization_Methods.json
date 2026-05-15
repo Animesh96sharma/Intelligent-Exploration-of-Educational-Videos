@@ -1,0 +1,16 @@
+{
+"video_id": "tib_010",
+"video_title": "Numerical Optimization for Machine Learning",
+"video_url": "https://av.tib.eu/media/tib_010",
+"duration": 5400,
+"language": "en",
+"speaker": "Dr. Natalia Sokolova",
+"domain": "mathematics",
+"chapters": [
+{"chapter_id": "tib_010_ch1", "chapter_index": 1, "title": "Convex vs Nonconvex Optimization", "start_time": 0, "end_time": 800, "transcript": "Convex functions have one global minimum. Nonconvex have local minima. Deep learning loss surfaces are nonconvex.", "frame_captions": ["Convex bowl shape", "Nonconvex landscape", "Local vs global minima"], "keywords": ["convex", "nonconvex", "global optimum", "local optimum"]},
+{"chapter_id": "tib_010_ch2", "chapter_index": 2, "title": "Gradient Descent Variants", "start_time": 800, "end_time": 2000, "transcript": "Batch, mini-batch, SGD. Momentum, Nesterov, AdaGrad, RMSprop, Adam.", "frame_captions": ["Momentum vector", "Adam algorithm", "Learning rate schedules"], "keywords": ["SGD", "momentum", "Adam", "AdaGrad", "RMSprop"]},
+{"chapter_id": "tib_010_ch3", "chapter_index": 3, "title": "Constrained Optimization", "start_time": 2000, "end_time": 3200, "transcript": "Lagrange multipliers, KKT conditions. Linear programming. Support vector machines use constrained optimization.", "frame_captions": ["Lagrange multiplier diagram", "KKT conditions", "SVM margin"], "keywords": ["Lagrange", "KKT", "constrained", "SVM"]},
+{"chapter_id": "tib_010_ch4", "chapter_index": 4, "title": "Second-order Methods", "start_time": 3200, "end_time": 4400, "transcript": "Newton's method, Quasi-Newton (BFGS), L-BFGS. Faster but more memory.", "frame_captions": ["Newton step", "BFGS update", "L-BFGS approximation"], "keywords": ["Newton", "BFGS", "L-BFGS", "Hessian"]},
+{"chapter_id": "tib_010_ch5", "chapter_index": 5, "title": "Stochastic Optimization", "start_time": 4400, "end_time": 5400, "transcript": "SGD with variance reduction. SVRG, SAGA. Coordinate descent.", "frame_captions": ["SVRG algorithm", "Coordinate descent path", "Variance reduction"], "keywords": ["SVRG", "SAGA", "coordinate descent", "variance reduction"]}
+]
+}

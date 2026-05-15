@@ -1,0 +1,16 @@
+{
+"video_id": "tib_018",
+"video_title": "Supply Chain Management and Logistics",
+"video_url": "https://av.tib.eu/media/tib_018",
+"duration": 5400,
+"language": "en",
+"speaker": "Prof. Henrik Lund",
+"domain": "commerce",
+"chapters": [
+{"chapter_id": "tib_018_ch1", "chapter_index": 1, "title": "SCOR Model", "start_time": 0, "end_time": 800, "transcript": "Plan, Source, Make, Deliver, Return. Supply chain metrics: cash-to-cash cycle, inventory turns.", "frame_captions": ["SCOR framework", "Cycle diagram", "Metric dashboard"], "keywords": ["SCOR", "supply chain", "inventory turns", "cash-to-cash"]},
+{"chapter_id": "tib_018_ch2", "chapter_index": 2, "title": "Inventory Management", "start_time": 800, "end_time": 2100, "transcript": "EOQ, safety stock, reorder point. Newsvendor model. ABC analysis.", "frame_captions": ["EOQ formula", "Safety stock graph", "Newsvendor critical fractile"], "keywords": ["EOQ", "safety stock", "newsvendor", "ABC analysis"]},
+{"chapter_id": "tib_018_ch3", "chapter_index": 3, "title": "Forecasting Demand", "start_time": 2100, "end_time": 3300, "transcript": "Time series: exponential smoothing, ARIMA. Forecast error (MSE, MAPE). Bullwhip effect.", "frame_captions": ["Exponential smoothing", "ARIMA equation", "Bullwhip diagram"], "keywords": ["demand forecasting", "ARIMA", "exponential smoothing", "bullwhip"]},
+{"chapter_id": "tib_018_ch4", "chapter_index": 4, "title": "Network Design", "start_time": 3300, "end_time": 4400, "transcript": "Facility location models (p-median, covering). Transportation modes. Cross-docking.", "frame_captions": ["p-median example", "Transport mode comparison", "Cross-dock layout"], "keywords": ["network design", "facility location", "transportation", "cross-docking"]},
+{"chapter_id": "tib_018_ch5", "chapter_index": 5, "title": "Risk and Resilience", "start_time": 4400, "end_time": 5400, "transcript": "Risk assessment, disruption scenarios. Dual sourcing, postponement. COVID-19 lessons.", "frame_captions": ["Risk matrix", "Postponement model", "Resilience framework"], "keywords": ["risk", "resilience", "dual sourcing", "postponement"]}
+]
+}

@@ -1,0 +1,16 @@
+{
+"video_id": "tib_011",
+"video_title": "Introduction to Genomics and DNA Sequencing",
+"video_url": "https://av.tib.eu/media/tib_011",
+"duration": 4800,
+"language": "en",
+"speaker": "Prof. Sarah Jenkins",
+"domain": "biology",
+"chapters": [
+{"chapter_id": "tib_011_ch1", "chapter_index": 1, "title": "DNA Structure and Function", "start_time": 0, "end_time": 900, "transcript": "DNA double helix, nucleotides ATCG, genes code for proteins. Human genome has 3 billion base pairs.", "frame_captions": ["DNA helix", "ATCG bases", "Chromosome diagram"], "keywords": ["DNA", "genes", "genome", "nucleotides"]},
+{"chapter_id": "tib_011_ch2", "chapter_index": 2, "title": "Next-Generation Sequencing", "start_time": 900, "end_time": 2100, "transcript": "Illumina, PacBio, Oxford Nanopore. Short vs long reads. Sequencing by synthesis.", "frame_captions": ["Illumina flow cell", "Read length comparison", "Nanopore diagram"], "keywords": ["NGS", "Illumina", "PacBio", "nanopore", "sequencing"]},
+{"chapter_id": "tib_011_ch3", "chapter_index": 3, "title": "Genome Assembly", "start_time": 2100, "end_time": 3300, "transcript": "Overlap-layout-consensus, de Bruijn graphs. Short-read assembly challenges. Reference-based vs de novo.", "frame_captions": ["de Bruijn graph", "Overlap graph", "Assembly contigs"], "keywords": ["assembly", "de Bruijn", "contigs", "scaffolds"]},
+{"chapter_id": "tib_011_ch4", "chapter_index": 4, "title": "Variant Calling", "start_time": 3300, "end_time": 4200, "transcript": "SNPs, indels, structural variants. Mapping reads to reference. GATK pipeline.", "frame_captions": ["SNP position", "Alignment pileup", "VCF format"], "keywords": ["SNP", "indel", "variant calling", "GATK", "VCF"]},
+{"chapter_id": "tib_011_ch5", "chapter_index": 5, "title": "Functional Genomics", "start_time": 4200, "end_time": 4800, "transcript": "RNA-seq, ChIP-seq, ATAC-seq. Gene expression and regulation.", "frame_captions": ["RNA-seq heatmap", "ChIP-seq peaks", "ATAC-seq accessibility"], "keywords": ["RNA-seq", "ChIP-seq", "ATAC-seq", "expression"]}
+]
+}

@@ -1,0 +1,16 @@
+{
+"video_id": "tib_016",
+"video_title": "Financial Accounting Fundamentals",
+"video_url": "https://av.tib.eu/media/tib_016",
+"duration": 4200,
+"language": "en",
+"speaker": "Prof. Linda Grant",
+"domain": "commerce",
+"chapters": [
+{"chapter_id": "tib_016_ch1", "chapter_index": 1, "title": "Accounting Equation", "start_time": 0, "end_time": 700, "transcript": "Assets = Liabilities + Equity. Double-entry bookkeeping. Debits and credits.", "frame_captions": ["Accounting equation", "T-accounts", "Debit credit table"], "keywords": ["assets", "liabilities", "equity", "double-entry"]},
+{"chapter_id": "tib_016_ch2", "chapter_index": 2, "title": "Financial Statements", "start_time": 700, "end_time": 1800, "transcript": "Income statement, balance sheet, cash flow statement. How they connect.", "frame_captions": ["Income statement format", "Balance sheet", "Cash flow categories"], "keywords": ["income statement", "balance sheet", "cash flow", "financial statements"]},
+{"chapter_id": "tib_016_ch3", "chapter_index": 3, "title": "Revenue Recognition", "start_time": 1800, "end_time": 2800, "transcript": "ASC 606 five-step model. Accrual vs cash accounting. Deferred revenue.", "frame_captions": ["Five-step model", "Accrual example", "Deferred revenue entry"], "keywords": ["revenue recognition", "accrual", "deferred revenue", "ASC 606"]},
+{"chapter_id": "tib_016_ch4", "chapter_index": 4, "title": "Inventory and COGS", "start_time": 2800, "end_time": 3600, "transcript": "FIFO, LIFO, weighted average. Periodic vs perpetual. Lower of cost or market.", "frame_captions": ["FIFO vs LIFO", "Inventory ledger", "LCM calculation"], "keywords": ["FIFO", "LIFO", "COGS", "inventory valuation"]},
+{"chapter_id": "tib_016_ch5", "chapter_index": 5, "title": "Financial Ratios", "start_time": 3600, "end_time": 4200, "transcript": "Liquidity, solvency, profitability ratios. DuPont analysis.", "frame_captions": ["Ratio formula sheet", "DuPont triangle", "Comparison chart"], "keywords": ["financial ratios", "liquidity", "profitability", "DuPont"]}
+]
+}

@@ -1,0 +1,67 @@
+{
+  "video_id": "tib_004",
+  "video_title": "Transformers and Attention Mechanisms",
+  "video_url": "https://av.tib.eu/media/tib_004",
+  "duration": 4200,
+  "language": "en",
+  "speaker": "Prof. David Kim",
+  "domain": "deep_learning",
+  "chapters": [
+    {
+      "chapter_id": "tib_004_ch1", "chapter_index": 1,
+      "title": "Limitations of RNNs and Motivation for Attention",
+      "start_time": 0, "end_time": 540,
+      "transcript": "Before we get to Transformers, we need to understand what problems they solve. Recurrent Neural Networks process sequences step by step, maintaining a hidden state. This architecture has two major problems. First, the vanishing gradient problem makes it hard to learn long-range dependencies — information from early in a sequence gets diluted by the time we reach the end. Second, RNNs are inherently sequential and cannot be parallelized during training, making them very slow on modern GPU hardware. The attention mechanism was proposed as a solution. Instead of relying on a single fixed context vector, attention allows the decoder to look back at all encoder hidden states and dynamically focus on the most relevant parts of the input for each output step. The seminal paper Attention Is All You Need by Vaswani et al. in 2017 showed that you can build powerful sequence models using attention alone, without any recurrence, giving birth to the Transformer architecture.",
+      "frame_captions": ["RNN unrolled diagram showing sequential processing", "Vanishing gradient visualization across timesteps", "Attention mechanism: decoder attending to all encoder states", "Paper title slide: Attention Is All You Need 2017"],
+      "keywords": ["RNN", "vanishing gradient", "attention mechanism", "sequential processing", "Vaswani", "Attention Is All You Need", "parallelization"]
+    },
+    {
+      "chapter_id": "tib_004_ch2", "chapter_index": 2,
+      "title": "Scaled Dot-Product Attention",
+      "start_time": 540, "end_time": 1140,
+      "transcript": "The core operation in the Transformer is scaled dot-product attention. We have three inputs: queries Q, keys K, and values V. The attention score between a query and a key is computed as the dot product of the query with the key, scaled by the square root of the key dimension. We then apply softmax to get attention weights that sum to one, and multiply by the values to get the output. Mathematically: Attention(Q,K,V) = softmax(QK^T / sqrt(d_k)) * V. Scaling by sqrt(d_k) prevents the dot products from growing too large, which would push softmax into regions with very small gradients. Intuitively, the query represents what we are looking for, the key represents what each position offers, and the value is the actual content we retrieve. This mechanism allows the model to dynamically focus on different parts of the sequence for each position.",
+      "frame_captions": ["Query, Key, Value diagram with matrix operations", "Scaled dot-product attention formula on whiteboard", "Softmax attention weights visualized as heatmap", "Intuition diagram: query looking for keys to retrieve values"],
+      "keywords": ["scaled dot-product attention", "query", "key", "value", "softmax", "attention weights", "dot product", "gradient"]
+    },
+    {
+      "chapter_id": "tib_004_ch3", "chapter_index": 3,
+      "title": "Multi-Head Attention",
+      "start_time": 1140, "end_time": 1800,
+      "transcript": "Multi-head attention runs several attention operations in parallel, each with different learned projection matrices. Each head can learn to attend to different aspects of the input — one head might focus on syntactic relationships, another on semantic similarity, another on positional proximity. The outputs of all heads are concatenated and projected back to the model dimension. Multi-head attention with h heads: we project Q, K, V h times with different learned weight matrices, compute attention for each head, concatenate all head outputs, and apply a final linear projection. This allows the model to jointly attend to information from different representation subspaces at different positions.",
+      "frame_captions": ["Multi-head attention diagram with parallel attention heads", "Each head attending to different input relationships", "Concatenation and projection of head outputs", "Code implementation of multi-head attention"],
+      "keywords": ["multi-head attention", "attention heads", "parallel attention", "concatenation", "representation subspace", "projection"]
+    },
+    {
+      "chapter_id": "tib_004_ch4", "chapter_index": 4,
+      "title": "The Transformer Architecture",
+      "start_time": 1800, "end_time": 2520,
+      "transcript": "The full Transformer architecture consists of an encoder stack and a decoder stack. The encoder takes the input sequence and produces contextual representations. Each encoder layer has two sublayers: multi-head self-attention and a position-wise feed-forward network. Residual connections and layer normalization are applied around each sublayer. The decoder is similar but has an additional cross-attention layer that attends to the encoder output. Positional encoding is added to the input embeddings to give the model information about the position of each token, since unlike RNNs the Transformer has no inherent notion of order. The standard Transformer uses sinusoidal positional encodings.",
+      "frame_captions": ["Full Transformer architecture diagram from Vaswani et al.", "Encoder layer: self-attention plus feed-forward with residuals", "Decoder layer: self-attention, cross-attention, feed-forward", "Sinusoidal positional encoding visualization"],
+      "keywords": ["Transformer architecture", "encoder", "decoder", "self-attention", "cross-attention", "positional encoding", "layer normalization", "residual connection", "feed-forward"]
+    },
+    {
+      "chapter_id": "tib_004_ch5", "chapter_index": 5,
+      "title": "BERT, GPT, and Pretrained Language Models",
+      "start_time": 2520, "end_time": 3120,
+      "transcript": "The Transformer architecture led to a revolution in NLP through large pretrained language models. BERT, Bidirectional Encoder Representations from Transformers, uses only the encoder stack and is pretrained using masked language modeling and next sentence prediction. Fine-tuning BERT on downstream tasks achieves state-of-the-art results with relatively little task-specific data. GPT, Generative Pretrained Transformer, uses only the decoder stack and is trained on autoregressive language modeling — predicting the next token given previous tokens. GPT-2 and GPT-3 showed that scaling model size leads to emergent capabilities. The key insight of pretraining is transfer learning: learn general language understanding from massive text corpora, then fine-tune on small task-specific datasets.",
+      "frame_captions": ["BERT architecture: encoder-only with masked language modeling", "GPT architecture: decoder-only with causal language modeling", "Transfer learning diagram: pretrain then fine-tune", "Scaling laws graph: performance vs model size"],
+      "keywords": ["BERT", "GPT", "pretrained language models", "masked language modeling", "autoregressive", "transfer learning", "fine-tuning", "NLP"]
+    },
+    {
+      "chapter_id": "tib_004_ch6", "chapter_index": 6,
+      "title": "Transformers Beyond NLP: Vision and Multimodal",
+      "start_time": 3120, "end_time": 3720,
+      "transcript": "Transformers have expanded far beyond natural language processing. Vision Transformer or ViT applies the Transformer architecture directly to images by splitting them into patches and treating each patch as a token. CLIP learns joint representations of images and text using contrastive learning, enabling zero-shot image classification. DALL-E and Stable Diffusion use Transformer-based architectures for text-to-image generation. In video understanding, video Transformers process spatial and temporal information simultaneously. The key advantage of Transformers across modalities is the same: global attention allows every element to directly attend to every other element, capturing long-range dependencies efficiently.",
+      "frame_captions": ["ViT patch tokenization of an image", "CLIP contrastive learning diagram with images and text", "DALL-E generated images from text prompts", "Video Transformer spatial-temporal attention"],
+      "keywords": ["Vision Transformer", "ViT", "CLIP", "multimodal", "image patches", "contrastive learning", "DALL-E", "text-to-image", "video Transformer"]
+    },
+    {
+      "chapter_id": "tib_004_ch7", "chapter_index": 7,
+      "title": "Summary and Open Research Questions",
+      "start_time": 3720, "end_time": 4200,
+      "transcript": "We covered the motivation for attention, scaled dot-product attention, multi-head attention, the full Transformer architecture, pretrained models like BERT and GPT, and extensions to vision and multimodal tasks. Open research questions include: efficient Transformers for longer sequences since attention is quadratic in sequence length, better positional encodings, understanding what Transformers learn internally, reducing the environmental cost of training large models, and making Transformers more robust and interpretable. The Transformer has become the dominant architecture across AI — understanding it deeply is essential for any modern AI practitioner.",
+      "frame_captions": ["Summary slide with all topics", "Attention complexity: quadratic vs linear alternatives", "Research directions: efficient attention, interpretability", "Timeline of Transformer variants from 2017 to present"],
+      "keywords": ["summary", "efficient attention", "quadratic complexity", "interpretability", "research directions", "Transformer variants"]
+    }
+  ]
+}

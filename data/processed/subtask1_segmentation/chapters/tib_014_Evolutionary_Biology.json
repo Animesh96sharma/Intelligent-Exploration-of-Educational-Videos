@@ -1,0 +1,16 @@
+{
+"video_id": "tib_014",
+"video_title": "Evolutionary Biology and Phylogenetics",
+"video_url": "https://av.tib.eu/media/tib_014",
+"duration": 4500,
+"language": "en",
+"speaker": "Dr. Caroline Fossi",
+"domain": "biology",
+"chapters": [
+{"chapter_id": "tib_014_ch1", "chapter_index": 1, "title": "Natural Selection", "start_time": 0, "end_time": 800, "transcript": "Darwinian evolution, fitness landscapes. Adaptation and speciation.", "frame_captions": ["Darwin finches", "Fitness landscape", "Peppered moth"], "keywords": ["natural selection", "fitness", "adaptation", "speciation"]},
+{"chapter_id": "tib_014_ch2", "chapter_index": 2, "title": "Population Genetics", "start_time": 800, "end_time": 1900, "transcript": "Hardy-Weinberg equilibrium, genetic drift, migration, mutation, selection.", "frame_captions": ["Hardy-Weinberg equation", "Founder effect", "Gene flow"], "keywords": ["Hardy-Weinberg", "genetic drift", "mutation", "gene flow"]},
+{"chapter_id": "tib_014_ch3", "chapter_index": 3, "title": "Phylogenetic Trees", "start_time": 1900, "end_time": 3100, "transcript": "Maximum parsimony, maximum likelihood, Bayesian inference. Bootstrapping.", "frame_captions": ["Cladogram", "Bootstrap values", "Maximum likelihood tree"], "keywords": ["phylogeny", "parsimony", "maximum likelihood", "bootstrap"]},
+{"chapter_id": "tib_014_ch4", "chapter_index": 4, "title": "Molecular Evolution", "start_time": 3100, "end_time": 4000, "transcript": "Substitution models (JC69, K80, GTR). dN/dS ratio. Positive selection.", "frame_captions": ["JC69 model", "dN/dS scatter", "Codon alignment"], "keywords": ["substitution models", "dN/dS", "positive selection", "codon"]},
+{"chapter_id": "tib_014_ch5", "chapter_index": 5, "title": "Comparative Genomics", "start_time": 4000, "end_time": 4500, "transcript": "Synteny, orthologs vs paralogs. Genome evolution.", "frame_captions": ["Synteny plot", "Ortholog groups", "Genome rearrangements"], "keywords": ["synteny", "ortholog", "paralog", "comparative genomics"]}
+]
+}

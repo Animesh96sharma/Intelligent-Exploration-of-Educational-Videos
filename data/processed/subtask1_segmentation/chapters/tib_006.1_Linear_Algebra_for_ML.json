@@ -1,0 +1,16 @@
+{
+"video_id": "tib_006.1",
+"video_title": "Linear Algebra Foundations for Machine Learning",
+"video_url": "https://av.tib.eu/media/tib_006.1",
+"duration": 4800,
+"language": "en",
+"speaker": "Dr. Markus Weber",
+"domain": "mathematics",
+"chapters": [
+{"chapter_id": "tib_006.1_ch1", "chapter_index": 1, "title": "Vectors and Vector Spaces", "start_time": 0, "end_time": 600, "transcript": "Vectors are the fundamental building blocks. A vector is an ordered list of numbers. In machine learning, each data point is often a vector. We will cover vector addition, scalar multiplication, and linear combinations.", "frame_captions": ["Vector arrow in 2D", "Vector addition parallelogram rule", "Linear combination example"], "keywords": ["vectors", "linear algebra", "vector space"]},
+{"chapter_id": "tib_006.1_ch2", "chapter_index": 2, "title": "Matrices and Linear Transformations", "start_time": 600, "end_time": 1500, "transcript": "Matrices represent linear transformations. Multiplying a matrix by a vector transforms it. Matrix multiplication is associative but not commutative. We also cover identity and inverse matrices.", "frame_captions": ["2x3 matrix grid", "Matrix-vector multiplication animation", "Inverse matrix formula"], "keywords": ["matrices", "linear transformation", "matrix inverse"]},
+{"chapter_id": "tib_006.1_ch3", "chapter_index": 3, "title": "Eigenvalues and Eigenvectors", "start_time": 1500, "end_time": 2700, "transcript": "Eigenvectors are special directions that do not change under a transformation, only scaling by eigenvalues. Principal Component Analysis relies on eigendecomposition.", "frame_captions": ["Eigenvector direction unchanged", "PCA scatter plot", "Characteristic polynomial"], "keywords": ["eigenvalues", "eigenvectors", "PCA", "diagonalization"]},
+{"chapter_id": "tib_006.1_ch4", "chapter_index": 4, "title": "Norms and Inner Products", "start_time": 2700, "end_time": 3900, "transcript": "Norms measure vector length. L1 and L2 norms are common. Dot products measure similarity. Cauchy-Schwarz inequality is key.", "frame_captions": ["L1 vs L2 ball", "Dot product projection", "Cauchy-Schwarz formula"], "keywords": ["norms", "inner product", "L1", "L2", "Cauchy-Schwarz"]},
+{"chapter_id": "tib_006.1_ch5", "chapter_index": 5, "title": "Applications in ML", "start_time": 3900, "end_time": 4800, "transcript": "Linear regression, PCA, neural network weight matrices, and SVD for dimensionality reduction all depend on linear algebra.", "frame_captions": ["Linear regression line", "SVD decomposition diagram", "Neural network weight matrix"], "keywords": ["SVD", "linear regression", "applications", "neural nets"]}
+]
+}

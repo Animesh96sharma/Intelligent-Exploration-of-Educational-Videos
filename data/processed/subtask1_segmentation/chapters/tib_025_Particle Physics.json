@@ -1,0 +1,16 @@
+{
+"video_id": "tib_025",
+"video_title": "Particle Physics and the Standard Model",
+"video_url": "https://av.tib.eu/media/tib_025",
+"duration": 5400,
+"language": "en",
+"speaker": "Prof. Fabiola Gianotti",
+"domain": "physics",
+"chapters": [
+{"chapter_id": "tib_025_ch1", "chapter_index": 1, "title": "Elementary Particles", "start_time": 0, "end_time": 1000, "transcript": "Quarks (up, down, charm, strange, top, bottom), leptons (electron, muon, tau, neutrinos).", "frame_captions": ["Standard Model chart", "Quark flavors", "Lepton generations"], "keywords": ["quarks", "leptons", "elementary particles", "Standard Model"]},
+{"chapter_id": "tib_025_ch2", "chapter_index": 2, "title": "Forces and Bosons", "start_time": 1000, "end_time": 2200, "transcript": "Photon (EM), gluon (strong), W/Z (weak), graviton (hypothetical). Feynman diagrams.", "frame_captions": ["Force carriers", "Feynman diagram electron scattering", "Gluon exchange"], "keywords": ["bosons", "photon", "gluon", "W/Z", "Feynman"]},
+{"chapter_id": "tib_025_ch3", "chapter_index": 3, "title": "Quantum Chromodynamics", "start_time": 2200, "end_time": 3400, "transcript": "Color charge, confinement, asymptotic freedom. Hadrons: baryons and mesons.", "frame_captions": ["Color charge", "QCD potential", "Hadron zoo"], "keywords": ["QCD", "color charge", "confinement", "hadrons"]},
+{"chapter_id": "tib_025_ch4", "chapter_index": 4, "title": "Electroweak Unification", "start_time": 3400, "end_time": 4500, "transcript": "Glashow-Weinberg-Salam model. Higgs mechanism. Neutrino oscillations.", "frame_captions": ["Electroweak symmetry", "Higgs potential", "Neutrino oscillation"], "keywords": ["electroweak", "Higgs", "neutrino oscillation", "GWS"]},
+{"chapter_id": "tib_025_ch5", "chapter_index": 5, "title": "Particle Accelerators", "start_time": 4500, "end_time": 5400, "transcript": "LHC, CMS, ATLAS. Discovery of Higgs boson (2012).", "frame_captions": ["LHC tunnel", "CMS detector", "Higgs decay channels"], "keywords": ["LHC", "Higgs discovery", "CMS", "ATLAS", "accelerator"]}
+]
+}

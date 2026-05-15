@@ -1,0 +1,141 @@
+{
+  "video_id": "tib_018",
+  "video_title": "Supply Chain Management and Logistics",
+  "speaker": "Prof. Henrik Lund",
+  "domain": "commerce",
+  "duration": 5400,
+  "total_chapters": 5,
+  "chapter_summaries": [
+    {
+      "chapter_id": "tib_018_ch1",
+      "chapter_index": 1,
+      "title": "SCOR Model",
+      "start_time": 0,
+      "end_time": 800,
+      "duration_seconds": 800,
+      "summary_short": "The lecture discusses the SCOR Model, a supply chain management framework composed of five phases.",
+      "summary_medium": "The SCOR Model consists of Plan, Source, Make, Deliver, and Return phases. Metrics used to evaluate supply chain performance include cash-to-cash cycle and inventory turns. A visual representation of the SCOR framework and cycle diagram was presented.",
+      "summary_long": "In this lecture, students were introduced to the SCOR (Supply Chain Operations Reference) Model, a widely-used framework for managing various aspects of supply chain operations. The model is organized into five phases: Plan, Source, Make, Deliver, and Return. Each phase focuses on a specific aspect of supply chain management. For example, the Plan phase involves determining demand and capacity requirements, while the Make phase deals with manufacturing or procurement processes. Metrics such as cash-to-cash cycle and inventory turns are used to measure the effectiveness of the supply chain. A diagram was shown to illustrate the SCOR framework's structure and flow.",
+      "key_concepts": [
+        "SCOR Model",
+        "Supply Chain Management",
+        "Cash-to-cash cycle",
+        "Inventory turns"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the key components of the SCOR Model.",
+        "They will also understand common supply chain metrics and how they are used to evaluate performance."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes a diagram illustrating the SCOR framework as well as a cycle diagram.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_018_ch2",
+      "chapter_index": 2,
+      "title": "Inventory Management",
+      "start_time": 800,
+      "end_time": 2100,
+      "duration_seconds": 1300,
+      "summary_short": "This chapter introduces students to various inventory management concepts, including EOQ formula, safety stock, reorder point, Newsvendor model, ABC analysis.",
+      "summary_medium": "The lecture begins by introducing the EOQ (Economic Order Quantity) formula, a method for determining the optimal order quantity to minimize total inventory costs. Next, it discusses safety stock and reorder points, which aim to ensure that sufficient quantities of goods are available during lead times. The Newsvendor model is then presented, a demand forecasting model used in inventory control, especially for perishable goods. ABC analysis, a popular inventory management technique, is also covered, focusing on categorizing items based on their relative importance to the business.",
+      "summary_long": "The lecture starts with an introduction of EOQ (Economic Order Quantity) formula, which determines the optimal order quantity that minimizes total inventory costs by balancing ordering and holding costs. The concept of safety stock is then discussed, a buffer stock kept to ensure continuous supply during lead times. Alongside safety stock, reorder points are introduced as the levels at which an order is placed to replenish inventory.",
+      "key_concepts": [
+        "EOQ formula",
+        "Safety stock",
+        "Reorder point",
+        "Newsvendor model",
+        "ABC analysis"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the EOQ (Economic Order Quantity) formula and its significance in inventory management.",
+        "Understand safety stock and reorder points as methods for maintaining an adequate supply of goods during lead times.",
+        " Describe the Newsvendor model as a demand forecasting method used in inventory control, especially for perishable goods.",
+        "Explain ABC analysis and its application in categorizing items based on their relative importance to the business."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes diagrams illustrating EOQ formula, safety stock graph, and Newsvendor critical fractile.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_018_ch3",
+      "chapter_index": 3,
+      "title": "Forecasting Demand",
+      "start_time": 2100,
+      "end_time": 3300,
+      "duration_seconds": 1200,
+      "summary_short": "This chapter discusses forecasting demand using techniques such as exponential smoothing and ARIMA. The Bullwhip effect is also introduced.",
+      "summary_medium": "The lecture covers two main methods for forecasting demand: Exponential Smoothing, which adjusts historical data to predict future trends, and ARIMA (Auto Regressive Integrated Moving Average), an equation that uses past observations to predict future values. The Bullwhip effect, demonstrated through a diagram, is discussed as a phenomenon where demand fluctuations are amplified as they move up the supply chain.",
+      "summary_long": "Exponential Smoothing is a method for forecasting time series data by adjusting historical data to predict future trends. It assigns different weights to older and newer observations depending on their reliability, with more recent data being given more weight. ARIMA (Auto Regressive Integrated Moving Average) is an equation used for predicting future values of a time series based on past observations, differences in the data, and errors in previous predictions. The Bullwhip effect is a supply chain phenomenon where demand fluctuations are amplified as they move up the supply chain, often due to miscommunication or misinterpretation of demand signals between different levels of the supply chain. This was illustrated through a Bullwhip diagram.",
+      "key_concepts": [
+        "Exponential Smoothing",
+        "ARIMA",
+        "Time series",
+        "Bullwhip effect"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the concepts of Exponential Smoothing and ARIMA, understand how they are used for forecasting demand in time series data, and discuss the Bullwhip effect and its impact on supply chains."
+      ],
+      "has_visuals": true,
+      "visual_description": "The visual content shown includes diagrams of Exponential Smoothing and ARIMA equations, as well as a Bullwhip diagram.",
+      "difficulty_level": "intermediate",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_018_ch4",
+      "chapter_index": 4,
+      "title": "Network Design",
+      "start_time": 3300,
+      "end_time": 4400,
+      "duration_seconds": 1100,
+      "summary_short": "This chapter covers facility location models, transportation modes, and cross-docking.",
+      "summary_medium": "The lecture discusses the p-median example and other facility location models such as covering. It also compares various transportation modes, including their advantages and disadvantages. Lastly, it introduces the concept of cross-docking layouts.",
+      "summary_long": "In this chapter, students will learn about facility location models like p-median and covering, which are used to optimize the placement of facilities for efficient service coverage. The lecture then compares different transportation modes, explaining their respective advantages and disadvantages in terms of cost, speed, and environmental impact. Furthermore, it introduces the concept of cross-docking, a logistics strategy that aims to minimize inventory costs by efficiently managing the flow of goods.",
+      "key_concepts": [
+        "facility location models",
+        "p-median example",
+        "transportation modes comparison",
+        "cross-dock layout"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to understand facility location models and their applications. They will also gain knowledge about different transportation modes and learn about the concept of cross-docking."
+      ],
+      "has_visuals": true,
+      "visual_description": "Diagrams are shown for the p-median example and cross-dock layout.",
+      "difficulty_level": "intermediate",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_018_ch5",
+      "chapter_index": 5,
+      "title": "Risk and Resilience",
+      "start_time": 4400,
+      "end_time": 5400,
+      "duration_seconds": 1000,
+      "summary_short": "Exploration of risk assessment, disruption scenarios, and resilience strategies using tools like risk matrix, postponement model, and a resilience framework; with COVID-19 as an example.",
+      "summary_medium": "The lecture focuses on understanding various strategies to assess risks and manage disruptions, including dual sourcing and postponement. It demonstrates the impact of these strategies using the COVID-19 pandemic as an illustrative case study. The presentation also introduces a resilience framework for effective risk management. ",
+      "summary_long": "The lecture begins with a discussion on risk assessment, emphasizing the importance of identifying potential disruptions in supply chains. The postponement model is introduced as a strategy to mitigate risks by delaying certain stages of production until closer to market demand. A case study on how this model was applied during the COVID-19 pandemic is provided. The lecture then moves on to present a resilience framework, which includes a risk matrix to help organizations anticipate and prepare for various disruptions. ",
+      "key_concepts": [
+        "risk assessment",
+        "disruption scenarios",
+        "dual sourcing",
+        "postponement model",
+        "resilience framework",
+        "COVID-19"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to understand the importance of risk assessment and disruption management in supply chains.",
+        "Students will learn about the postponement model as a strategy for managing risks in production.",
+        "Students will gain insight into a resilience framework for effectively managing various types of disruptions."
+      ],
+      "has_visuals": true,
+      "visual_description": [
+        "Risk matrix: A tool used to visualize potential risks and their impact on an organization. Postponement model: A diagram showcasing the stages in production that can be postponed to manage risks more effectively. Resilience framework: An overview of the steps and components involved in a comprehensive resilience strategy."
+      ],
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    }
+  ]
+}

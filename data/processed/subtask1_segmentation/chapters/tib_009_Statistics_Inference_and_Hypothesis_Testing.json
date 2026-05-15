@@ -1,0 +1,16 @@
+{
+"video_id": "tib_009",
+"video_title": "Statistical Inference and Hypothesis Testing",
+"video_url": "https://av.tib.eu/media/tib_009",
+"duration": 4800,
+"language": "en",
+"speaker": "Prof. Li Wei",
+"domain": "mathematics",
+"chapters": [
+{"chapter_id": "tib_009_ch1", "chapter_index": 1, "title": "Descriptive vs Inferential Statistics", "start_time": 0, "end_time": 700, "transcript": "Descriptive: mean, median, mode, standard deviation. Inferential: drawing conclusions about population from samples.", "frame_captions": ["Histogram", "Box plot", "Population vs sample"], "keywords": ["descriptive", "inferential", "mean", "median"]},
+{"chapter_id": "tib_009_ch2", "chapter_index": 2, "title": "Confidence Intervals", "start_time": 700, "end_time": 1800, "transcript": "A 95% confidence interval means if we repeat sampling, 95% of intervals contain true parameter. Margin of error.", "frame_captions": ["Confidence interval formula", "Multiple intervals plot", "Z-score table"], "keywords": ["confidence interval", "margin of error", "z-score"]},
+{"chapter_id": "tib_009_ch3", "chapter_index": 3, "title": "Hypothesis Testing Basics", "start_time": 1800, "end_time": 3000, "transcript": "Null H0 vs alternative H1. p-value: probability of observed data if H0 true. Type I and Type II errors.", "frame_captions": ["Null hypothesis distribution", "p-value shaded area", "Error types table"], "keywords": ["hypothesis test", "p-value", "type I error", "type II error"]},
+{"chapter_id": "tib_009_ch4", "chapter_index": 4, "title": "T-tests and ANOVA", "start_time": 3000, "end_time": 4000, "transcript": "One-sample, two-sample, paired t-tests. ANOVA compares more than two group means.", "frame_captions": ["T-test formula", "ANOVA table", "Box plots groups"], "keywords": ["t-test", "ANOVA", "F-statistic"]},
+{"chapter_id": "tib_009_ch5", "chapter_index": 5, "title": "Chi-square Tests", "start_time": 4000, "end_time": 4800, "transcript": "Goodness-of-fit and independence tests for categorical data. Contingency tables.", "frame_captions": ["Chi-square formula", "Contingency table", "Expected vs observed"], "keywords": ["chi-square", "goodness of fit", "independence test"]}
+]
+}

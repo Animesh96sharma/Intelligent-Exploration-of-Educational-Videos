@@ -1,0 +1,1942 @@
+{
+  "metadata": {
+    "language": "en",
+    "duration_seconds": 1652.04,
+    "model": "medium",
+    "device": "cuda",
+    "fp16": true,
+    "processing_time_seconds": 55.71,
+    "realtime_factor": 0.034,
+    "num_segments": 241
+  },
+  "segments": [
+    {
+      "start": 0.0,
+      "end": 9.12,
+      "start_timestamp": "00:00:00.000",
+      "end_timestamp": "00:00:09.120",
+      "text": "Welcome to the unit 0 on proof techniques. This is a little primer on mathematical techniques",
+      "confidence": 0.959
+    },
+    {
+      "start": 9.12,
+      "end": 17.18,
+      "start_timestamp": "00:00:09.120",
+      "end_timestamp": "00:00:17.180",
+      "text": "and tools that we will just use a little bit on the side, but they're just very useful",
+      "confidence": 0.959
+    },
+    {
+      "start": 17.18,
+      "end": 24.06,
+      "start_timestamp": "00:00:17.180",
+      "end_timestamp": "00:00:24.060",
+      "text": "to know in general. It's a little bit of formal logic if you like. Don't be too scared. It's",
+      "confidence": 0.959
+    },
+    {
+      "start": 24.06,
+      "end": 30.54,
+      "start_timestamp": "00:00:24.060",
+      "end_timestamp": "00:00:30.540",
+      "text": "not a lot and it's not very deep but it's helpful to know the terms that I will show",
+      "confidence": 0.976
+    },
+    {
+      "start": 30.54,
+      "end": 36.62,
+      "start_timestamp": "00:00:30.540",
+      "end_timestamp": "00:00:36.620",
+      "text": "you and it's helpful to know some of these proof techniques because they're used again",
+      "confidence": 0.976
+    },
+    {
+      "start": 36.62,
+      "end": 41.66,
+      "start_timestamp": "00:00:36.620",
+      "end_timestamp": "00:00:41.660",
+      "text": "in research papers, they're used in other classes and they're used a little bit also",
+      "confidence": 0.976
+    },
+    {
+      "start": 41.66,
+      "end": 49.42,
+      "start_timestamp": "00:00:41.660",
+      "end_timestamp": "00:00:49.420",
+      "text": "in some of the material I want to share with you later in this module.",
+      "confidence": 0.976
+    },
+    {
+      "start": 49.42,
+      "end": 54.1,
+      "start_timestamp": "00:00:49.420",
+      "end_timestamp": "00:00:54.100",
+      "text": "So let's get started with the proof techniques.",
+      "confidence": 0.997
+    },
+    {
+      "start": 54.1,
+      "end": 59.34,
+      "start_timestamp": "00:00:54.100",
+      "end_timestamp": "00:00:59.340",
+      "text": "I'll show you some templates for proofs, and then specifically mathematical induction,",
+      "confidence": 0.997
+    },
+    {
+      "start": 59.34,
+      "end": 64.98,
+      "start_timestamp": "00:00:59.340",
+      "end_timestamp": "00:01:04.980",
+      "text": "because that's one that's heavily used in computer science and discrete mathematics.",
+      "confidence": 0.997
+    },
+    {
+      "start": 64.98,
+      "end": 71.38,
+      "start_timestamp": "00:01:04.980",
+      "end_timestamp": "00:01:11.380",
+      "text": "And I'll briefly touch on how to prove formally that a program is correct, that what you created",
+      "confidence": 0.997
+    },
+    {
+      "start": 71.38,
+      "end": 76.26,
+      "start_timestamp": "00:01:11.380",
+      "end_timestamp": "00:01:16.260",
+      "text": "in software is actually exactly doing the right thing.",
+      "confidence": 0.997
+    },
+    {
+      "start": 76.26,
+      "end": 80.58,
+      "start_timestamp": "00:01:16.260",
+      "end_timestamp": "00:01:20.580",
+      "text": "That's again a whole big area of verification.",
+      "confidence": 0.973
+    },
+    {
+      "start": 80.58,
+      "end": 82.58,
+      "start_timestamp": "00:01:20.580",
+      "end_timestamp": "00:01:22.580",
+      "text": "People are studying this in much more detail.",
+      "confidence": 0.973
+    },
+    {
+      "start": 82.58,
+      "end": 88.62,
+      "start_timestamp": "00:01:22.580",
+      "end_timestamp": "00:01:28.620",
+      "text": "I just want to give you a brief glimpse on it because again some of these questions will",
+      "confidence": 0.973
+    },
+    {
+      "start": 88.62,
+      "end": 95.7,
+      "start_timestamp": "00:01:28.620",
+      "end_timestamp": "00:01:35.700",
+      "text": "arise again when we discuss algorithms.",
+      "confidence": 0.973
+    },
+    {
+      "start": 95.7,
+      "end": 97.9,
+      "start_timestamp": "00:01:35.700",
+      "end_timestamp": "00:01:37.900",
+      "text": "So what is a proof?",
+      "confidence": 0.973
+    },
+    {
+      "start": 97.9,
+      "end": 103.58,
+      "start_timestamp": "00:01:37.900",
+      "end_timestamp": "00:01:43.580",
+      "text": "That's a very deep question once you think about it and it has only really been settled",
+      "confidence": 0.973
+    },
+    {
+      "start": 103.58,
+      "end": 112.22,
+      "start_timestamp": "00:01:43.580",
+      "end_timestamp": "00:01:52.220",
+      "text": "in the early 20th century. So it's a fairly novel construction in this sense where you stress",
+      "confidence": 0.95
+    },
+    {
+      "start": 112.22,
+      "end": 120.22,
+      "start_timestamp": "00:01:52.220",
+      "end_timestamp": "00:02:00.220",
+      "text": "formal. Of course, people have been doing mathematical proofs for decades and well,",
+      "confidence": 0.95
+    },
+    {
+      "start": 120.22,
+      "end": 128.14,
+      "start_timestamp": "00:02:00.220",
+      "end_timestamp": "00:02:08.140",
+      "text": "dating back to ancient Greece. But they might not have had the very strict notion of a proof that",
+      "confidence": 0.95
+    },
+    {
+      "start": 128.14,
+      "end": 135.74,
+      "start_timestamp": "00:02:08.140",
+      "end_timestamp": "00:02:15.740",
+      "text": "mathematics now has. So what is a proof? A proof is a sequence of statements,",
+      "confidence": 0.867
+    },
+    {
+      "start": 137.5,
+      "end": 145.34,
+      "start_timestamp": "00:02:17.500",
+      "end_timestamp": "00:02:25.340",
+      "text": "statements that say something about a certain matter. And each of these statements is either",
+      "confidence": 0.867
+    },
+    {
+      "start": 145.34,
+      "end": 153.34,
+      "start_timestamp": "00:02:25.340",
+      "end_timestamp": "00:02:33.340",
+      "text": "an axiom. That's a statement that you accept outside of the mathematical system to be true.",
+      "confidence": 0.867
+    },
+    {
+      "start": 153.34,
+      "end": 160.3,
+      "start_timestamp": "00:02:33.340",
+      "end_timestamp": "00:02:40.300",
+      "text": "So that's interesting. To get mathematics going, you have to accept, you have to believe, if you",
+      "confidence": 0.778
+    },
+    {
+      "start": 160.3,
+      "end": 167.3,
+      "start_timestamp": "00:02:40.300",
+      "end_timestamp": "00:02:47.300",
+      "text": "like, in certain axioms to make sense or to hold true. And there's no way for you to prove that",
+      "confidence": 0.778
+    },
+    {
+      "start": 167.3,
+      "end": 173.42,
+      "start_timestamp": "00:02:47.300",
+      "end_timestamp": "00:02:53.420",
+      "text": "these axioms are actually true or make any sense or anything like this. You have to accept them as",
+      "confidence": 0.778
+    },
+    {
+      "start": 173.42,
+      "end": 180.14,
+      "start_timestamp": "00:02:53.420",
+      "end_timestamp": "00:03:00.140",
+      "text": "given. Now then, of course, mathematicians wonder whether the weakest axioms that you can start with,",
+      "confidence": 0.778
+    },
+    {
+      "start": 180.14,
+      "end": 184.9,
+      "start_timestamp": "00:03:00.140",
+      "end_timestamp": "00:03:04.900",
+      "text": "and that's the subject of formal logic.",
+      "confidence": 0.86
+    },
+    {
+      "start": 186.06,
+      "end": 188.78,
+      "start_timestamp": "00:03:06.060",
+      "end_timestamp": "00:03:08.780",
+      "text": "But coming back out of the historical discussion,",
+      "confidence": 0.86
+    },
+    {
+      "start": 188.78,
+      "end": 190.86,
+      "start_timestamp": "00:03:08.780",
+      "end_timestamp": "00:03:10.860",
+      "text": "a formal proof is a sequence of statements,",
+      "confidence": 0.86
+    },
+    {
+      "start": 190.86,
+      "end": 194.46,
+      "start_timestamp": "00:03:10.860",
+      "end_timestamp": "00:03:14.460",
+      "text": "and each statement is either something that you accept to be true,",
+      "confidence": 0.86
+    },
+    {
+      "start": 194.46,
+      "end": 196.06,
+      "start_timestamp": "00:03:14.460",
+      "end_timestamp": "00:03:16.060",
+      "text": "God-given,",
+      "confidence": 0.86
+    },
+    {
+      "start": 196.06,
+      "end": 199.58,
+      "start_timestamp": "00:03:16.060",
+      "end_timestamp": "00:03:19.580",
+      "text": "or it follows from previous statements in this sequence,",
+      "confidence": 0.86
+    },
+    {
+      "start": 199.58,
+      "end": 202.14,
+      "start_timestamp": "00:03:19.580",
+      "end_timestamp": "00:03:22.140",
+      "text": "using given inference rules.",
+      "confidence": 0.86
+    },
+    {
+      "start": 202.14,
+      "end": 205.82,
+      "start_timestamp": "00:03:22.140",
+      "end_timestamp": "00:03:25.820",
+      "text": "And these are usually very, very few rules that are allowed,",
+      "confidence": 0.86
+    },
+    {
+      "start": 206.54,
+      "end": 208.54,
+      "start_timestamp": "00:03:26.540",
+      "end_timestamp": "00:03:28.540",
+      "text": "and they're specified by the logical systems.",
+      "confidence": 0.86
+    },
+    {
+      "start": 210.14,
+      "end": 216.54,
+      "start_timestamp": "00:03:30.140",
+      "end_timestamp": "00:03:36.540",
+      "text": "Alright, what does that mean for you and for us usually? Among experts in a field,",
+      "confidence": 0.976
+    },
+    {
+      "start": 217.26,
+      "end": 221.18,
+      "start_timestamp": "00:03:37.260",
+      "end_timestamp": "00:03:41.180",
+      "text": "often that's mathematicians, but it can also be theoretical computer scientists,",
+      "confidence": 0.976
+    },
+    {
+      "start": 221.18,
+      "end": 229.26,
+      "start_timestamp": "00:03:41.180",
+      "end_timestamp": "00:03:49.260",
+      "text": "or it can be programmers. They often also argue about proofs. It's often accepted that it's enough",
+      "confidence": 0.976
+    },
+    {
+      "start": 229.26,
+      "end": 236.54,
+      "start_timestamp": "00:03:49.260",
+      "end_timestamp": "00:03:56.540",
+      "text": "to convince another expert human that a formal proof is possible, that a formal proof can be",
+      "confidence": 0.976
+    },
+    {
+      "start": 236.54,
+      "end": 245.1,
+      "start_timestamp": "00:03:56.540",
+      "end_timestamp": "00:04:05.100",
+      "text": "written down, but you often don't write it down. Now, how can you be sure, how can you convince",
+      "confidence": 0.836
+    },
+    {
+      "start": 245.1,
+      "end": 250.46,
+      "start_timestamp": "00:04:05.100",
+      "end_timestamp": "00:04:10.460",
+      "text": "someone that this proof exists without writing it down? That's actually a bit tricky. Sometimes",
+      "confidence": 0.836
+    },
+    {
+      "start": 251.26,
+      "end": 260.7,
+      "start_timestamp": "00:04:11.260",
+      "end_timestamp": "00:04:20.700",
+      "text": "it seems like a proof exists, but it doesn't really exist. And so what you have to do is use",
+      "confidence": 0.836
+    },
+    {
+      "start": 260.7,
+      "end": 267.34,
+      "start_timestamp": "00:04:20.700",
+      "end_timestamp": "00:04:27.340",
+      "text": "formal logic as guidance against faulty reasoning because that's something that easily happens,",
+      "confidence": 0.98
+    },
+    {
+      "start": 267.34,
+      "end": 274.14,
+      "start_timestamp": "00:04:27.340",
+      "end_timestamp": "00:04:34.140",
+      "text": "especially for beginners. So the easy way to prove, to convince someone that a formal proof",
+      "confidence": 0.98
+    },
+    {
+      "start": 274.14,
+      "end": 279.26,
+      "start_timestamp": "00:04:34.140",
+      "end_timestamp": "00:04:39.260",
+      "text": "exists is to write it down. And that's the only way to get bulletproof statements where",
+      "confidence": 0.98
+    },
+    {
+      "start": 279.9,
+      "end": 287.34,
+      "start_timestamp": "00:04:39.900",
+      "end_timestamp": "00:04:47.340",
+      "text": "you can absolutely be sure that it holds true. So let's see some more concrete examples what that",
+      "confidence": 0.98
+    },
+    {
+      "start": 287.34,
+      "end": 296.7,
+      "start_timestamp": "00:04:47.340",
+      "end_timestamp": "00:04:56.700",
+      "text": "means. And for that we need a little bit of notation. So I think this is big enough.",
+      "confidence": 0.972
+    },
+    {
+      "start": 297.98,
+      "end": 305.98,
+      "start_timestamp": "00:04:57.980",
+      "end_timestamp": "00:05:05.980",
+      "text": "We will talk about statements. So these are logical sentences in English or they can be",
+      "confidence": 0.972
+    },
+    {
+      "start": 306.86,
+      "end": 314.94,
+      "start_timestamp": "00:05:06.860",
+      "end_timestamp": "00:05:14.940",
+      "text": "statements about numbers with variables. So a simple statement could be A, which is the",
+      "confidence": 0.972
+    },
+    {
+      "start": 314.94,
+      "end": 321.58,
+      "start_timestamp": "00:05:14.940",
+      "end_timestamp": "00:05:21.580",
+      "text": "the statement it rains, which is not true in my place at least.",
+      "confidence": 0.673
+    },
+    {
+      "start": 321.58,
+      "end": 324.38,
+      "start_timestamp": "00:05:21.580",
+      "end_timestamp": "00:05:24.380",
+      "text": "And another statement could be the street is wet.",
+      "confidence": 0.673
+    },
+    {
+      "start": 324.38,
+      "end": 326.3,
+      "start_timestamp": "00:05:24.380",
+      "end_timestamp": "00:05:26.300",
+      "text": "Okay, this is fairly vague.",
+      "confidence": 0.673
+    },
+    {
+      "start": 326.3,
+      "end": 327.3,
+      "start_timestamp": "00:05:26.300",
+      "end_timestamp": "00:05:27.300",
+      "text": "What street?",
+      "confidence": 0.673
+    },
+    {
+      "start": 327.3,
+      "end": 334.78,
+      "start_timestamp": "00:05:27.300",
+      "end_timestamp": "00:05:34.780",
+      "text": "I mean, also it rains is vague where, when, but let's suppose now and here where I am",
+      "confidence": 0.673
+    },
+    {
+      "start": 334.78,
+      "end": 336.02,
+      "start_timestamp": "00:05:34.780",
+      "end_timestamp": "00:05:36.020",
+      "text": "and the street is wet.",
+      "confidence": 0.673
+    },
+    {
+      "start": 336.02,
+      "end": 340.78,
+      "start_timestamp": "00:05:36.020",
+      "end_timestamp": "00:05:40.780",
+      "text": "Well, the one outside of my window, let's take this one.",
+      "confidence": 0.673
+    },
+    {
+      "start": 340.78,
+      "end": 341.78,
+      "start_timestamp": "00:05:40.780",
+      "end_timestamp": "00:05:41.780",
+      "text": "It's not really wet.",
+      "confidence": 0.673
+    },
+    {
+      "start": 341.78,
+      "end": 344.74,
+      "start_timestamp": "00:05:41.780",
+      "end_timestamp": "00:05:44.740",
+      "text": "So both statements are wrong for me at this point.",
+      "confidence": 0.673
+    },
+    {
+      "start": 344.74,
+      "end": 349.28,
+      "start_timestamp": "00:05:44.740",
+      "end_timestamp": "00:05:49.280",
+      "text": "But at a different time, they might be true, they might be satisfied.",
+      "confidence": 0.942
+    },
+    {
+      "start": 349.28,
+      "end": 353.26,
+      "start_timestamp": "00:05:49.280",
+      "end_timestamp": "00:05:53.260",
+      "text": "So usually statements are something where you can clearly say this is either true or",
+      "confidence": 0.942
+    },
+    {
+      "start": 353.26,
+      "end": 354.26,
+      "start_timestamp": "00:05:53.260",
+      "end_timestamp": "00:05:54.260",
+      "text": "false.",
+      "confidence": 0.942
+    },
+    {
+      "start": 354.26,
+      "end": 362.02,
+      "start_timestamp": "00:05:54.260",
+      "end_timestamp": "00:06:02.020",
+      "text": "It's hard to find examples in the physical world that are very clear-cut either true",
+      "confidence": 0.942
+    },
+    {
+      "start": 362.02,
+      "end": 367.2,
+      "start_timestamp": "00:06:02.020",
+      "end_timestamp": "00:06:07.200",
+      "text": "or false, but in mathematics, it's usually easier.",
+      "confidence": 0.942
+    },
+    {
+      "start": 367.2,
+      "end": 371.98,
+      "start_timestamp": "00:06:07.200",
+      "end_timestamp": "00:06:11.980",
+      "text": "Either a number is equal to five or it's not equal to five, there's nothing in between",
+      "confidence": 0.942
+    },
+    {
+      "start": 371.98,
+      "end": 374.62,
+      "start_timestamp": "00:06:11.980",
+      "end_timestamp": "00:06:14.620",
+      "text": "really.",
+      "confidence": 0.942
+    },
+    {
+      "start": 374.62,
+      "end": 377.68,
+      "start_timestamp": "00:06:14.620",
+      "end_timestamp": "00:06:17.680",
+      "text": "If we have a statement, we can negate it.",
+      "confidence": 0.905
+    },
+    {
+      "start": 377.68,
+      "end": 382.7,
+      "start_timestamp": "00:06:17.680",
+      "end_timestamp": "00:06:22.700",
+      "text": "That means we put this funny symbol in front of it.",
+      "confidence": 0.905
+    },
+    {
+      "start": 382.7,
+      "end": 386.06,
+      "start_timestamp": "00:06:22.700",
+      "end_timestamp": "00:06:26.060",
+      "text": "And that is a new statement, which has just the opposite meaning.",
+      "confidence": 0.905
+    },
+    {
+      "start": 386.06,
+      "end": 398.58,
+      "start_timestamp": "00:06:26.060",
+      "end_timestamp": "00:06:38.580",
+      "text": "So not a is the statement that in English we would say that it does not rain.",
+      "confidence": 0.905
+    },
+    {
+      "start": 398.58,
+      "end": 404.24,
+      "start_timestamp": "00:06:38.580",
+      "end_timestamp": "00:06:44.240",
+      "text": "But in more computerized speak you could just say it's not it rains.",
+      "confidence": 0.959
+    },
+    {
+      "start": 404.24,
+      "end": 409.48,
+      "start_timestamp": "00:06:44.240",
+      "end_timestamp": "00:06:49.480",
+      "text": "Well, sounds not great, but it's understandable.",
+      "confidence": 0.959
+    },
+    {
+      "start": 409.48,
+      "end": 414.72,
+      "start_timestamp": "00:06:49.480",
+      "end_timestamp": "00:06:54.720",
+      "text": "Then we can take two statements and use their conjunction, the and between them that's written",
+      "confidence": 0.959
+    },
+    {
+      "start": 414.72,
+      "end": 418.36,
+      "start_timestamp": "00:06:54.720",
+      "end_timestamp": "00:06:58.360",
+      "text": "as this little roof.",
+      "confidence": 0.959
+    },
+    {
+      "start": 418.36,
+      "end": 423.16,
+      "start_timestamp": "00:06:58.360",
+      "end_timestamp": "00:07:03.160",
+      "text": "That's A and B. So it rains and the street is wet.",
+      "confidence": 0.959
+    },
+    {
+      "start": 423.16,
+      "end": 428.4,
+      "start_timestamp": "00:07:03.160",
+      "end_timestamp": "00:07:08.400",
+      "text": "Which is true if and only if A is true and B is true.",
+      "confidence": 0.959
+    },
+    {
+      "start": 428.4,
+      "end": 434.88,
+      "start_timestamp": "00:07:08.400",
+      "end_timestamp": "00:07:14.880",
+      "text": "what and usually means also in the in the natural language sense. We can also put an or between the",
+      "confidence": 0.884
+    },
+    {
+      "start": 434.88,
+      "end": 448.0,
+      "start_timestamp": "00:07:14.880",
+      "end_timestamp": "00:07:28.000",
+      "text": "two. So this is true or this is true or both. It's the non-exclusive or to use the term from there,",
+      "confidence": 0.884
+    },
+    {
+      "start": 449.6,
+      "end": 456.24,
+      "start_timestamp": "00:07:29.600",
+      "end_timestamp": "00:07:36.240",
+      "text": "which means it's allowed that both are true. Sometimes when we talk in English and we say",
+      "confidence": 0.884
+    },
+    {
+      "start": 456.24,
+      "end": 462.48,
+      "start_timestamp": "00:07:36.240",
+      "end_timestamp": "00:07:42.480",
+      "text": "or we mean the exclusive or. It's either this or that if you want to make the distinction clear.",
+      "confidence": 0.887
+    },
+    {
+      "start": 464.48,
+      "end": 470.0,
+      "start_timestamp": "00:07:44.480",
+      "end_timestamp": "00:07:50.000",
+      "text": "That doesn't have in classical logic doesn't have an extra symbol. Sometimes it's used and",
+      "confidence": 0.887
+    },
+    {
+      "start": 470.0,
+      "end": 483.04,
+      "start_timestamp": "00:07:50.000",
+      "end_timestamp": "00:08:03.040",
+      "text": "sometimes it's written as a plus with a circle around it and it's called x or. That's the exclusive",
+      "confidence": 0.887
+    },
+    {
+      "start": 483.04,
+      "end": 488.0,
+      "start_timestamp": "00:08:03.040",
+      "end_timestamp": "00:08:08.000",
+      "text": "or which has the meaning of either A or B.",
+      "confidence": 0.761
+    },
+    {
+      "start": 490.64,
+      "end": 493.44,
+      "start_timestamp": "00:08:10.640",
+      "end_timestamp": "00:08:13.440",
+      "text": "But not both. That's what I mean with either or.",
+      "confidence": 0.761
+    },
+    {
+      "start": 496.48,
+      "end": 500.8,
+      "start_timestamp": "00:08:16.480",
+      "end_timestamp": "00:08:20.800",
+      "text": "These are usually the things that are fairly natural and easy to understand.",
+      "confidence": 0.761
+    },
+    {
+      "start": 501.44,
+      "end": 508.4,
+      "start_timestamp": "00:08:21.440",
+      "end_timestamp": "00:08:28.400",
+      "text": "Now slightly more controversial is implication. If A holds, then B is also true. If A, then B.",
+      "confidence": 0.761
+    },
+    {
+      "start": 508.4,
+      "end": 518.6,
+      "start_timestamp": "00:08:28.400",
+      "end_timestamp": "00:08:38.600",
+      "text": "b. If it rains, then the street is wet. That would be the example for our a and b. I have",
+      "confidence": 0.788
+    },
+    {
+      "start": 518.6,
+      "end": 524.56,
+      "start_timestamp": "00:08:38.600",
+      "end_timestamp": "00:08:44.560",
+      "text": "a nice question about that in a second, so I'll come back to that. But I want to mention",
+      "confidence": 0.788
+    },
+    {
+      "start": 524.56,
+      "end": 531.96,
+      "start_timestamp": "00:08:44.560",
+      "end_timestamp": "00:08:51.960",
+      "text": "the last one, the equivalence written as this double arrow. And that means statement a and",
+      "confidence": 0.788
+    },
+    {
+      "start": 531.96,
+      "end": 539.24,
+      "start_timestamp": "00:08:51.960",
+      "end_timestamp": "00:08:59.240",
+      "text": "and B are logically equivalent in the sense that A holds true exactly if and only if B",
+      "confidence": 0.986
+    },
+    {
+      "start": 539.24,
+      "end": 553.16,
+      "start_timestamp": "00:08:59.240",
+      "end_timestamp": "00:09:13.160",
+      "text": "holds true. And you can essentially define this as in terms of the other symbols. Okay,",
+      "confidence": 0.986
+    },
+    {
+      "start": 553.16,
+      "end": 566.84,
+      "start_timestamp": "00:09:13.160",
+      "end_timestamp": "00:09:26.840",
+      "text": "is sometimes written as this. We define this to be the same as a implies b and b implies a.",
+      "confidence": 0.996
+    },
+    {
+      "start": 573.64,
+      "end": 578.12,
+      "start_timestamp": "00:09:33.640",
+      "end_timestamp": "00:09:38.120",
+      "text": "So that is the same thing as a is equivalent to b.",
+      "confidence": 0.996
+    },
+    {
+      "start": 578.12,
+      "end": 584.6,
+      "start_timestamp": "00:09:38.120",
+      "end_timestamp": "00:09:44.600",
+      "text": "The two are equivalent if one implies the other and the other implies the former.",
+      "confidence": 0.92
+    },
+    {
+      "start": 584.6,
+      "end": 590.2,
+      "start_timestamp": "00:09:44.600",
+      "end_timestamp": "00:09:50.200",
+      "text": "Okay, let's see a more concrete example.",
+      "confidence": 0.92
+    },
+    {
+      "start": 590.2,
+      "end": 600.2,
+      "start_timestamp": "00:09:50.200",
+      "end_timestamp": "00:10:00.200",
+      "text": "And for this, I want to ask you this question.",
+      "confidence": 0.92
+    },
+    {
+      "start": 600.2,
+      "end": 602.24,
+      "start_timestamp": "00:10:00.200",
+      "end_timestamp": "00:10:02.240",
+      "text": "So please have a think about this one.",
+      "confidence": 0.92
+    },
+    {
+      "start": 602.24,
+      "end": 610.32,
+      "start_timestamp": "00:10:02.240",
+      "end_timestamp": "00:10:10.320",
+      "text": "the following statement true, if the earth is flat then ships can fall over its rim.",
+      "confidence": 0.991
+    },
+    {
+      "start": 610.32,
+      "end": 618.92,
+      "start_timestamp": "00:10:10.320",
+      "end_timestamp": "00:10:18.920",
+      "text": "Take it as a logical statement and just tell me if that as a logical statement is true",
+      "confidence": 0.991
+    },
+    {
+      "start": 618.92,
+      "end": 621.92,
+      "start_timestamp": "00:10:18.920",
+      "end_timestamp": "00:10:21.920",
+      "text": "or false.",
+      "confidence": 0.991
+    },
+    {
+      "start": 621.92,
+      "end": 644.76,
+      "start_timestamp": "00:10:21.920",
+      "end_timestamp": "00:10:44.760",
+      "text": "Like, if you just second to answer it and think about it.",
+      "confidence": 0.785
+    },
+    {
+      "start": 644.76,
+      "end": 667.2,
+      "start_timestamp": "00:10:44.760",
+      "end_timestamp": "00:11:07.200",
+      "text": "Okay, I see 26 people answered, so maybe another few seconds.",
+      "confidence": 0.868
+    },
+    {
+      "start": 667.2,
+      "end": 677.44,
+      "start_timestamp": "00:11:07.200",
+      "end_timestamp": "00:11:17.440",
+      "text": "Okay, 33.",
+      "confidence": 0.744
+    },
+    {
+      "start": 677.44,
+      "end": 695.36,
+      "start_timestamp": "00:11:17.440",
+      "end_timestamp": "00:11:35.360",
+      "text": "Again, remember it's about participation, it's not about being correct about this.",
+      "confidence": 0.744
+    },
+    {
+      "start": 695.36,
+      "end": 701.12,
+      "start_timestamp": "00:11:35.360",
+      "end_timestamp": "00:11:41.120",
+      "text": "I will tell you, I haven't really told you what the answer to this is at this point in time.",
+      "confidence": 0.982
+    },
+    {
+      "start": 710.56,
+      "end": 711.56,
+      "start_timestamp": "00:11:50.560",
+      "end_timestamp": "00:11:51.560",
+      "text": "Okay, let's see.",
+      "confidence": 0.982
+    },
+    {
+      "start": 712.16,
+      "end": 714.76,
+      "start_timestamp": "00:11:52.160",
+      "end_timestamp": "00:11:54.760",
+      "text": "Does anyone feel he needs more time to think about it?",
+      "confidence": 0.982
+    },
+    {
+      "start": 714.76,
+      "end": 717.56,
+      "start_timestamp": "00:11:54.760",
+      "end_timestamp": "00:11:57.560",
+      "text": "Then shout out in the lecture back channel.",
+      "confidence": 0.982
+    },
+    {
+      "start": 725.36,
+      "end": 729.72,
+      "start_timestamp": "00:12:05.360",
+      "end_timestamp": "00:12:09.720",
+      "text": "It doesn't look like it.",
+      "confidence": 0.7
+    },
+    {
+      "start": 729.72,
+      "end": 733.56,
+      "start_timestamp": "00:12:09.720",
+      "end_timestamp": "00:12:13.560",
+      "text": "So here are the results.",
+      "confidence": 0.7
+    },
+    {
+      "start": 733.56,
+      "end": 739.4,
+      "start_timestamp": "00:12:13.560",
+      "end_timestamp": "00:12:19.400",
+      "text": "I think you can see them on the right, but just in case.",
+      "confidence": 0.7
+    },
+    {
+      "start": 739.4,
+      "end": 744.0,
+      "start_timestamp": "00:12:19.400",
+      "end_timestamp": "00:12:24.000",
+      "text": "So a lot of people say yes, but there's also a few that say no, and a few that say neither",
+      "confidence": 0.7
+    },
+    {
+      "start": 744.0,
+      "end": 748.0,
+      "start_timestamp": "00:12:24.000",
+      "end_timestamp": "00:12:28.000",
+      "text": "of the two is true.",
+      "confidence": 0.7
+    },
+    {
+      "start": 748.0,
+      "end": 750.52,
+      "start_timestamp": "00:12:28.000",
+      "end_timestamp": "00:12:30.520",
+      "text": "And I see.",
+      "confidence": 0.7
+    },
+    {
+      "start": 750.52,
+      "end": 756.44,
+      "start_timestamp": "00:12:30.520",
+      "end_timestamp": "00:12:36.440",
+      "text": "is again I can only show the correct answer if I leave it open. That's fine. So you can in",
+      "confidence": 0.896
+    },
+    {
+      "start": 756.44,
+      "end": 765.16,
+      "start_timestamp": "00:12:36.440",
+      "end_timestamp": "00:12:45.160",
+      "text": "principle still change your answer, but not much is learned if you do. So yes, the statement is true",
+      "confidence": 0.896
+    },
+    {
+      "start": 766.76,
+      "end": 772.76,
+      "start_timestamp": "00:12:46.760",
+      "end_timestamp": "00:12:52.760",
+      "text": "and that's despite the fact that it talks about this nonsensical assumption. I mean,",
+      "confidence": 0.896
+    },
+    {
+      "start": 772.76,
+      "end": 776.6,
+      "start_timestamp": "00:12:52.760",
+      "end_timestamp": "00:12:56.600",
+      "text": "we know the earth is not flat by now. We're pretty sure about this. At least",
+      "confidence": 0.896
+    },
+    {
+      "start": 776.6,
+      "end": 783.88,
+      "start_timestamp": "00:12:56.600",
+      "end_timestamp": "00:13:03.880",
+      "text": "At least most of humanity are pretty sure that the earth is not flat.",
+      "confidence": 0.912
+    },
+    {
+      "start": 783.88,
+      "end": 793.08,
+      "start_timestamp": "00:13:03.880",
+      "end_timestamp": "00:13:13.080",
+      "text": "But for the logical statement, this means the entire thing is trivially true.",
+      "confidence": 0.912
+    },
+    {
+      "start": 793.08,
+      "end": 805.36,
+      "start_timestamp": "00:13:13.080",
+      "end_timestamp": "00:13:25.360",
+      "text": "So it's true because A implies B, again is defined in terms of other things we already",
+      "confidence": 0.912
+    },
+    {
+      "start": 805.36,
+      "end": 822.72,
+      "start_timestamp": "00:13:25.360",
+      "end_timestamp": "00:13:42.720",
+      "text": "know, A implies B is the same as either not A or B. So in this example, A implies B, A is the earth",
+      "confidence": 0.985
+    },
+    {
+      "start": 822.72,
+      "end": 834.72,
+      "start_timestamp": "00:13:42.720",
+      "end_timestamp": "00:13:54.720",
+      "text": "is flat, B is ships can fall over the rim. Now that means A implies B is the same as this thing.",
+      "confidence": 0.985
+    },
+    {
+      "start": 835.36,
+      "end": 843.04,
+      "start_timestamp": "00:13:55.360",
+      "end_timestamp": "00:14:03.040",
+      "text": "not A or B. Now we can read out what that means in English. It says,",
+      "confidence": 0.986
+    },
+    {
+      "start": 843.68,
+      "end": 850.16,
+      "start_timestamp": "00:14:03.680",
+      "end_timestamp": "00:14:10.160",
+      "text": "the earth is not flat or ships can fall over its rim. Well, this is clearly not true,",
+      "confidence": 0.986
+    },
+    {
+      "start": 852.24,
+      "end": 857.52,
+      "start_timestamp": "00:14:12.240",
+      "end_timestamp": "00:14:17.520",
+      "text": "but this is true. And because it's an or in between, the overall thing is true.",
+      "confidence": 0.986
+    },
+    {
+      "start": 865.36,
+      "end": 874.26,
+      "start_timestamp": "00:14:25.360",
+      "end_timestamp": "00:14:34.260",
+      "text": "All right, so that's just one important notion.",
+      "confidence": 0.867
+    },
+    {
+      "start": 874.26,
+      "end": 881.42,
+      "start_timestamp": "00:14:34.260",
+      "end_timestamp": "00:14:41.420",
+      "text": "Just to keep in mind this formal definition of implication is maybe sometimes not completely",
+      "confidence": 0.867
+    },
+    {
+      "start": 881.42,
+      "end": 882.42,
+      "start_timestamp": "00:14:41.420",
+      "end_timestamp": "00:14:42.420",
+      "text": "intuitive.",
+      "confidence": 0.867
+    },
+    {
+      "start": 882.42,
+      "end": 890.74,
+      "start_timestamp": "00:14:42.420",
+      "end_timestamp": "00:14:50.740",
+      "text": "You can totally make statements when the precedent, the thing in the if is not true, you can claim",
+      "confidence": 0.867
+    },
+    {
+      "start": 890.74,
+      "end": 893.9,
+      "start_timestamp": "00:14:50.740",
+      "end_timestamp": "00:14:53.900",
+      "text": "anything, and it's still a correct statement.",
+      "confidence": 0.867
+    },
+    {
+      "start": 893.9,
+      "end": 899.9,
+      "start_timestamp": "00:14:53.900",
+      "end_timestamp": "00:14:59.900",
+      "text": "not a very useful statement in that the implication doesn't really do anything. That's logically true.",
+      "confidence": 0.988
+    },
+    {
+      "start": 903.26,
+      "end": 907.66,
+      "start_timestamp": "00:15:03.260",
+      "end_timestamp": "00:15:07.660",
+      "text": "Okay, I want to dive into a few more proof techniques, templates.",
+      "confidence": 0.988
+    },
+    {
+      "start": 910.06,
+      "end": 916.54,
+      "start_timestamp": "00:15:10.060",
+      "end_timestamp": "00:15:16.540",
+      "text": "So what these are for is assume you have a statement that you would like to prove correct.",
+      "confidence": 0.988
+    },
+    {
+      "start": 917.18,
+      "end": 923.58,
+      "start_timestamp": "00:15:17.180",
+      "end_timestamp": "00:15:23.580",
+      "text": "You have, say, you found a cool new observation in an algorithm and you'd like to show",
+      "confidence": 0.988
+    },
+    {
+      "start": 923.58,
+      "end": 932.22,
+      "start_timestamp": "00:15:23.580",
+      "end_timestamp": "00:15:32.220",
+      "text": "that a statement of the forum if A is true then B is true holds. You want to convince someone that",
+      "confidence": 0.86
+    },
+    {
+      "start": 932.22,
+      "end": 941.1,
+      "start_timestamp": "00:15:32.220",
+      "end_timestamp": "00:15:41.100",
+      "text": "this is true. What could be a more useful example? A useful example in ours context could be",
+      "confidence": 0.86
+    },
+    {
+      "start": 943.02,
+      "end": 947.02,
+      "start_timestamp": "00:15:43.020",
+      "end_timestamp": "00:15:47.020",
+      "text": "A is the input to your program",
+      "confidence": 0.86
+    },
+    {
+      "start": 947.02,
+      "end": 969.46,
+      "start_timestamp": "00:15:47.020",
+      "end_timestamp": "00:16:09.460",
+      "text": "is valid and I mean this is whatever that means for you say a list of numbers then B could be",
+      "confidence": 0.89
+    },
+    {
+      "start": 969.46,
+      "end": 985.3,
+      "start_timestamp": "00:16:09.460",
+      "end_timestamp": "00:16:25.300",
+      "text": "the output of your program is what it should be is correct. And then again that has to be substituted",
+      "confidence": 0.95
+    },
+    {
+      "start": 985.3,
+      "end": 991.5,
+      "start_timestamp": "00:16:25.300",
+      "end_timestamp": "00:16:31.500",
+      "text": "in a concrete instance by something that makes sense maybe the list has become sorted.",
+      "confidence": 0.95
+    },
+    {
+      "start": 991.5,
+      "end": 1001.66,
+      "start_timestamp": "00:16:31.500",
+      "end_timestamp": "00:16:41.660",
+      "text": "That's one of the topics that we will talk about in a couple of weeks.",
+      "confidence": 0.931
+    },
+    {
+      "start": 1001.66,
+      "end": 1002.74,
+      "start_timestamp": "00:16:41.660",
+      "end_timestamp": "00:16:42.740",
+      "text": "So that's one instance.",
+      "confidence": 0.931
+    },
+    {
+      "start": 1002.74,
+      "end": 1005.52,
+      "start_timestamp": "00:16:42.740",
+      "end_timestamp": "00:16:45.520",
+      "text": "Now you might have this situation.",
+      "confidence": 0.931
+    },
+    {
+      "start": 1005.52,
+      "end": 1007.94,
+      "start_timestamp": "00:16:45.520",
+      "end_timestamp": "00:16:47.940",
+      "text": "You want to make this statement about your program.",
+      "confidence": 0.931
+    },
+    {
+      "start": 1007.94,
+      "end": 1013.86,
+      "start_timestamp": "00:16:47.940",
+      "end_timestamp": "00:16:53.860",
+      "text": "If the input is a valid list of numbers, then the output is correctly sorted.",
+      "confidence": 0.931
+    },
+    {
+      "start": 1013.86,
+      "end": 1015.2,
+      "start_timestamp": "00:16:53.860",
+      "end_timestamp": "00:16:55.200",
+      "text": "You would like to prove this.",
+      "confidence": 0.931
+    },
+    {
+      "start": 1015.2,
+      "end": 1017.8,
+      "start_timestamp": "00:16:55.200",
+      "end_timestamp": "00:16:57.800",
+      "text": "Then you have different strategies how you could do this.",
+      "confidence": 0.931
+    },
+    {
+      "start": 1017.8,
+      "end": 1021.18,
+      "start_timestamp": "00:16:57.800",
+      "end_timestamp": "00:17:01.180",
+      "text": "You can do a direct proof.",
+      "confidence": 0.931
+    },
+    {
+      "start": 1021.18,
+      "end": 1027.18,
+      "start_timestamp": "00:17:01.180",
+      "end_timestamp": "00:17:07.180",
+      "text": "assume that A holds and you show that then also B holds. That's the obvious way to prove this,",
+      "confidence": 0.89
+    },
+    {
+      "start": 1027.18,
+      "end": 1035.82,
+      "start_timestamp": "00:17:07.180",
+      "end_timestamp": "00:17:15.820",
+      "text": "but there are other alternatives. So this is kind of, I only listed because it's sometimes the way",
+      "confidence": 0.89
+    },
+    {
+      "start": 1035.82,
+      "end": 1040.86,
+      "start_timestamp": "00:17:15.820",
+      "end_timestamp": "00:17:20.860",
+      "text": "to go, it's sometimes the most convenient way to prove something, but it's not very surprising.",
+      "confidence": 0.89
+    },
+    {
+      "start": 1040.86,
+      "end": 1045.82,
+      "start_timestamp": "00:17:20.860",
+      "end_timestamp": "00:17:25.820",
+      "text": "The more interesting ones are the other ones because sometimes this is hard to do, it seems",
+      "confidence": 0.89
+    },
+    {
+      "start": 1045.82,
+      "end": 1051.66,
+      "start_timestamp": "00:17:25.820",
+      "end_timestamp": "00:17:31.660",
+      "text": "not easy to show this and some of the other strategies are easier. So one thing you can do",
+      "confidence": 0.973
+    },
+    {
+      "start": 1051.66,
+      "end": 1061.98,
+      "start_timestamp": "00:17:31.660",
+      "end_timestamp": "00:17:41.980",
+      "text": "is you assume that B is not true and then you show A has also been false. So it's a proof by",
+      "confidence": 0.973
+    },
+    {
+      "start": 1062.78,
+      "end": 1067.9,
+      "start_timestamp": "00:17:42.780",
+      "end_timestamp": "00:17:47.900",
+      "text": "contraposition. It's similar to proof by contradiction but it's slightly different in",
+      "confidence": 0.973
+    },
+    {
+      "start": 1067.9,
+      "end": 1072.14,
+      "start_timestamp": "00:17:47.900",
+      "end_timestamp": "00:17:52.140",
+      "text": "in that you work your way strictly backwards.",
+      "confidence": 0.987
+    },
+    {
+      "start": 1072.14,
+      "end": 1078.14,
+      "start_timestamp": "00:17:52.140",
+      "end_timestamp": "00:17:58.140",
+      "text": "So assume your output of the program is not sorted, then you show that something in the",
+      "confidence": 0.987
+    },
+    {
+      "start": 1078.14,
+      "end": 1079.14,
+      "start_timestamp": "00:17:58.140",
+      "end_timestamp": "00:17:59.140",
+      "text": "input was fishy.",
+      "confidence": 0.987
+    },
+    {
+      "start": 1079.14,
+      "end": 1085.86,
+      "start_timestamp": "00:17:59.140",
+      "end_timestamp": "00:18:05.860",
+      "text": "Maybe the input contains an invalid number that cannot be compared with others.",
+      "confidence": 0.987
+    },
+    {
+      "start": 1085.86,
+      "end": 1088.04,
+      "start_timestamp": "00:18:05.860",
+      "end_timestamp": "00:18:08.040",
+      "text": "Related is the proof by contradiction.",
+      "confidence": 0.987
+    },
+    {
+      "start": 1088.04,
+      "end": 1096.3,
+      "start_timestamp": "00:18:08.040",
+      "end_timestamp": "00:18:16.300",
+      "text": "That means you assume A holds and B is violated, and then you derive that this leads to a nonsensical",
+      "confidence": 0.987
+    },
+    {
+      "start": 1096.3,
+      "end": 1110.38,
+      "start_timestamp": "00:18:16.300",
+      "end_timestamp": "00:18:30.380",
+      "text": "statement. So classic examples in mathematics for this kind of proof are often that the square root",
+      "confidence": 0.991
+    },
+    {
+      "start": 1110.38,
+      "end": 1122.3,
+      "start_timestamp": "00:18:30.380",
+      "end_timestamp": "00:18:42.300",
+      "text": "of 2 is irrational. So you can prove that the square root of 2 cannot be written as a fraction",
+      "confidence": 0.991
+    },
+    {
+      "start": 1122.3,
+      "end": 1129.26,
+      "start_timestamp": "00:18:42.300",
+      "end_timestamp": "00:18:49.260",
+      "text": "of two integers and one way to do is to assume, well assume it could be written like that",
+      "confidence": 0.981
+    },
+    {
+      "start": 1129.82,
+      "end": 1137.66,
+      "start_timestamp": "00:18:49.820",
+      "end_timestamp": "00:18:57.660",
+      "text": "and assume that the numerator and denominator are relatively prime and then you can show by",
+      "confidence": 0.981
+    },
+    {
+      "start": 1137.66,
+      "end": 1145.18,
+      "start_timestamp": "00:18:57.660",
+      "end_timestamp": "00:19:05.180",
+      "text": "rearranging the equations that then actually they share a factor of two so that's a contradiction",
+      "confidence": 0.981
+    },
+    {
+      "start": 1145.18,
+      "end": 1153.26,
+      "start_timestamp": "00:19:05.180",
+      "end_timestamp": "00:19:13.260",
+      "text": "to your assumption. And lastly, sometimes it helps to make the statement more complicated",
+      "confidence": 0.706
+    },
+    {
+      "start": 1153.26,
+      "end": 1159.18,
+      "start_timestamp": "00:19:13.260",
+      "end_timestamp": "00:19:19.180",
+      "text": "to make the proof easier. So instead of just showing A implies B, you take a different condition",
+      "confidence": 0.706
+    },
+    {
+      "start": 1159.18,
+      "end": 1166.94,
+      "start_timestamp": "00:19:19.180",
+      "end_timestamp": "00:19:26.940",
+      "text": "C and distinguish two cases when C holds and when it doesn't hold. And if you can show in both cases",
+      "confidence": 0.706
+    },
+    {
+      "start": 1166.94,
+      "end": 1175.66,
+      "start_timestamp": "00:19:26.940",
+      "end_timestamp": "00:19:35.660",
+      "text": "that a and c implies b and a and not c implies b then a implies b either way and you can",
+      "confidence": 0.917
+    },
+    {
+      "start": 1175.66,
+      "end": 1186.06,
+      "start_timestamp": "00:19:35.660",
+      "end_timestamp": "00:19:46.060",
+      "text": "have more than two cases as well.",
+      "confidence": 0.917
+    },
+    {
+      "start": 1186.06,
+      "end": 1193.14,
+      "start_timestamp": "00:19:46.060",
+      "end_timestamp": "00:19:53.140",
+      "text": "That depends on the exact statement what is more convenient or more useful.",
+      "confidence": 0.917
+    },
+    {
+      "start": 1193.14,
+      "end": 1204.18,
+      "start_timestamp": "00:19:53.140",
+      "end_timestamp": "00:20:04.180",
+      "text": "a little question for you guys, an example and I would like you to tell me what proof",
+      "confidence": 0.89
+    },
+    {
+      "start": 1204.18,
+      "end": 1212.46,
+      "start_timestamp": "00:20:04.180",
+      "end_timestamp": "00:20:12.460",
+      "text": "template has been used there. So the example we're proving is if n squared is an even number,",
+      "confidence": 0.89
+    },
+    {
+      "start": 1212.46,
+      "end": 1221.7,
+      "start_timestamp": "00:20:12.460",
+      "end_timestamp": "00:20:21.700",
+      "text": "then n is also even. That is a correct statement and one way to show it is you show that when",
+      "confidence": 0.89
+    },
+    {
+      "start": 1221.7,
+      "end": 1227.76,
+      "start_timestamp": "00:20:21.700",
+      "end_timestamp": "00:20:27.760",
+      "text": "When n is odd, you assume n is odd, and then you show that n squared is also odd.",
+      "confidence": 0.998
+    },
+    {
+      "start": 1227.76,
+      "end": 1229.8,
+      "start_timestamp": "00:20:27.760",
+      "end_timestamp": "00:20:29.800",
+      "text": "What proof technique is that?",
+      "confidence": 0.998
+    },
+    {
+      "start": 1229.8,
+      "end": 1234.74,
+      "start_timestamp": "00:20:29.800",
+      "end_timestamp": "00:20:34.740",
+      "text": "What template did you follow for this little proof?",
+      "confidence": 0.998
+    },
+    {
+      "start": 1234.74,
+      "end": 1241.66,
+      "start_timestamp": "00:20:34.740",
+      "end_timestamp": "00:20:41.660",
+      "text": "And just while you're voting, this proof is actually fairly simple.",
+      "confidence": 0.998
+    },
+    {
+      "start": 1241.66,
+      "end": 1245.9,
+      "start_timestamp": "00:20:41.660",
+      "end_timestamp": "00:20:45.900",
+      "text": "When n is odd, that means you can write...",
+      "confidence": 0.998
+    },
+    {
+      "start": 1245.9,
+      "end": 1260.3,
+      "start_timestamp": "00:20:45.900",
+      "end_timestamp": "00:21:00.300",
+      "text": "I shouldn't use that arrow. That means n can be written as 2k plus one for some integer",
+      "confidence": 0.998
+    },
+    {
+      "start": 1260.3,
+      "end": 1273.06,
+      "start_timestamp": "00:21:00.300",
+      "end_timestamp": "00:21:13.060",
+      "text": "k, say a natural number. And if I now look at what happens to n squared, well, that's",
+      "confidence": 0.998
+    },
+    {
+      "start": 1273.06,
+      "end": 1288.1,
+      "start_timestamp": "00:21:13.060",
+      "end_timestamp": "00:21:28.100",
+      "text": "2k plus 1 squared that's nothing but 4k squared plus 4k plus 1 and you see that this is even",
+      "confidence": 0.934
+    },
+    {
+      "start": 1288.1,
+      "end": 1301.94,
+      "start_timestamp": "00:21:28.100",
+      "end_timestamp": "00:21:41.940",
+      "text": "because it's divisible by 2 and so it can be written as 2 times or 2 times k prime plus 1",
+      "confidence": 0.934
+    },
+    {
+      "start": 1301.94,
+      "end": 1311.74,
+      "start_timestamp": "00:21:41.940",
+      "end_timestamp": "00:21:51.740",
+      "text": "and k prime is again a natural number and it's just this divided by 2. So that's the proof that",
+      "confidence": 0.936
+    },
+    {
+      "start": 1311.74,
+      "end": 1320.9,
+      "start_timestamp": "00:21:51.740",
+      "end_timestamp": "00:22:00.900",
+      "text": "also n squared is odd. So it's a simple statement and the proof is clearly correct though the",
+      "confidence": 0.936
+    },
+    {
+      "start": 1320.9,
+      "end": 1327.3,
+      "start_timestamp": "00:22:00.900",
+      "end_timestamp": "00:22:07.300",
+      "text": "statement is also true but what proof technique have we used?",
+      "confidence": 0.993
+    },
+    {
+      "start": 1336.5,
+      "end": 1345.18,
+      "start_timestamp": "00:22:16.500",
+      "end_timestamp": "00:22:25.180",
+      "text": "Okay we have 33 people maybe again just a couple of seconds because this was a",
+      "confidence": 0.993
+    },
+    {
+      "start": 1345.18,
+      "end": 1349.86,
+      "start_timestamp": "00:22:25.180",
+      "end_timestamp": "00:22:29.860",
+      "text": "bit more reading necessary.",
+      "confidence": 0.993
+    },
+    {
+      "start": 1350.9,
+      "end": 1370.26,
+      "start_timestamp": "00:22:30.900",
+      "end_timestamp": "00:22:50.260",
+      "text": "Okay, 40ish.",
+      "confidence": 0.819
+    },
+    {
+      "start": 1370.26,
+      "end": 1376.76,
+      "start_timestamp": "00:22:50.260",
+      "end_timestamp": "00:22:56.760",
+      "text": "40ish.",
+      "confidence": 0.439
+    },
+    {
+      "start": 1376.76,
+      "end": 1383.22,
+      "start_timestamp": "00:22:56.760",
+      "end_timestamp": "00:23:03.220",
+      "text": "Would anyone?",
+      "confidence": 0.439
+    },
+    {
+      "start": 1383.22,
+      "end": 1387.4,
+      "start_timestamp": "00:23:03.220",
+      "end_timestamp": "00:23:07.400",
+      "text": "Would anyone need more time?",
+      "confidence": 0.439
+    },
+    {
+      "start": 1387.4,
+      "end": 1389.62,
+      "start_timestamp": "00:23:07.400",
+      "end_timestamp": "00:23:09.620",
+      "text": "And out yourself in the back channel?",
+      "confidence": 0.439
+    },
+    {
+      "start": 1389.62,
+      "end": 1392.28,
+      "start_timestamp": "00:23:09.620",
+      "end_timestamp": "00:23:12.280",
+      "text": "Maybe we need this.",
+      "confidence": 0.439
+    },
+    {
+      "start": 1392.28,
+      "end": 1397.82,
+      "start_timestamp": "00:23:12.280",
+      "end_timestamp": "00:23:17.820",
+      "text": "You can't post anonymously to the chat rooms, unfortunately.",
+      "confidence": 0.439
+    },
+    {
+      "start": 1397.82,
+      "end": 1411.14,
+      "start_timestamp": "00:23:17.820",
+      "end_timestamp": "00:23:31.140",
+      "text": "Okay, 46. So I'll show you the results now. So most people voted for indirect proof and",
+      "confidence": 0.881
+    },
+    {
+      "start": 1411.14,
+      "end": 1421.7,
+      "start_timestamp": "00:23:31.140",
+      "end_timestamp": "00:23:41.700",
+      "text": "we also have a couple of answers for the other things. The correct answer is indirect proof.",
+      "confidence": 0.881
+    },
+    {
+      "start": 1421.7,
+      "end": 1428.08,
+      "start_timestamp": "00:23:41.700",
+      "end_timestamp": "00:23:48.080",
+      "text": "And let me go back to the slides to show why.",
+      "confidence": 0.971
+    },
+    {
+      "start": 1428.08,
+      "end": 1433.24,
+      "start_timestamp": "00:23:48.080",
+      "end_timestamp": "00:23:53.240",
+      "text": "So that's again, we should just identify A and B in this statement.",
+      "confidence": 0.971
+    },
+    {
+      "start": 1433.24,
+      "end": 1438.14,
+      "start_timestamp": "00:23:53.240",
+      "end_timestamp": "00:23:58.140",
+      "text": "n squared is an even number, that's our A.",
+      "confidence": 0.971
+    },
+    {
+      "start": 1438.14,
+      "end": 1442.54,
+      "start_timestamp": "00:23:58.140",
+      "end_timestamp": "00:24:02.540",
+      "text": "n is also even, or is even, that's our B.",
+      "confidence": 0.971
+    },
+    {
+      "start": 1442.54,
+      "end": 1450.74,
+      "start_timestamp": "00:24:02.540",
+      "end_timestamp": "00:24:10.740",
+      "text": "And now if you see, we start with n is odd, which was a bit mean, because it's not",
+      "confidence": 0.971
+    },
+    {
+      "start": 1450.74,
+      "end": 1462.26,
+      "start_timestamp": "00:24:10.740",
+      "end_timestamp": "00:24:22.260",
+      "text": "It's not directly the same thing as not B, but this is effectively not B because not",
+      "confidence": 0.871
+    },
+    {
+      "start": 1462.26,
+      "end": 1467.84,
+      "start_timestamp": "00:24:22.260",
+      "end_timestamp": "00:24:27.840",
+      "text": "even is the same as odd.",
+      "confidence": 0.871
+    },
+    {
+      "start": 1467.84,
+      "end": 1475.3,
+      "start_timestamp": "00:24:27.840",
+      "end_timestamp": "00:24:35.300",
+      "text": "And same here, this is again not A because again, we flipped even and odd.",
+      "confidence": 0.871
+    },
+    {
+      "start": 1475.3,
+      "end": 1478.38,
+      "start_timestamp": "00:24:35.300",
+      "end_timestamp": "00:24:38.380",
+      "text": "So the proof technique we used is indirect proof.",
+      "confidence": 0.871
+    },
+    {
+      "start": 1478.38,
+      "end": 1481.98,
+      "start_timestamp": "00:24:38.380",
+      "end_timestamp": "00:24:41.980",
+      "text": "we showed the implication, not B implies not A.",
+      "confidence": 0.991
+    },
+    {
+      "start": 1484.44,
+      "end": 1486.76,
+      "start_timestamp": "00:24:44.440",
+      "end_timestamp": "00:24:46.760",
+      "text": "All right, good.",
+      "confidence": 0.991
+    },
+    {
+      "start": 1486.76,
+      "end": 1491.02,
+      "start_timestamp": "00:24:46.760",
+      "end_timestamp": "00:24:51.020",
+      "text": "Thanks for the good participation in the question.",
+      "confidence": 0.991
+    },
+    {
+      "start": 1492.58,
+      "end": 1496.02,
+      "start_timestamp": "00:24:52.580",
+      "end_timestamp": "00:24:56.020",
+      "text": "And let's move on.",
+      "confidence": 0.991
+    },
+    {
+      "start": 1498.3,
+      "end": 1499.48,
+      "start_timestamp": "00:24:58.300",
+      "end_timestamp": "00:24:59.480",
+      "text": "There are other types of statements",
+      "confidence": 0.991
+    },
+    {
+      "start": 1499.48,
+      "end": 1501.3,
+      "start_timestamp": "00:24:59.480",
+      "end_timestamp": "00:25:01.300",
+      "text": "that we sometimes have to show.",
+      "confidence": 0.991
+    },
+    {
+      "start": 1501.3,
+      "end": 1503.22,
+      "start_timestamp": "00:25:01.300",
+      "end_timestamp": "00:25:03.220",
+      "text": "And one example is equivalences.",
+      "confidence": 0.991
+    },
+    {
+      "start": 1503.22,
+      "end": 1506.66,
+      "start_timestamp": "00:25:03.220",
+      "end_timestamp": "00:25:06.660",
+      "text": "We want to show that A is true exactly when B is true.",
+      "confidence": 0.991
+    },
+    {
+      "start": 1506.66,
+      "end": 1508.02,
+      "start_timestamp": "00:25:06.660",
+      "end_timestamp": "00:25:08.020",
+      "text": "That was this.",
+      "confidence": 0.991
+    },
+    {
+      "start": 1508.02,
+      "end": 1514.22,
+      "start_timestamp": "00:25:08.020",
+      "end_timestamp": "00:25:14.220",
+      "text": "So remember that was A if and only if B often written as this.",
+      "confidence": 0.997
+    },
+    {
+      "start": 1514.22,
+      "end": 1522.8,
+      "start_timestamp": "00:25:14.220",
+      "end_timestamp": "00:25:22.800",
+      "text": "So that's if and only if.",
+      "confidence": 0.997
+    },
+    {
+      "start": 1522.8,
+      "end": 1527.12,
+      "start_timestamp": "00:25:22.800",
+      "end_timestamp": "00:25:27.120",
+      "text": "So we can often prove both implications.",
+      "confidence": 0.997
+    },
+    {
+      "start": 1527.12,
+      "end": 1531.9,
+      "start_timestamp": "00:25:27.120",
+      "end_timestamp": "00:25:31.900",
+      "text": "We can often prove A implies B and B implies A as just two steps.",
+      "confidence": 0.997
+    },
+    {
+      "start": 1531.9,
+      "end": 1537.98,
+      "start_timestamp": "00:25:31.900",
+      "end_timestamp": "00:25:37.980",
+      "text": "So it's two little sub-proofs that together show that A is the same as B is equivalent",
+      "confidence": 0.997
+    },
+    {
+      "start": 1537.98,
+      "end": 1545.74,
+      "start_timestamp": "00:25:37.980",
+      "end_timestamp": "00:25:45.740",
+      "text": "be in this sense. And it often happens that one direction is much easier than the other, but not",
+      "confidence": 0.948
+    },
+    {
+      "start": 1545.74,
+      "end": 1553.74,
+      "start_timestamp": "00:25:45.740",
+      "end_timestamp": "00:25:53.740",
+      "text": "always. Another type of statement that we will sometimes need is about two sets. So we have a set",
+      "confidence": 0.948
+    },
+    {
+      "start": 1553.74,
+      "end": 1559.58,
+      "start_timestamp": "00:25:53.740",
+      "end_timestamp": "00:25:59.580",
+      "text": "S and another set R, and we'd like to show that R is a subset of S.",
+      "confidence": 0.948
+    },
+    {
+      "start": 1559.58,
+      "end": 1574.98,
+      "start_timestamp": "00:25:59.580",
+      "end_timestamp": "00:26:14.980",
+      "text": "Now, and just to make sure this notation here with the bar below, this is somewhat similar",
+      "confidence": 0.973
+    },
+    {
+      "start": 1574.98,
+      "end": 1581.42,
+      "start_timestamp": "00:26:14.980",
+      "end_timestamp": "00:26:21.420",
+      "text": "to a less or equal sign.",
+      "confidence": 0.973
+    },
+    {
+      "start": 1581.42,
+      "end": 1586.34,
+      "start_timestamp": "00:26:21.420",
+      "end_timestamp": "00:26:26.340",
+      "text": "It also means that r can be equal to s.",
+      "confidence": 0.973
+    },
+    {
+      "start": 1586.34,
+      "end": 1593.46,
+      "start_timestamp": "00:26:26.340",
+      "end_timestamp": "00:26:33.460",
+      "text": "And in logical terms, it means you show this implication whenever you have an element in",
+      "confidence": 0.951
+    },
+    {
+      "start": 1593.46,
+      "end": 1600.34,
+      "start_timestamp": "00:26:33.460",
+      "end_timestamp": "00:26:40.340",
+      "text": "R, that same element is also in S. So instead of arguing about sets, what you really have",
+      "confidence": 0.951
+    },
+    {
+      "start": 1600.34,
+      "end": 1602.86,
+      "start_timestamp": "00:26:40.340",
+      "end_timestamp": "00:26:42.860",
+      "text": "to do is prove an implication.",
+      "confidence": 0.951
+    },
+    {
+      "start": 1602.86,
+      "end": 1605.18,
+      "start_timestamp": "00:26:42.860",
+      "end_timestamp": "00:26:45.180",
+      "text": "And we've just seen how to do that.",
+      "confidence": 0.951
+    },
+    {
+      "start": 1605.18,
+      "end": 1610.06,
+      "start_timestamp": "00:26:45.180",
+      "end_timestamp": "00:26:50.060",
+      "text": "Scroll a couple of slides back and use one of the techniques from there.",
+      "confidence": 0.951
+    },
+    {
+      "start": 1610.06,
+      "end": 1616.32,
+      "start_timestamp": "00:26:50.060",
+      "end_timestamp": "00:26:56.320",
+      "text": "Now, this in isolation is not so often what we want to prove.",
+      "confidence": 0.951
+    },
+    {
+      "start": 1616.32,
+      "end": 1622.4,
+      "start_timestamp": "00:26:56.320",
+      "end_timestamp": "00:27:02.400",
+      "text": "more often that we want to prove that two sets are equal, S and R are equal as sets.",
+      "confidence": 0.92
+    },
+    {
+      "start": 1623.68,
+      "end": 1632.4,
+      "start_timestamp": "00:27:03.680",
+      "end_timestamp": "00:27:12.400",
+      "text": "And that again means you prove two inclusions, S is a subset of R, R is a subset of S. If both",
+      "confidence": 0.92
+    },
+    {
+      "start": 1632.4,
+      "end": 1639.68,
+      "start_timestamp": "00:27:12.400",
+      "end_timestamp": "00:27:19.680",
+      "text": "is true, then the two sets must be the same. So again, you have reduced proving set equivalence",
+      "confidence": 0.92
+    },
+    {
+      "start": 1639.68,
+      "end": 1646.0,
+      "start_timestamp": "00:27:19.680",
+      "end_timestamp": "00:27:26.000",
+      "text": "to set inclusion, which we reduce to implication, which you could reduce to one of the strategies",
+      "confidence": 0.92
+    },
+    {
+      "start": 1646.0,
+      "end": 1647.84,
+      "start_timestamp": "00:27:26.000",
+      "end_timestamp": "00:27:27.840",
+      "text": "that I've shown you.",
+      "confidence": 0.959
+    },
+    {
+      "start": 1647.84,
+      "end": 1652.04,
+      "start_timestamp": "00:27:27.840",
+      "end_timestamp": "00:27:32.040",
+      "text": "That's how proofs often get structured.",
+      "confidence": 0.959
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "video_ids": [
+    "tib_001",
+    "tib_003",
+    "tib_004"
+  ],
+  "video_titles": [
+    "Introduction to Machine Learning",
+    "Database Systems: From Relational to NoSQL",
+    "Transformers and Attention Mechanisms"
+  ],
+  "similarity_matrix": [
+    [
+      1.0,
+      0.16203871369361877,
+      0.28118202090263367
+    ],
+    [
+      0.16203871369361877,
+      1.0,
+      0.06763552129268646
+    ],
+    [
+      0.28118202090263367,
+      0.06763552129268646,
+      1.0
+    ]
+  ]
+}

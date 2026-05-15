@@ -1,0 +1,16 @@
+{
+"video_id": "tib_013",
+"video_title": "Systems Biology: Networks and Dynamics",
+"video_url": "https://av.tib.eu/media/tib_013",
+"duration": 5400,
+"language": "en",
+"speaker": "Prof. Yuki Tanaka",
+"domain": "biology",
+"chapters": [
+{"chapter_id": "tib_013_ch1", "chapter_index": 1, "title": "Biological Networks", "start_time": 0, "end_time": 1000, "transcript": "Protein-protein interaction networks, gene regulatory networks. Scale-free properties.", "frame_captions": ["PPI network", "Gene regulatory network", "Degree distribution"], "keywords": ["PPI", "gene regulatory", "scale-free", "network"]},
+{"chapter_id": "tib_013_ch2", "chapter_index": 2, "title": "Ordinary Differential Equations in Biology", "start_time": 1000, "end_time": 2300, "transcript": "Lotka-Volterra predator-prey, enzyme kinetics Michaelis-Menten.", "frame_captions": ["Lotka-Volterra cycles", "Michaelis-Menten curve", "ODE phase portrait"], "keywords": ["ODE", "Lotka-Volterra", "Michaelis-Menten", "kinetics"]},
+{"chapter_id": "tib_013_ch3", "chapter_index": 3, "title": "Stochastic Models", "start_time": 2300, "end_time": 3500, "transcript": "Gillespie algorithm, chemical master equation. Low copy number effects.", "frame_captions": ["Gillespie simulation", "Master equation", "Stochastic vs deterministic"], "keywords": ["Gillespie", "stochastic", "master equation", "chemical reactions"]},
+{"chapter_id": "tib_013_ch4", "chapter_index": 4, "title": "Metabolic Networks", "start_time": 3500, "end_time": 4600, "transcript": "Flux balance analysis, stoichiometric matrix. Metabolic engineering.", "frame_captions": ["Metabolic pathway", "Stoichiometric matrix", "FBA optimization"], "keywords": ["FBA", "metabolic", "stoichiometry", "flux"]},
+{"chapter_id": "tib_013_ch5", "chapter_index": 5, "title": "Parameter Estimation", "start_time": 4600, "end_time": 5400, "transcript": "Inverse problems, sensitivity analysis. Fitting models to omics data.", "frame_captions": ["Parameter fitting", "Sensitivity indices", "Data vs model"], "keywords": ["parameter estimation", "sensitivity", "fitting", "inverse"]}
+]
+}

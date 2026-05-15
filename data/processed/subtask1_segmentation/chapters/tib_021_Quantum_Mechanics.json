@@ -1,0 +1,16 @@
+{
+"video_id": "tib_021",
+"video_title": "Introduction to Quantum Mechanics",
+"video_url": "https://av.tib.eu/media/tib_021",
+"duration": 5400,
+"language": "en",
+"speaker": "Prof. Richard Feynman (archive)",
+"domain": "physics",
+"chapters": [
+{"chapter_id": "tib_021_ch1", "chapter_index": 1, "title": "Wave-Particle Duality", "start_time": 0, "end_time": 1000, "transcript": "Double-slit experiment. Photons and electrons behave as both waves and particles. Complementarity.", "frame_captions": ["Double-slit pattern", "Electron interference", "Complementarity"], "keywords": ["wave-particle", "double-slit", "interference", "complementarity"]},
+{"chapter_id": "tib_021_ch2", "chapter_index": 2, "title": "Schrödinger Equation", "start_time": 1000, "end_time": 2400, "transcript": "Time-dependent and time-independent. Wavefunctions, probability density. Particle in a box.", "frame_captions": ["Schrödinger equation", "Wavefunction plot", "Box energy levels"], "keywords": ["Schrödinger", "wavefunction", "probability density", "particle in a box"]},
+{"chapter_id": "tib_021_ch3", "chapter_index": 3, "title": "Quantum Operators", "start_time": 2400, "end_time": 3600, "transcript": "Observables as Hermitian operators. Eigenvalues and eigenstates. Position and momentum.", "frame_captions": ["Operator action", "Hermitian definition", "Momentum eigenstate"], "keywords": ["operators", "Hermitian", "eigenvalues", "observables"]},
+{"chapter_id": "tib_021_ch4", "chapter_index": 4, "title": "Heisenberg Uncertainty Principle", "start_time": 3600, "end_time": 4500, "transcript": "Δx Δp ≥ ħ/2. Energy-time uncertainty. Implications for measurement.", "frame_captions": ["Uncertainty relation", "Gaussian wavepacket", "Minimum uncertainty"], "keywords": ["uncertainty principle", "Heisenberg", "measurement", "ΔxΔp"]},
+{"chapter_id": "tib_021_ch5", "chapter_index": 5, "title": "Quantum Entanglement", "start_time": 4500, "end_time": 5400, "transcript": "Bell states, EPR paradox. Bell's inequality. Quantum teleportation.", "frame_captions": ["Entangled particles", "Bell inequality test", "Teleportation circuit"], "keywords": ["entanglement", "EPR", "Bell inequality", "teleportation"]}
+]
+}

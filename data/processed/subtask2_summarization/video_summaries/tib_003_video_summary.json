@@ -1,0 +1,175 @@
+{
+  "video_id": "tib_003",
+  "video_title": "Database Systems: From Relational to NoSQL",
+  "speaker": "Prof. Maria Santos",
+  "domain": "databases",
+  "duration": 3900,
+  "total_chapters": 7,
+  "chapter_timeline": [
+    {
+      "chapter_index": 1,
+      "title": "Why Database Systems? Motivation and History",
+      "start_time": 0,
+      "end_time": 450,
+      "summary_short": "The lecture discusses the need for database management systems due to issues with file-based systems like redundancy, inconsistency, isolation, concurrency, and security. It highlights Edgar Codd's work in developing the relational model of data, leading to the creation of SQL language and commercial databases.",
+      "key_concepts": [
+        "data management systems",
+        "file-based systems",
+        "redundancy",
+        "inconsistency",
+        "isolation",
+        "concurrency",
+        "security",
+        "atomicity of operations",
+        "Edgar F. Codd",
+        "Turing Award",
+        "relational model",
+        "tables",
+        "rows and columns",
+        "relational algebra",
+        "System R",
+        "SQL language",
+        "Oracle"
+      ],
+      "difficulty_level": "beginner",
+      "has_visuals": true
+    },
+    {
+      "chapter_index": 2,
+      "title": "Relational Model: Tables, Keys, and Constraints",
+      "start_time": 450,
+      "end_time": 1050,
+      "summary_short": "Learn about the relational model, its core concepts like tables, keys (primary, foreign), and integrity constraints.",
+      "key_concepts": [
+        "relational model",
+        "tables",
+        "keys (superkey, candidate key, primary key)",
+        "foreign keys",
+        "integrity constraints"
+      ],
+      "difficulty_level": "beginner",
+      "has_visuals": true
+    },
+    {
+      "chapter_index": 3,
+      "title": "SQL: Querying Relational Databases",
+      "start_time": 1050,
+      "end_time": 1680,
+      "summary_short": "Learn the basics of SQL, a standard language for querying relational databases, including SELECT, WHERE, ORDER BY, GROUP BY, INNER JOIN, LEFT OUTER JOIN, subqueries, and window functions.",
+      "key_concepts": [
+        "SQL",
+        "Structured Query Language",
+        "Relational databases",
+        "DDL (Data Definition Language)",
+        "DML (Data Manipulation Language)",
+        "DCL (Data Control Language)",
+        "SELECT statement",
+        "WHERE clause",
+        "ORDER BY",
+        "GROUP BY",
+        "HAVING clause",
+        "INNER JOIN",
+        "LEFT OUTER JOIN",
+        "FULL OUTER JOIN",
+        "subquery",
+        "window function",
+        "ROW_NUMBER",
+        "RANK",
+        "LAG"
+      ],
+      "difficulty_level": "beginner",
+      "has_visuals": true
+    },
+    {
+      "chapter_index": 4,
+      "title": "Transactions and ACID Properties",
+      "start_time": 1680,
+      "end_time": 2280,
+      "summary_short": "Transactions are units of work ensuring all database operations within them either complete successfully or not at all, with guarantees for atomicity, consistency, isolation, and durability. This lecture covers these ACID properties.",
+      "key_concepts": [
+        "transactions",
+        "ACID properties",
+        "Atomicity",
+        "Consistency",
+        "Isolation",
+        "Durability",
+        "write-ahead log"
+      ],
+      "difficulty_level": "beginner",
+      "has_visuals": true
+    },
+    {
+      "chapter_index": 5,
+      "title": "Database Normalization",
+      "start_time": 2280,
+      "end_time": 2820,
+      "summary_short": "Learn about Database Normalization to reduce redundancy and improve data integrity by organizing a relational database schema.",
+      "key_concepts": [
+        "Database Normalization",
+        "1NF",
+        "2NF",
+        "3NF",
+        "BCNF",
+        "Update Anomalies",
+        "Insertion Anomalies",
+        "Deletion Anomalies"
+      ],
+      "difficulty_level": "beginner",
+      "has_visuals": true
+    },
+    {
+      "chapter_index": 6,
+      "title": "NoSQL Databases: Types and Use Cases",
+      "start_time": 2820,
+      "end_time": 3480,
+      "summary_short": "This lecture discusses NoSQL databases, their types (Document, Key-Value, Column-Family, Graph), and use cases. It also introduces the CAP theorem.",
+      "key_concepts": [
+        "NoSQL databases",
+        "Document database",
+        "Key-Value store",
+        "Column-Family store",
+        "Graph database",
+        "CAP theorem"
+      ],
+      "difficulty_level": "beginner",
+      "has_visuals": true
+    },
+    {
+      "chapter_index": 7,
+      "title": "Choosing the Right Database and Summary",
+      "start_time": 3480,
+      "end_time": 3900,
+      "summary_short": "This lecture discusses the process of choosing the right database for an application based on data model, consistency requirements, scale, and team expertise.",
+      "key_concepts": [
+        "data model",
+        "consistency requirements",
+        "scale",
+        "team expertise",
+        "polyglot persistence"
+      ],
+      "difficulty_level": "intermediate",
+      "has_visuals": true
+    }
+  ],
+  "extractive_summary": "The relational model is fundamental to databases and structured around tables (relations). SQL (Structured Query Language) is the standard language for interacting with relational databases. 3NF eliminates transitive dependencies and requires that every non-key attribute is directly dependent on the primary key and not on any other non-key attribute. The lecture begins by shifting from the relational world to NoSQL databases, which don't follow the relational model. The lecture covers four main categories of NoSQL databases: Document, Key-Value, Column-Family, and Graph. It explains that based on the data model, different databases are suitable: relational databases for structured and complex join operations, document databases for hierarchical or document-like data, graph databases for handling graph-like relationships, and key-value stores for simple key-value access.",
+  "summary_short": "Lecture explores the history and evolution of database systems from relational to NoSQL databases. Topics include data management challenges, the relational model, SQL querying, transactions, normalization, NoSQL types, and choosing the right database.",
+  "summary_medium": "Prof. Maria Santos delves into the development of dedicated database systems to address issues with file-based systems in early computing, emphasizing data management difficulties like redundancy, inconsistency, isolation, concurrency, and security. The lecture covers Edgar Codd's work on the relational model, tables, keys, constraints, SQL, transactions, ACID properties, database normalization, NoSQL databases (Document, Key-Value, Column-Family, Graph), and selecting appropriate databases based on data models, consistency requirements, scalability, team expertise, and polyglot persistence.",
+  "summary_long": "The lecture begins by discussing the development of dedicated database systems to address problems with file-based systems in early computing. These issues include redundancy, inconsistency, isolation, concurrency, and security that make data management difficult. The lecture then highlights Edgar Codd's work at IBM Research, including his 1970 landmark paper on the relational model of data, which forms the theoretical foundation for relational databases. The relational model is based on tables that hold records (tuples) with defined structures (schema), and keys play a vital role in relational databases. The lecture covers SQL (Structured Query Language), ACID properties, database normalization, and NoSQL databases (Document, Key-Value, Column-Family, Graph). Finally, the lecture provides guidance on choosing the right database for various data models, consistency requirements, scalability, team expertise, and polyglot persistence.",
+  "key_concepts": [
+    "data management systems, file-based systems, redundancy, inconsistency, isolation, concurrency, security, atomicity of operations, Edgar F. Codd, Turing Award, relational model, tables, rows and columns, relational algebra, System R, SQL language, Oracle, keys (superkey, candidate key, primary key), foreign keys, integrity constraints, SQL, DDL (Data Definition Language), DML (Data Manipulation Language), DCL (Data Control Language), SELECT statement, WHERE clause, ORDER BY, GROUP BY, HAVING clause, INNER JOIN, LEFT OUTER JOIN, FULL OUTER JOIN, subquery, window function, ROW_NUMBER, RANK, LAG, transactions, ACID properties, Atomicity, Consistency, Isolation, Durability, write-ahead log, Database Normalization, 1NF, 2NF, 3NF, BCNF, Update Anomalies, Insertion Anomalies, Deletion Anomalies, NoSQL databases, Document database, Key-Value store, Column-Family store, Graph database, CAP theorem"
+  ],
+  "learning_objectives": [
+    "Understand the motivation and history of dedicated database systems, the relational model, SQL querying, transactions, ACID properties, database normalization, and NoSQL databases. Learn how to choose an appropriate database for various data models."
+  ],
+  "prerequisites": [
+    "Basic understanding of programming concepts"
+  ],
+  "topic_progression": "The lecture begins with a historical overview and motivation for dedicated database systems, followed by the relational model, SQL querying, transactions, ACID properties, database normalization, NoSQL databases, and concludes with guidance on choosing an appropriate database.",
+  "difficulty_level": "Intermediate",
+  "domain_tags": [
+    "Databases"
+  ],
+  "has_code_examples": false,
+  "has_mathematical_content": false,
+  "has_diagrams": false
+}

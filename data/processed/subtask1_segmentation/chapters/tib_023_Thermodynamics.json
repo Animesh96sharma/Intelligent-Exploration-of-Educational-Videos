@@ -1,0 +1,16 @@
+{
+"video_id": "tib_023",
+"video_title": "Thermodynamics and Statistical Mechanics",
+"video_url": "https://av.tib.eu/media/tib_023",
+"duration": 4800,
+"language": "en",
+"speaker": "Prof. Enrico Fermi (reenactment)",
+"domain": "physics",
+"chapters": [
+{"chapter_id": "tib_023_ch1", "chapter_index": 1, "title": "Zeroth and First Laws", "start_time": 0, "end_time": 900, "transcript": "Temperature equilibrium. Internal energy, heat, work. Conservation of energy: ΔU = Q - W.", "frame_captions": ["Thermometer equilibrium", "First law equation", "Piston diagram"], "keywords": ["zeroth law", "first law", "internal energy", "heat"]},
+{"chapter_id": "tib_023_ch2", "chapter_index": 2, "title": "Second Law", "start_time": 900, "end_time": 2100, "transcript": "Entropy always increases. Clausius and Kelvin statements. Heat engines and Carnot efficiency.", "frame_captions": ["Entropy increase", "Carnot cycle", "Heat engine schematic"], "keywords": ["second law", "entropy", "Carnot", "heat engine"]},
+{"chapter_id": "tib_023_ch3", "chapter_index": 3, "title": "Third Law", "start_time": 2100, "end_time": 3000, "transcript": "Absolute zero unreachable. Entropy of perfect crystal is zero at T=0.", "frame_captions": ["Third law statement", "Nernst heat theorem", "Low temp behavior"], "keywords": ["third law", "absolute zero", "Nernst", "entropy"]},
+{"chapter_id": "tib_023_ch4", "chapter_index": 4, "title": "Thermodynamic Potentials", "start_time": 3000, "end_time": 3900, "transcript": "Enthalpy, Helmholtz free energy, Gibbs free energy. Maxwell relations.", "frame_captions": ["Potential definitions", "Maxwell relations table", "Free energy surface"], "keywords": ["enthalpy", "Gibbs free energy", "Helmholtz", "Maxwell relations"]},
+{"chapter_id": "tib_023_ch5", "chapter_index": 5, "title": "Statistical Mechanics", "start_time": 3900, "end_time": 4800, "transcript": "Microstates and macrostates. Boltzmann entropy S = k log W. Partition function.", "frame_captions": ["Boltzmann tomb", "Partition function", "Thermal distribution"], "keywords": ["statistical mechanics", "Boltzmann", "partition function", "microstates"]}
+]
+}

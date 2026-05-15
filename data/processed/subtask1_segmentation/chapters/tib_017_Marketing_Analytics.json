@@ -1,0 +1,16 @@
+{
+"video_id": "tib_017",
+"video_title": "Marketing Analytics and Customer Insights",
+"video_url": "https://av.tib.eu/media/tib_017",
+"duration": 4800,
+"language": "en",
+"speaker": "Dr. Rachel Simmons",
+"domain": "commerce",
+"chapters": [
+{"chapter_id": "tib_017_ch1", "chapter_index": 1, "title": "Customer Lifetime Value", "start_time": 0, "end_time": 900, "transcript": "CLV formula: average purchase value × purchase frequency × customer lifespan. Retention and churn.", "frame_captions": ["CLV equation", "Cohort retention curve", "Churn rate"], "keywords": ["CLV", "retention", "churn", "lifetime value"]},
+{"chapter_id": "tib_017_ch2", "chapter_index": 2, "title": "Market Basket Analysis", "start_time": 900, "end_time": 2000, "transcript": "Association rules, support, confidence, lift. Apriori algorithm. Amazon 'frequently bought together'.", "frame_captions": ["Transaction matrix", "Association rule example", "Apriori pseudocode"], "keywords": ["market basket", "association rules", "apriori", "lift"]},
+{"chapter_id": "tib_017_ch3", "chapter_index": 3, "title": "Customer Segmentation", "start_time": 2000, "end_time": 3200, "transcript": "RFM analysis (recency, frequency, monetary). K-means clustering for segments. Personas.", "frame_captions": ["RFM score grid", "Cluster scatter plot", "Persona cards"], "keywords": ["RFM", "segmentation", "clustering", "personas"]},
+{"chapter_id": "tib_017_ch4", "chapter_index": 4, "title": "A/B Testing", "start_time": 3200, "end_time": 4100, "transcript": "Hypothesis testing for conversion rates. Sample size calculation. Statistical significance.", "frame_captions": ["A/B test dashboard", "Conversion funnel", "p-value calculator"], "keywords": ["A/B test", "conversion rate", "statistical significance", "hypothesis test"]},
+{"chapter_id": "tib_017_ch5", "chapter_index": 5, "title": "Marketing Mix Modeling", "start_time": 4100, "end_time": 4800, "transcript": "Regression to measure channel effectiveness. ROAS, attribution. Budget allocation.", "frame_captions": ["MMM regression output", "ROAS bar chart", "Attribution models"], "keywords": ["MMM", "ROAS", "attribution", "budget allocation"]}
+]
+}

@@ -1,0 +1,16 @@
+{
+"video_id": "tib_022",
+"video_title": "Classical Electromagnetism",
+"video_url": "https://av.tib.eu/media/tib_022",
+"duration": 4800,
+"language": "en",
+"speaker": "Dr. James Clerk Maxwell (reenactment)",
+"domain": "physics",
+"chapters": [
+{"chapter_id": "tib_022_ch1", "chapter_index": 1, "title": "Electrostatics", "start_time": 0, "end_time": 900, "transcript": "Coulomb's law, electric field, Gauss's law. Potential and voltage. Conductors vs insulators.", "frame_captions": ["Coulomb force", "Electric field lines", "Gauss surface"], "keywords": ["electrostatics", "Coulomb", "Gauss", "electric field"]},
+{"chapter_id": "tib_022_ch2", "chapter_index": 2, "title": "Magnetostatics", "start_time": 900, "end_time": 1900, "transcript": "Biot-Savart law, Ampere's law. Magnetic field from currents. Lorentz force.", "frame_captions": ["Right-hand rule", "Biot-Savart diagram", "Ampere loop"], "keywords": ["magnetostatics", "Biot-Savart", "Ampere", "Lorentz force"]},
+{"chapter_id": "tib_022_ch3", "chapter_index": 3, "title": "Faraday's Law", "start_time": 1900, "end_time": 2900, "transcript": "Electromagnetic induction. Lenz's law. Transformers and generators.", "frame_captions": ["Changing flux", "Lenz direction", "Transformer core"], "keywords": ["Faraday", "induction", "Lenz", "generator"]},
+{"chapter_id": "tib_022_ch4", "chapter_index": 4, "title": "Maxwell's Equations", "start_time": 2900, "end_time": 4000, "transcript": "Integral and differential forms. Displacement current. Electromagnetic waves.", "frame_captions": ["Four Maxwell equations", "Displacement current", "Wave equation"], "keywords": ["Maxwell", "displacement current", "EM waves", "speed of light"]},
+{"chapter_id": "tib_022_ch5", "chapter_index": 5, "title": "Electromagnetic Waves", "start_time": 4000, "end_time": 4800, "transcript": "Plane waves, polarization. Poynting vector. Reflection and refraction.", "frame_captions": ["EM wave diagram", "Polarization types", "Snell's law"], "keywords": ["EM waves", "polarization", "Poynting", "refraction"]}
+]
+}

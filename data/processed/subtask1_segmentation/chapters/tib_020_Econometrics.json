@@ -1,0 +1,16 @@
+{
+"video_id": "tib_020",
+"video_title": "Introduction to Econometrics",
+"video_url": "https://av.tib.eu/media/tib_020",
+"duration": 4800,
+"language": "en",
+"speaker": "Prof. Claudia Goldin",
+"domain": "commerce",
+"chapters": [
+{"chapter_id": "tib_020_ch1", "chapter_index": 1, "title": "Simple Linear Regression", "start_time": 0, "end_time": 900, "transcript": "Y = α + βX + ε. Ordinary least squares. R-squared. Interpreting coefficients.", "frame_captions": ["Scatter with regression line", "OLS formula", "R-squared meaning"], "keywords": ["regression", "OLS", "R-squared", "coefficient"]},
+{"chapter_id": "tib_020_ch2", "chapter_index": 2, "title": "Multiple Regression", "start_time": 900, "end_time": 2000, "transcript": "Adding controls. Adjusted R-squared. Multicollinearity. Dummy variables.", "frame_captions": ["Multiple regression table", "Variance inflation factor", "Dummy variable coding"], "keywords": ["multiple regression", "multicollinearity", "dummy variables", "adjusted R2"]},
+{"chapter_id": "tib_020_ch3", "chapter_index": 3, "title": "Hypothesis Testing in Regression", "start_time": 2000, "end_time": 3100, "transcript": "T-tests for individual coefficients. F-test for joint significance. Confidence intervals.", "frame_captions": ["t-statistic formula", "F-distribution", "CI around coefficient"], "keywords": ["t-test", "F-test", "p-value", "confidence interval"]},
+{"chapter_id": "tib_020_ch4", "chapter_index": 4, "title": "Causality and Endogeneity", "start_time": 3100, "end_time": 4100, "transcript": "Omitted variable bias, reverse causality. Instrumental variables. Natural experiments.", "frame_captions": ["Bias diagram", "IV two-stage", "Difference-in-differences"], "keywords": ["causality", "endogeneity", "instrumental variables", "DiD"]},
+{"chapter_id": "tib_020_ch5", "chapter_index": 5, "title": "Panel Data Models", "start_time": 4100, "end_time": 4800, "transcript": "Fixed effects and random effects. Within transformation. Hausman test.", "frame_captions": ["Panel data structure", "Fixed effects demo", "Hausman test"], "keywords": ["panel data", "fixed effects", "random effects", "Hausman"]}
+]
+}

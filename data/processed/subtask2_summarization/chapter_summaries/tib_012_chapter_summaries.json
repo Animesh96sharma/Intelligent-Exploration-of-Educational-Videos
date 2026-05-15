@@ -1,0 +1,105 @@
+{
+  "video_id": "tib_012",
+  "video_title": "Computational Neuroscience: Neural Dynamics",
+  "speaker": "Dr. Miguel Cortez",
+  "domain": "biology",
+  "duration": 5100,
+  "total_chapters": 5,
+  "chapter_summaries": [
+    {
+      "chapter_id": "tib_012_ch1",
+      "chapter_index": 1,
+      "title": "Neuron Models",
+      "start_time": 0,
+      "end_time": 1000,
+      "duration_seconds": 1000,
+      "error": "JSON parse failed",
+      "raw_llm_output": "{\n  \"summary_short\": \"This chapter discusses the Hodgkin-Huxley model, a fundamental neuron model that describes ion channels and action potentials.\",\n  \"summary_medium\": \"The lecture delves into the Hodgkin-Huxley model, a landmark neuron model that explains how action potentials are generated through ion channel activity. The model integrates and fires based on ionic currents, and is crucial for understanding neural impulses. Visual aids include diagrams of neuron anatomy, action potential gra"
+    },
+    {
+      "chapter_id": "tib_012_ch2",
+      "chapter_index": 2,
+      "title": "Synaptic Plasticity",
+      "start_time": 1000,
+      "end_time": 2200,
+      "duration_seconds": 1200,
+      "summary_short": "This lecture discusses synaptic plasticity, focusing on Long-Term Potentiation (LTP), Hebbian learning, Spike-Timing-Dependent Plasticity (STDP), and their diagrams.",
+      "summary_medium": "The lecture dives into the concept of synaptic plasticity, a significant neural property that enables the brain to adapt to new information. LTP is a long-lasting enhancement in synaptic strength resulting from high-frequency stimulation and is associated with Hebbian learning. Spike-Timing-Dependent Plasticity (STDP) explains how the relative timing of pre- and postsynaptic spikes influences the synaptic strength. The lecture provides diagrams to illustrate these concepts.",
+      "summary_long": "Synaptic plasticity is a fundamental mechanism that allows neurons in the brain to change their connections over time. One form of synaptic plasticity is Long-Term Potentiation (LTP), which involves an increase in synaptic strength following high-frequency stimulation. This increase is thought to underlie learning and memory processes, particularly through Hebbian learning, a learning rule that suggests that synapses are strengthened when pre- and postsynaptic neurons are active at the same time. Spike-Timing-Dependent Plasticity (STDP) offers insight into how the timing of pre- and postsynaptic spikes influences synaptic strength. The STDP curve, shown during the lecture, displays a relationship between the difference in timing between the pre- and postsynaptic spikes and the resulting change in synaptic strength.",
+      "key_concepts": [
+        "Long-Term Potentiation (LTP)",
+        "Hebbian learning",
+        "Spike-Timing-Dependent Plasticity (STDP)",
+        "Synaptic plasticity"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the concept of synaptic plasticity and its role in learning and memory.",
+        "Students should understand the difference between LTP, Hebbian learning, and STDP, as well as their relation to each other."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes diagrams illustrating synapses, LTP induction, and an STDP curve.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_012_ch3",
+      "chapter_index": 3,
+      "title": "Population Dynamics",
+      "start_time": 2200,
+      "end_time": 3400,
+      "duration_seconds": 1200,
+      "summary_short": "This chapter explores rate coding, population vectors, Wilson-Cowan equations, and neural field models in the context of population dynamics.",
+      "summary_medium": "The lecture discusses rate tuning curves, a representation of the relationship between firing rates and stimulus intensities. The Wilson-Cowan phase plane, which explores the behavior of a network of two interacting neurons, is also covered. Lastly, neural field models are introduced as a way to study large populations of interconnected neurons.",
+      "summary_long": "The chapter begins by introducing rate coding, a method used by neurons to encode information through their firing rates. This is followed by an explanation of population vectors, which represent the activity of a large group of neurons. The Wilson-Cowan equations are then presented as a mathematical model for understanding the dynamics of a network of two interacting neurons. Finally, neural field models are introduced as a means to study the behavior of large populations of interconnected neurons. These models can provide insights into various aspects of brain function, including synchronization and seizures.",
+      "key_concepts": [
+        "Rate coding",
+        "Population vectors",
+        "Wilson-Cowan equations",
+        "Neural field models"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain rate coding and population vectors. They will also understand the Wilson-Cowan equations and neural field models and their applications in population dynamics.",
+        "They should be able to describe the behavior of a network of two interacting neurons using the Wilson-Cowan phase plane and analyze the activity of large populations of interconnected neurons using neural field models."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes diagrams for rate tuning curves, the Wilson-Cowan phase plane, and a representation of a neural field.",
+      "difficulty_level": "intermediate",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_012_ch4",
+      "chapter_index": 4,
+      "title": "Learning and Memory",
+      "start_time": 3400,
+      "end_time": 4400,
+      "duration_seconds": 1000,
+      "error": "JSON parse failed",
+      "raw_llm_output": "{\n  \"summary_short\": \"This lecture discusses Hopfield networks and their attractor dynamics, as well as the role of dopamine in reinforcement learning.\",\n  \"summary_medium\": \"The lecture delves into Hopfield networks, a type of artificial neural network that utilizes feedback connections to create stable internal states. The attractor landscape of these networks was discussed, demonstrating how they serve as models for understanding complex systems with multiple stable states. Additionally, the "
+    },
+    {
+      "chapter_id": "tib_012_ch5",
+      "chapter_index": 5,
+      "title": "Brain-Computer Interfaces",
+      "start_time": 4400,
+      "end_time": 5100,
+      "duration_seconds": 700,
+      "summary_short": "Exploration of brain-computer interfaces using EEG decoding and motor imagery tasks. Concept of neural prosthetics and spike sorting is introduced.",
+      "summary_medium": "In this lecture, the focus is on brain-computer interfaces (BCIs). The primary method used for BCI is Electroencephalography (EEG) decoding. Students learn about a specific task called motor imagery, where individuals are asked to imagine moving a body part without actually doing so. This produces distinctive neural activity patterns that can be detected by EEG. Another aspect discussed is the use of these BCIs for neural prosthetics, which allows paralyzed patients to control computers or robotic limbs. Spike sorting, a crucial step in processing raw EEG signals, is also covered.",
+      "summary_long": "The lecture commences by discussing brain-computer interfaces (BCIs), which aim to establish communication between the human brain and external devices. The primary method used for BCIs is Electroencephalography (EEG) decoding, where electrodes are placed on the scalp to record electrical activity from the brain. One specific task used in EEG-based BCIs is motor imagery, a mental exercise that involves imagining moving a body part without physically doing so. This imagined movement produces distinctive neural activity patterns that can be detected by EEG and interpreted by algorithms to control external devices. Another application of BCIs is for neural prosthetics, where individuals with paralysis can operate computers or robotic limbs using only their thoughts. A key challenge in processing EEG signals is spike sorting, a process that separates individual action potentials from the noisy recordings.",
+      "key_concepts": [
+        "brain-computer interfaces",
+        "EEG decoding",
+        "motor imagery",
+        "neural prosthetics",
+        "spike sorting"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the concept of brain-computer interfaces and how they use EEG decoding and motor imagery tasks. They will also understand the application of BCIs in neural prosthetics and the role of spike sorting in processing EEG signals."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes visuals such as an Electroencephalography (EEG) cap, a diagram showing a motor imagery task, and images depicting spike sorting.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    }
+  ]
+}

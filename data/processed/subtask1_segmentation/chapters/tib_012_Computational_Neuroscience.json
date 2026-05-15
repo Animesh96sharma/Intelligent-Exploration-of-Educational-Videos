@@ -1,0 +1,16 @@
+{
+"video_id": "tib_012",
+"video_title": "Computational Neuroscience: Neural Dynamics",
+"video_url": "https://av.tib.eu/media/tib_012",
+"duration": 5100,
+"language": "en",
+"speaker": "Dr. Miguel Cortez",
+"domain": "biology",
+"chapters": [
+{"chapter_id": "tib_012_ch1", "chapter_index": 1, "title": "Neuron Models", "start_time": 0, "end_time": 1000, "transcript": "Hodgkin-Huxley model, integrate-and-fire. Ion channels, action potentials.", "frame_captions": ["Neuron anatomy", "Action potential graph", "Hodgkin-Huxley circuit"], "keywords": ["neuron", "action potential", "Hodgkin-Huxley", "integrate-and-fire"]},
+{"chapter_id": "tib_012_ch2", "chapter_index": 2, "title": "Synaptic Plasticity", "start_time": 1000, "end_time": 2200, "transcript": "Long-term potentiation, Hebbian learning. Spike-timing-dependent plasticity.", "frame_captions": ["Synapse diagram", "LTP induction", "STDP curve"], "keywords": ["LTP", "STDP", "Hebbian", "synaptic plasticity"]},
+{"chapter_id": "tib_012_ch3", "chapter_index": 3, "title": "Population Dynamics", "start_time": 2200, "end_time": 3400, "transcript": "Rate coding, population vectors. Wilson-Cowan equations. Neural field models.", "frame_captions": ["Rate tuning curve", "Wilson-Cowan phase plane", "Neural field"], "keywords": ["rate coding", "population model", "Wilson-Cowan"]},
+{"chapter_id": "tib_012_ch4", "chapter_index": 4, "title": "Learning and Memory", "start_time": 3400, "end_time": 4400, "transcript": "Hopfield networks, attractor dynamics. Reinforcement learning in dopamine system.", "frame_captions": ["Hopfield energy", "Attractor landscape", "Dopamine reward"], "keywords": ["Hopfield", "attractor", "dopamine", "memory"]},
+{"chapter_id": "tib_012_ch5", "chapter_index": 5, "title": "Brain-Computer Interfaces", "start_time": 4400, "end_time": 5100, "transcript": "EEG decoding, motor imagery. Neural prosthetics. Spike sorting.", "frame_captions": ["EEG cap", "Motor imagery task", "Spike sorting"], "keywords": ["BCI", "EEG", "motor imagery", "neural prosthetic"]}
+]
+}

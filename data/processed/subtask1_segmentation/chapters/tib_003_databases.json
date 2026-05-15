@@ -1,0 +1,116 @@
+{
+  "video_id": "tib_003",
+  "video_title": "Database Systems: From Relational to NoSQL",
+  "video_url": "https://av.tib.eu/media/tib_003",
+  "duration": 3900,
+  "language": "en",
+  "speaker": "Prof. Maria Santos",
+  "domain": "databases",
+  "chapters": [
+    {
+      "chapter_id": "tib_003_ch1",
+      "chapter_index": 1,
+      "title": "Why Database Systems? Motivation and History",
+      "start_time": 0,
+      "end_time": 450,
+      "transcript": "Good morning everyone. Today we start our module on database systems. I want to begin by asking a simple question: why do we need a dedicated system for managing data? Why not just store everything in files on a hard disk? In the early days of computing, this is exactly what was done. Applications managed their own data files in their own formats. This led to a number of serious problems. Data redundancy was rampant — the same information was stored in multiple places, and keeping them consistent was a nightmare. Data inconsistency followed naturally from redundancy. Data isolation made it hard to access data across different files in different formats. Concurrent access by multiple users was not handled properly, leading to corruption. Security was difficult to enforce at the level of individual data items. And atomicity of operations — ensuring that either all of a transaction happens or none of it does — was nearly impossible to guarantee. These problems motivated the development of database management systems, or DBMS, in the 1960s and 1970s. Edgar F. Codd at IBM Research published his landmark 1970 paper 'A Relational Model of Data for Large Shared Data Banks', which laid the theoretical foundation for relational databases. This work earned him the Turing Award in 1981. The relational model organizes data into tables with rows and columns, and provides a mathematically clean way to query and manipulate data using relational algebra. IBM developed System R and the SQL language based on Codd's ideas, and commercial products like Oracle followed in the late 1970s.",
+      "frame_captions": [
+        "Timeline of database history from 1960s file systems to modern cloud databases",
+        "Portrait of Edgar Codd with Turing Award medal and year 1981",
+        "Problems with file-based systems listed: redundancy, inconsistency, isolation, concurrency",
+        "Cover of Codd's 1970 landmark paper"
+      ],
+      "keywords": ["database motivation", "Edgar Codd", "relational model", "DBMS", "SQL history", "data redundancy", "Turing Award"]
+    },
+    {
+      "chapter_id": "tib_003_ch2",
+      "chapter_index": 2,
+      "title": "Relational Model: Tables, Keys, and Constraints",
+      "start_time": 450,
+      "end_time": 1050,
+      "transcript": "The relational model is built around a few core concepts that we will now explore carefully. The fundamental unit is the relation, which we visualize as a table. A table has a schema, which defines its structure: the column names and their data types. Each row in a table is called a tuple and represents one record or entity. Each column is called an attribute. For example, a Students table might have attributes student_id, name, email, and enrollment_date. The domain of an attribute is the set of allowed values — for instance, student_id might be integers, name might be variable-length strings up to 100 characters. Keys are one of the most important concepts in relational databases. A superkey is any set of attributes that uniquely identifies a tuple. A candidate key is a minimal superkey — removing any attribute from it would lose the uniqueness property. The primary key is the candidate key we choose as the main identifier. For our Students table, student_id would be the primary key. A foreign key is an attribute in one table that references the primary key of another table, establishing a relationship between them. For example, an Enrollments table might have a student_id foreign key that references the Students table. Integrity constraints ensure the database remains consistent. The entity integrity constraint says primary keys cannot be null. The referential integrity constraint says foreign key values must either be null or match an existing primary key in the referenced table. Domain constraints restrict attribute values to their defined domain. Check constraints allow us to define custom conditions that must always be satisfied.",
+      "frame_captions": [
+        "Example Students table with columns: student_id, name, email, enrollment_date",
+        "Diagram showing primary key, foreign key relationship between Students and Enrollments tables",
+        "Visual showing superkey, candidate key, primary key hierarchy",
+        "Referential integrity diagram with arrows between related tables"
+      ],
+      "keywords": ["relation", "table", "tuple", "attribute", "primary key", "foreign key", "referential integrity", "domain constraint"]
+    },
+    {
+      "chapter_id": "tib_003_ch3",
+      "chapter_index": 3,
+      "title": "SQL: Querying Relational Databases",
+      "start_time": 1050,
+      "end_time": 1680,
+      "transcript": "SQL, or Structured Query Language, is the standard language for interacting with relational databases. It has been standardized by ANSI and ISO, and virtually all relational database systems — PostgreSQL, MySQL, Oracle, SQL Server, SQLite — support SQL, with some vendor-specific extensions. SQL has several sublanguages. DDL, the Data Definition Language, is used to create and modify database schemas using CREATE TABLE, ALTER TABLE, and DROP TABLE statements. DML, the Data Manipulation Language, is used to insert, update, delete, and query data using INSERT, UPDATE, DELETE, and SELECT statements. DCL, the Data Control Language, manages permissions using GRANT and REVOKE. The SELECT statement is by far the most complex and powerful part of SQL. A basic SELECT query has the form: SELECT column list FROM table name WHERE condition. The WHERE clause filters rows based on a Boolean condition. The ORDER BY clause sorts results. The GROUP BY clause groups rows for aggregate functions like COUNT, SUM, AVG, MAX, and MIN. The HAVING clause filters groups. Joins are essential for combining data from multiple tables. An INNER JOIN returns rows where the join condition is satisfied in both tables. A LEFT OUTER JOIN returns all rows from the left table plus matching rows from the right table, with NULL for non-matching right rows. FULL OUTER JOIN combines both. Subqueries allow you to nest SELECT statements inside other queries, either in the WHERE clause, the FROM clause, or the SELECT clause. Window functions like ROW_NUMBER, RANK, and LAG allow sophisticated analytical queries without collapsing groups, which would be required with GROUP BY.",
+      "frame_captions": [
+        "SQL query example: SELECT with WHERE, ORDER BY, GROUP BY",
+        "INNER JOIN diagram with Venn diagram overlap visualization",
+        "LEFT OUTER JOIN with NULL values shown for non-matching rows",
+        "Code example of subquery and window function on screen"
+      ],
+      "keywords": ["SQL", "SELECT", "JOIN", "WHERE", "GROUP BY", "aggregate functions", "subquery", "window functions", "DDL", "DML"]
+    },
+    {
+      "chapter_id": "tib_003_ch4",
+      "chapter_index": 4,
+      "title": "Transactions and ACID Properties",
+      "start_time": 1680,
+      "end_time": 2280,
+      "transcript": "A transaction is a sequence of database operations that is treated as a single logical unit of work. Transactions are fundamental to database systems because they allow us to group related operations and ensure that either all of them complete successfully, or none of them take effect. Consider a classic example: transferring money from one bank account to another. This involves two operations: debit account A and credit account B. If the system crashes after the debit but before the credit, money would simply disappear. Transactions prevent this. The ACID properties define what a correct transaction implementation must guarantee. Atomicity means that a transaction is all-or-nothing. Either all operations in the transaction complete successfully, or if any operation fails, the entire transaction is rolled back as if it never happened. In our bank transfer example, if the credit to account B fails for any reason, the debit from account A is also reversed. Consistency means that a transaction takes the database from one valid state to another valid state. All integrity constraints, rules, and constraints must be satisfied before and after the transaction. Isolation means that concurrent transactions are executed as if they were running sequentially, one after the other. The intermediate states of a transaction are not visible to other concurrent transactions. This prevents dirty reads, non-repeatable reads, and phantom reads. Durability means that once a transaction has committed, its changes are permanent, even if the system crashes immediately afterward. This is typically implemented using write-ahead logging — changes are written to a log on persistent storage before being applied to the actual database.",
+      "frame_captions": [
+        "Bank transfer example showing two operations: debit and credit",
+        "ACID acronym with each property explained on slide",
+        "Write-ahead log diagram showing log entries before database pages",
+        "Isolation levels table: Read Uncommitted, Read Committed, Repeatable Read, Serializable"
+      ],
+      "keywords": ["transaction", "ACID", "atomicity", "consistency", "isolation", "durability", "rollback", "commit", "write-ahead log"]
+    },
+    {
+      "chapter_id": "tib_003_ch5",
+      "chapter_index": 5,
+      "title": "Database Normalization",
+      "start_time": 2280,
+      "end_time": 2820,
+      "transcript": "Normalization is the process of organizing a relational database schema to reduce redundancy and improve data integrity. An unnormalized database can have various anomalies — update anomalies where updating one copy of data but not another leads to inconsistency, insertion anomalies where we cannot insert certain data without also inserting other unrelated data, and deletion anomalies where deleting some data unintentionally removes other important data. Normal forms are a series of rules that a schema must satisfy to be considered normalized. First Normal Form, or 1NF, requires that each column contains atomic, indivisible values, and that there are no repeating groups. For example, storing multiple phone numbers in a single column violates 1NF. Second Normal Form, 2NF, builds on 1NF and requires that every non-key attribute is fully functionally dependent on the entire primary key, not just part of it. This mainly applies to tables with composite primary keys. Third Normal Form, 3NF, requires that every non-key attribute is directly dependent on the primary key and not on any other non-key attribute — eliminating transitive dependencies. For example, if we store zip code and city in the same table, and city is determined by zip code, this violates 3NF because city depends on zip code, which is not the key. Boyce-Codd Normal Form, or BCNF, is a stronger version of 3NF that handles certain edge cases. In practice, normalizing to 3NF or BCNF is usually sufficient. However, for performance-critical applications, databases are sometimes deliberately denormalized — reintroducing redundancy to avoid expensive JOIN operations.",
+      "frame_captions": [
+        "Example of unnormalized table with update, insertion, deletion anomalies highlighted",
+        "Step-by-step normalization from 1NF to 2NF to 3NF with example tables",
+        "Functional dependency diagram for 3NF example",
+        "Denormalization trade-off diagram: integrity vs query performance"
+      ],
+      "keywords": ["normalization", "1NF", "2NF", "3NF", "BCNF", "functional dependency", "anomalies", "denormalization"]
+    },
+    {
+      "chapter_id": "tib_003_ch6",
+      "chapter_index": 6,
+      "title": "NoSQL Databases: Types and Use Cases",
+      "start_time": 2820,
+      "end_time": 3480,
+      "transcript": "For the last part of today's lecture, we shift from the relational world to NoSQL databases. NoSQL, which stands for Not Only SQL, is an umbrella term for database systems that don't follow the relational model. They emerged in the 2000s and 2010s to address the scalability and flexibility limitations of relational databases for certain use cases, particularly the massive scale of web applications at companies like Google, Amazon, and Facebook. There are four main categories of NoSQL databases. Document databases store data as semi-structured documents, typically in JSON or BSON format. MongoDB is the most popular example. Each document can have a different structure, making them flexible for storing heterogeneous data. They are well-suited for content management systems, user profiles, and catalogs. Key-value stores are the simplest form of NoSQL — essentially a distributed hash map that stores values indexed by a key. Redis and Amazon DynamoDB are examples. They are extremely fast for simple read and write operations and are commonly used for caching, session management, and real-time leaderboards. Column-family stores, like Apache Cassandra and HBase, organize data into column families. They excel at write-heavy workloads and are designed for massive scale across many nodes. They are commonly used for time-series data, IoT sensor readings, and event logs. Graph databases, like Neo4j, store data as nodes and edges in a graph structure. They are ideal for data with complex, interconnected relationships, such as social networks, recommendation engines, and fraud detection. The CAP theorem is essential for understanding NoSQL systems. It states that a distributed system can only guarantee two of three properties simultaneously: Consistency, Availability, and Partition Tolerance. Since network partitions are unavoidable in distributed systems, a choice between consistency and availability must be made.",
+      "frame_captions": [
+        "Four NoSQL types diagram: Document, Key-Value, Column-Family, Graph",
+        "MongoDB document example in JSON format",
+        "CAP theorem triangle diagram with systems placed at vertices",
+        "Cassandra vs MongoDB vs Neo4j comparison table for use cases"
+      ],
+      "keywords": ["NoSQL", "document database", "MongoDB", "key-value store", "Redis", "Cassandra", "graph database", "Neo4j", "CAP theorem"]
+    },
+    {
+      "chapter_id": "tib_003_ch7",
+      "chapter_index": 7,
+      "title": "Choosing the Right Database and Summary",
+      "start_time": 3480,
+      "end_time": 3900,
+      "transcript": "So how do you choose the right database for your application? There is no one-size-fits-all answer, but here is a framework for thinking about it. Start with your data model: if your data is highly structured and relational with complex joins, a relational database is likely the best fit. If your data is hierarchical or document-like with varying structure, consider a document database. If you have graph-like relationships that need to be traversed efficiently, a graph database shines. If you need simple, ultra-fast key-value access, a key-value store is best. Consider your consistency requirements: if your application cannot tolerate any inconsistency — like financial transactions — choose a system that prioritizes consistency. If some inconsistency is acceptable in exchange for availability and performance — like a social media feed — eventually-consistent NoSQL systems may work well. Think about your scale: relational databases can scale to impressive sizes but scaling horizontally across many machines is harder. Most NoSQL databases are designed from the ground up for horizontal scaling. Also consider your team's expertise and the maturity of the tooling around each option. In practice, many modern applications use a combination: a relational database for core transactional data, a Redis cache for fast lookups, perhaps Elasticsearch for full-text search, and a graph database for recommendation features. This polyglot persistence approach uses the right tool for each job. To recap today's lecture: we covered the motivation for database systems, the relational model and SQL, ACID transactions, normalization, and an overview of NoSQL databases and the CAP theorem. See you next week where we will dive deeper into query optimization and indexing.",
+      "frame_captions": [
+        "Decision flowchart for choosing database type based on requirements",
+        "Polyglot persistence diagram showing multiple databases in one application",
+        "Summary slide with all topics covered today",
+        "Preview slide: Query Optimization and Indexing for next lecture"
+      ],
+      "keywords": ["database selection", "polyglot persistence", "horizontal scaling", "summary", "CAP theorem recap", "query optimization preview"]
+    }
+  ]
+}

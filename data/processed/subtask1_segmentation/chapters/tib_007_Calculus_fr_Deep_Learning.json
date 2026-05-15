@@ -1,0 +1,16 @@
+{
+"video_id": "tib_007",
+"video_title": "Calculus for Deep Learning: Derivatives and Gradients",
+"video_url": "https://av.tib.eu/media/tib_007",
+"duration": 5400,
+"language": "en",
+"speaker": "Prof. Elena Rossi",
+"domain": "mathematics",
+"chapters": [
+{"chapter_id": "tib_007_ch1", "chapter_index": 1, "title": "Derivatives and Slope", "start_time": 0, "end_time": 900, "transcript": "The derivative measures rate of change. For f(x)=x^2, derivative is 2x. We use limits and difference quotients.", "frame_captions": ["Tangent line on parabola", "Limit definition formula", "Derivative graph"], "keywords": ["derivatives", "slope", "limits"]},
+{"chapter_id": "tib_007_ch2", "chapter_index": 2, "title": "Partial Derivatives and Gradients", "start_time": 900, "end_time": 2100, "transcript": "For multivariate functions, partial derivatives treat other variables constant. The gradient vector points in direction of steepest ascent.", "frame_captions": ["3D surface with partial derivative", "Gradient vector field", "Contour plot"], "keywords": ["partial derivatives", "gradient", "multivariate calculus"]},
+{"chapter_id": "tib_007_ch3", "chapter_index": 3, "title": "Chain Rule and Backpropagation", "start_time": 2100, "end_time": 3600, "transcript": "The chain rule composes derivatives. Backpropagation is the chain rule applied to neural network computation graphs.", "frame_captions": ["Chain rule equation", "Neural network computation graph", "Backprop animation"], "keywords": ["chain rule", "backpropagation", "automatic differentiation"]},
+{"chapter_id": "tib_007_ch4", "chapter_index": 4, "title": "Optimization: Gradient Descent", "start_time": 3600, "end_time": 4800, "transcript": "Gradient descent updates parameters opposite the gradient. Learning rate controls step size. Stochastic gradient descent uses mini-batches.", "frame_captions": ["Gradient descent on loss surface", "Learning rate comparison", "SGD vs batch"], "keywords": ["gradient descent", "learning rate", "SGD", "optimization"]},
+{"chapter_id": "tib_007_ch5", "chapter_index": 5, "title": "Higher-order Derivatives", "start_time": 4800, "end_time": 5400, "transcript": "Hessian matrix contains second derivatives. Newton's method uses Hessian for faster convergence.", "frame_captions": ["Hessian matrix", "Newton step vs gradient step", "Convex vs nonconvex"], "keywords": ["Hessian", "Newton's method", "second derivatives"]}
+]
+}

@@ -1,0 +1,152 @@
+{
+  "video_id": "tib_016",
+  "video_title": "Financial Accounting Fundamentals",
+  "speaker": "Prof. Linda Grant",
+  "domain": "commerce",
+  "duration": 4200,
+  "total_chapters": 5,
+  "chapter_summaries": [
+    {
+      "chapter_id": "tib_016_ch1",
+      "chapter_index": 1,
+      "title": "Accounting Equation",
+      "start_time": 0,
+      "end_time": 700,
+      "duration_seconds": 700,
+      "summary_short": "Learn the basic accounting equation and double-entry bookkeeping method involving debits and credits.",
+      "summary_medium": "The Accounting Equation states Assets equals Liabilities plus Equity. This principle is fundamental to double-entry bookkeeping, which requires every transaction to be recorded with both a debit (increase) and credit (decrease). T-accounts and Debit Credit tables are used for organizing these transactions.",
+      "summary_long": "In accounting, the equation Assets = Liabilities + Equity is crucial. This principle, known as double-entry bookkeeping, requires each transaction to be recorded with both a debit (increase) and credit (decrease). T-accounts are used for organizing these transactions vertically, while Debit Credit tables present them horizontally. The accounting equation maintains the balance of financial records, ensuring assets always equal liabilities plus equity.",
+      "key_concepts": [
+        "Accounting Equation",
+        "Double-Entry Bookkeeping",
+        "Debits and Credits",
+        "T-accounts",
+        "Debit Credit table"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the accounting equation and double-entry bookkeeping.",
+        "Students will also understand how debits and credits function in accounting records."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture shows T-accounts, Debit Credit tables as visual aids for understanding the organization of financial transactions.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_016_ch2",
+      "chapter_index": 2,
+      "title": "Financial Statements",
+      "start_time": 700,
+      "end_time": 1800,
+      "duration_seconds": 1100,
+      "summary_short": "Understands the structure and interconnection between an income statement, balance sheet, and cash flow statement in financial reporting.",
+      "summary_medium": "This chapter covers the essential components of three primary financial statements: the Income Statement, Balance Sheet, and Cash Flow Statement. It explains how they are connected and provides examples of each statement's format. The Income Statement records a company's revenues and expenses over a specific period, while the Balance Sheet lists assets, liabilities, and equity as of a certain date. The Cash Flow Statement categorizes cash inflows and outflows into operating, investing, and financing activities.",
+      "summary_long": "In this chapter, students will learn about three key financial statements: the Income Statement, Balance Sheet, and Cash Flow Statement. The Income Statement provides a snapshot of a company's financial performance over a specific period by summarizing revenues, expenses, and net income or loss. Conversely, the Balance Sheet outlines a company's assets, liabilities, and equity as of a particular date. Finally, the Cash Flow Statement breaks down cash inflows and outflows into operational, investing, and financing activities, providing insight into a company's liquidity and cash management.",
+      "key_concepts": [
+        "Income Statement",
+        "Balance Sheet",
+        "Cash Flow Statement",
+        "Financial Reporting",
+        "Revenue",
+        "Expenses",
+        "Assets",
+        "Liabilities",
+        "Equity",
+        "Cash Inflows",
+        "Cash Outflows"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the purpose and structure of an Income Statement, Balance Sheet, and Cash Flow Statement.",
+        "Students will understand the interconnection between these financial statements."
+      ],
+      "has_visuals": true,
+      "visual_description": "In this lecture, diagrams are used to illustrate the format of an Income Statement and Balance Sheet, as well as the Cash Flow categories.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_016_ch3",
+      "chapter_index": 3,
+      "title": "Revenue Recognition",
+      "start_time": 1800,
+      "end_time": 2800,
+      "duration_seconds": 1000,
+      "summary_short": "Learning the ASC 606 five-step model for revenue recognition, with emphasis on accrual, deferred revenue, and examples.",
+      "summary_medium": "This chapter introduces the five-step model of ASC 606, which is used to recognize revenue. The model covers aspects such as accrual accounting and deferred revenue. An example of deferred revenue entry will also be presented.",
+      "summary_long": "The first section explains the ASC 606 five-step model for revenue recognition. Students will learn about the importance of understanding this model in accounting, particularly when using accrual accounting methods. The second section focuses on deferred revenue, where an example of a deferred revenue entry is provided to illustrate its application.",
+      "key_concepts": [
+        "ASC 606 five-step model",
+        "Accrual accounting",
+        "Deferred revenue",
+        "Revenue recognition"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the ASC 606 five-step model for revenue recognition.",
+        "Students will understand the concept of accrual accounting and its relation to the five-step model.",
+        "Students will be able to describe deferred revenue and perform a deferred revenue entry."
+      ],
+      "has_visuals": true,
+      "visual_description": "Visual content includes diagrams illustrating the five-step model, an example of deferred revenue entry.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_016_ch4",
+      "chapter_index": 4,
+      "title": "Inventory and COGS",
+      "start_time": 2800,
+      "end_time": 3600,
+      "duration_seconds": 800,
+      "summary_short": "This chapter discusses inventory management methods (FIFO, LIFO, weighted average) and related concepts such as perpetual and periodic systems, lower of cost or market, and calculation of least cost method.",
+      "summary_medium": "The lecture covers various inventory management techniques including FIFO (First In First Out), LIFO (Last In First Out), and Weighted Average. It explains how these methods are used to manage inventory and the accounting impact on Cost of Goods Sold (COGS). The chapter also introduces the concepts of perpetual and periodic systems, lower of cost or market, and least cost method calculation.",
+      "summary_long": "In this chapter, students learn about various inventory management techniques that help businesses maintain an optimal level of inventory. The first technique covered is FIFO (First In First Out), which assumes that the earliest goods purchased are sold first. Next is LIFO (Last In First Out), where the most recent goods are sold first. Another method discussed is Weighted Average, which calculates the average cost of all goods in inventory for COGS calculation. The chapter also discusses perpetual and periodic systems, wherein perpetual systems continuously record transactions while periodic systems do so at set intervals.",
+      "key_concepts": [
+        "FIFO",
+        "LIFO",
+        "Weighted Average",
+        "Perpetual System",
+        "Periodic System",
+        "Lower of Cost or Market"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to understand and explain the FIFO, LIFO, and Weighted Average inventory management techniques. They will also be able to distinguish between perpetual and periodic systems, calculate Least Cost Method, and understand the concept of Lower of Cost or Market."
+      ],
+      "has_visuals": true,
+      "visual_description": [
+        "Diagrams illustrating FIFO vs LIFO, an inventory ledger, and a calculation for Least Cost Method"
+      ],
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_016_ch5",
+      "chapter_index": 5,
+      "title": "Financial Ratios",
+      "start_time": 3600,
+      "end_time": 4200,
+      "duration_seconds": 600,
+      "summary_short": "Financial Ratios lecture covers liquidity, solvency, and profitability ratios, using DuPont analysis and a comparison chart.",
+      "summary_medium": "The chapter introduces financial ratios as analytical tools for evaluating a company's performance. Liquidity ratios like the current ratio measure a firm's ability to pay short-term debts, while solvency ratios such as debt-to-equity ratio indicate long-term financial health. Profitability ratios like return on equity (ROE) are used to assess earnings effectiveness. The DuPont triangle diagram illustrates the relationship between these three types of ratios. A comparison chart presents a visual representation of the ratios.",
+      "summary_long": "The lecture commences by introducing financial ratios, essential analytical tools for evaluating a company's performance. Liquidity ratios like the current ratio (current assets / current liabilities) measure a firm's ability to pay short-term debts, providing an insight into its immediate financial status. Solvency ratios such as debt-to-equity ratio (total debt / total equity) indicate long-term financial health, showing how much of the company's assets are financed by debt versus equity. Profitability ratios like return on equity (ROE) = net income / shareholder equity are used to assess earnings effectiveness and a firm's ability to generate profits for its shareholders. The DuPont triangle diagram illustrates the relationship between these three types of ratios, demonstrating how profitability is derived from asset turnover and leverage. A comparison chart presents a visual representation of the ratios for different companies, enabling learners to evaluate their relative financial performance.",
+      "key_concepts": [
+        "liquidity ratio",
+        "current ratio",
+        "solvency ratio",
+        "debt-to-equity ratio",
+        "profitability ratio",
+        "return on equity (ROE)",
+        "DuPont triangle"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the purpose of liquidity ratios and their calculation.",
+        "Students will understand how solvency ratios can be used to assess a company's long-term financial health.",
+        "Students will learn about profitability ratios and their role in evaluating a company's earnings effectiveness.",
+        "After studying the DuPont triangle diagram, students will comprehend the relationship between liquidity, solvency, and profitability ratios."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes a ratio formula sheet, DuPont triangle, and comparison chart.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    }
+  ]
+}

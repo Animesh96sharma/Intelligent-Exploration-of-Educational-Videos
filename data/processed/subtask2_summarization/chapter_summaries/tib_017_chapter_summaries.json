@@ -1,0 +1,143 @@
+{
+  "video_id": "tib_017",
+  "video_title": "Marketing Analytics and Customer Insights",
+  "speaker": "Dr. Rachel Simmons",
+  "domain": "commerce",
+  "duration": 4800,
+  "total_chapters": 5,
+  "chapter_summaries": [
+    {
+      "chapter_id": "tib_017_ch1",
+      "chapter_index": 1,
+      "title": "Customer Lifetime Value",
+      "start_time": 0,
+      "end_time": 900,
+      "duration_seconds": 900,
+      "summary_short": "Learn the Customer Lifetime Value (CLV) formula which combines average purchase value, purchase frequency, and customer lifespan. Topics also include retention and churn.",
+      "summary_medium": "This chapter focuses on understanding the Customer Lifetime Value (CLV), a crucial metric for businesses. The CLV equation consists of the average purchase value, purchase frequency, and customer lifespan multiplied together. Additionally, concepts like retention and churn are discussed in relation to CLV.",
+      "summary_long": "The lecture begins by introducing the Customer Lifetime Value (CLV), a fundamental business metric that calculates the total revenue a company can expect from a single customer throughout their relationship. The CLV formula consists of three components: average purchase value, purchase frequency, and customer lifespan. This chapter also delves into the importance of retention and churn in relation to the CLV.",
+      "key_concepts": [
+        "Customer Lifetime Value",
+        "Average Purchase Value",
+        "Purchase Frequency",
+        "Customer Lifespan",
+        "Retention",
+        "Churn"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the Customer Lifetime Value (CLV) formula.",
+        "Students will understand the role of retention and churn in calculating CLV."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes diagrams illustrating the CLV equation, cohort retention curve, and churn rate.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_017_ch2",
+      "chapter_index": 2,
+      "title": "Market Basket Analysis",
+      "start_time": 900,
+      "end_time": 2000,
+      "duration_seconds": 1100,
+      "summary_short": "Introduction to Market Basket Analysis, focusing on association rules and the Apriori algorithm used by Amazon for 'frequently bought together'.",
+      "summary_medium": "Market Basket Analysis is a data mining technique used to identify relationships between products in a transaction dataset. The key concept here is association rules, which are conditional statements about associations between different items that frequently appear together in the same transactions. One of the popular algorithms for generating such rules is the Apriori algorithm. For example, if a customer buys bread, they often buy milk as well. This chapter will also discuss support, confidence, and lift, which are important measures used to evaluate the strength of these association rules.",
+      "summary_long": "Market Basket Analysis (MBA) is an essential data mining technique employed to explore patterns in transactional databases. The primary goal of MBA is to identify relations among items that frequently co-occur within the same transactions. This analysis aids businesses in understanding customer behavior, product recommendations, and enhancing marketing strategies. The Apriori algorithm plays a crucial role in generating association rules from the transaction dataset. Association rules are conditional statements expressing relationships between different products, such as 'If a customer buys bread, they often buy milk as well'. Important measures to evaluate the strength of these associations include support, confidence, and lift.",
+      "key_concepts": [
+        "Market Basket Analysis",
+        "Association rules",
+        "Apriori algorithm",
+        "Support",
+        "Confidence",
+        "Lift"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to understand the concept of Market Basket Analysis and its importance.",
+        "Students will learn about association rules and how they are used to identify patterns in transactional databases.",
+        "Students will become familiar with the Apriori algorithm and its role in generating association rules."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes diagrams of a transaction matrix and an example of association rules, as well as the pseudocode for the Apriori algorithm.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_017_ch3",
+      "chapter_index": 3,
+      "title": "Customer Segmentation",
+      "start_time": 2000,
+      "end_time": 3200,
+      "duration_seconds": 1200,
+      "summary_short": "This chapter discusses RFM analysis and K-means clustering for customer segmentation, with an introduction to personas.",
+      "summary_medium": "The lecture covers the use of Recency, Frequency, Monetary (RFM) analysis for categorizing customers based on their purchasing behavior. It introduces K-means clustering as a method for segmenting these customers into distinct groups. Personas are also discussed, which are fictional characters created to represent different customer segments. Three types of visual content were shown: RFM score grid, cluster scatter plot, and persona cards.",
+      "summary_long": "The lecture begins by introducing the concept of RFM analysis (recency, frequency, monetary), a method used for customer segmentation based on when customers make purchases, how frequently they purchase, and the total amount spent. The recency score rewards recent purchases, while the frequency score rewards customers who make frequent purchases, and the monetary score rewards those who spend more. By assigning scores to each customer, businesses can create an RFM score grid that ranks their customers based on these factors. Next, the lecture discusses K-means clustering, a statistical method used for segmentation. This involves grouping similar data points together, and in this case, it is used to identify distinct segments of customers based on their RFM scores. The lecture then introduces personas, fictional characters created to represent different customer segments. These personas can help businesses understand the needs, preferences, and behaviors of their customers more effectively. Visual content shown includes an RFM score grid, a cluster scatter plot, and persona cards.",
+      "key_concepts": [
+        "RFM analysis",
+        "K-means clustering",
+        "customer segmentation",
+        "personas"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to describe the RFM analysis method for customer segmentation.",
+        "Students will understand how K-means clustering can be used for segmenting customers based on their RFM scores.",
+        "Students will learn about personas as a tool for understanding different customer segments."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture showed three types of visual content: an RFM score grid, a cluster scatter plot, and persona cards.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_017_ch4",
+      "chapter_index": 4,
+      "title": "A/B Testing",
+      "start_time": 3200,
+      "end_time": 4100,
+      "duration_seconds": 900,
+      "summary_short": "Learn about A/B testing for conversion rates, sample size calculation, and statistical significance.",
+      "summary_medium": "This lecture focuses on hypothesis testing for conversion rates in A/B testing. The process involves determining an appropriate sample size, calculating statistical significance, and interpreting results. Visual aids shown include an A/B test dashboard, conversion funnel, and p-value calculator.",
+      "summary_long": "The session delves into the application of hypothesis testing in A/B testing for assessing conversion rates between two variants. The process begins with determining an appropriate sample size based on the desired level of precision and effect size. Next, statistical significance is calculated using a p-value, which indicates the probability that the observed difference between the two versions occurred by chance. This lecture also covers how to interpret results and make data-driven decisions based on the test outcomes.",
+      "key_concepts": [
+        "A/B testing",
+        "hypothesis testing",
+        "sample size calculation",
+        "statistical significance",
+        "p-value"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to perform A/B tests for conversion rates and interpret the results.",
+        "Students will understand how to calculate sample sizes for hypothesis testing.",
+        "Students will learn about statistical significance in the context of A/B testing."
+      ],
+      "has_visuals": true,
+      "visual_description": "The visual content shown includes diagrams of an A/B test dashboard, conversion funnel, and p-value calculator.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_017_ch5",
+      "chapter_index": 5,
+      "title": "Marketing Mix Modeling",
+      "start_time": 4100,
+      "end_time": 4800,
+      "duration_seconds": 700,
+      "summary_short": "This lecture discusses Marketing Mix Modeling (MMM) using regression analysis to measure channel effectiveness, focusing on ROAS and attribution models.",
+      "summary_medium": "In this chapter, the concept of Marketing Mix Modeling (MMM) is introduced as a method for measuring the effectiveness of different marketing channels. MMM uses regression analysis to determine Return on Ad Spend (ROAS) and attribution models to understand the impact of each channel in the marketing mix. The lecture covers the output of MMM regression, ROAS bar charts, and various attribution models.",
+      "summary_long": "Marketing Mix Modeling (MMM) is a crucial tool for understanding the effectiveness of different marketing channels. By using regression analysis, MMM provides insights into Return on Ad Spend (ROAS), which helps businesses allocate their budgets effectively. The lecture demonstrates MMM regression output and ROAS bar charts to visualize these results. Furthermore, it discusses attribution models, which help marketers understand the contribution of each channel in the marketing mix to overall sales or conversion.",
+      "key_concepts": [
+        "Marketing Mix Modeling",
+        "Regression Analysis",
+        "ROAS",
+        "Attribution Models"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to understand Marketing Mix Modeling and its application in measuring channel effectiveness.",
+        "They will also learn about ROAS and attribution models, as well as how to interpret MMM regression output and ROAS bar charts."
+      ],
+      "has_visuals": true,
+      "visual_description": "The visual content includes diagrams of MMM regression output, ROAS bar charts, and various attribution models.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "aggregate": {
+    "total_videos_evaluated": 3,
+    "avg_concept_coverage": 0.1852,
+    "avg_coherence_score": 4.5
+  },
+  "per_video": {
+    "tib_001": {
+      "video_id": "tib_001",
+      "video_title": "Introduction to Machine Learning",
+      "concept_coverage": {
+        "coverage": 0.5556,
+        "covered": [
+          "Machine Learning",
+          "Reinforcement Learning",
+          "Overfitting",
+          "Underfitting",
+          "Bias-Variance tradeoff"
+        ],
+        "missing": [
+          "Arthur Samuel definition",
+          "Tom Mitchell definition",
+          "Supervised Learning",
+          "Unsupervised Learning"
+        ]
+      },
+      "llm_quality": {
+        "coherence_score": 4.5,
+        "informativeness_score": 4.5,
+        "conciseness_score": 4,
+        "feedback": "The summary provides a clear and logical flow of information, covering essential educational content related to the topic of machine learning. However, it could be slightly more concise, particularly in the area of explaining the differences between traditional programming and machine learning."
+      }
+    },
+    "tib_003": {
+      "video_id": "tib_003",
+      "video_title": "Database Systems: From Relational to NoSQL",
+      "concept_coverage": {
+        "coverage": 0.0,
+        "covered": [],
+        "missing": [
+          "data management systems, file-based systems, redundancy, inconsistency, isolation, concurrency, security, atomicity of operations, Edgar F. Codd, Turing Award, relational model, tables, rows and columns, relational algebra, System R, SQL language, Oracle, keys (superkey, candidate key, primary key), foreign keys, integrity constraints, SQL, Structured Query Language, Relational databases, DDL (Data Definition Language), DML (Data Manipulation Language), DCL (Data Control Language), SELECT statement, WHERE clause, ORDER BY, GROUP BY, HAVING clause, INNER JOIN, LEFT OUTER JOIN, FULL OUTER JOIN, subquery, window function, ROW_NUMBER, RANK, LAG, transactions, ACID properties, Atomicity, Consistency, Isolation, Durability, write-ahead log, Database Normalization, 1NF, 2NF, 3NF, BCNF, Update Anomalies, Insertion Anomalies, Deletion Anomalies, NoSQL databases, Document database, Key-Value store, Column-Family store, Graph database, CAP theorem"
+        ]
+      },
+      "llm_quality": {
+        "coherence_score": 4,
+        "informativeness_score": 5,
+        "conciseness_score": 4,
+        "feedback": "The summary provides a logical and well-structured overview of the topic. It covers key educational content effectively while maintaining brevity. However, it could be slightly more concise without sacrificing essential details."
+      }
+    },
+    "tib_004": {
+      "video_id": "tib_004",
+      "video_title": "Transformers and Attention Mechanisms",
+      "concept_coverage": {
+        "coverage": 0.0,
+        "covered": [],
+        "missing": [
+          "Transformer architecture, Scaled Dot-Product Attention, Multi-Head Attention, pretrained models (BERT, GPT), self-attention, feed-forward networks, residual connections, layer normalization, positional encoding"
+        ]
+      },
+      "llm_quality": {
+        "coherence_score": 5,
+        "informativeness_score": 4,
+        "conciseness_score": 4,
+        "feedback": "The summary flows logically and makes sense. It covers the key educational content about the Transformer architecture, its components, applications in language models like BERT and GPT, and extensions to other tasks. The summary is appropriately brief without losing important details."
+      }
+    }
+  }
+}

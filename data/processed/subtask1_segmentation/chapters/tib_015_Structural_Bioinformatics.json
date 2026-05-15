@@ -1,0 +1,16 @@
+{
+"video_id": "tib_015",
+"video_title": "Structural Bioinformatics and Protein Folding",
+"video_url": "https://av.tib.eu/media/tib_015",
+"duration": 5100,
+"language": "en",
+"speaker": "Prof. James O'Malley",
+"domain": "biology",
+"chapters": [
+{"chapter_id": "tib_015_ch1", "chapter_index": 1, "title": "Protein Structure Levels", "start_time": 0, "end_time": 900, "transcript": "Primary, secondary, tertiary, quaternary. Alpha helices, beta sheets. Domains and motifs.", "frame_captions": ["Primary sequence", "Alpha helix ribbon", "Beta sheet", "Tertiary fold"], "keywords": ["protein structure", "alpha helix", "beta sheet", "domain"]},
+{"chapter_id": "tib_015_ch2", "chapter_index": 2, "title": "Experimental Methods", "start_time": 900, "end_time": 2100, "transcript": "X-ray crystallography, NMR, cryo-EM. Resolution and PDB format.", "frame_captions": ["X-ray diffraction", "NMR spectra", "Cryo-EM density map", "PDB file"], "keywords": ["X-ray", "NMR", "cryo-EM", "PDB"]},
+{"chapter_id": "tib_015_ch3", "chapter_index": 3, "title": "Protein Folding Problem", "start_time": 2100, "end_time": 3300, "transcript": "Levinthal's paradox, energy landscapes. Chaperones. Misfolding diseases (Alzheimer's, Parkinson's).", "frame_captions": ["Folding funnel", "Levinthal paradox", "Amyloid fibrils"], "keywords": ["folding", "Levinthal", "chaperone", "amyloid"]},
+{"chapter_id": "tib_015_ch4", "chapter_index": 4, "title": "Computational Prediction", "start_time": 3300, "end_time": 4400, "transcript": "Homology modeling, threading, ab initio. CASP competition. AlphaFold and RoseTTAFold.", "frame_captions": ["Homology model", "CASP scores", "AlphaFold prediction"], "keywords": ["homology modeling", "threading", "AlphaFold", "CASP"]},
+{"chapter_id": "tib_015_ch5", "chapter_index": 5, "title": "Molecular Docking", "start_time": 4400, "end_time": 5100, "transcript": "Ligand-receptor docking. Scoring functions. Drug discovery applications.", "frame_captions": ["Docking pose", "Binding pocket", "AutoDock result"], "keywords": ["docking", "ligand", "scoring function", "drug discovery"]}
+]
+}

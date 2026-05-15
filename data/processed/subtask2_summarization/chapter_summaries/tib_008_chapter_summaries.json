@@ -1,0 +1,133 @@
+{
+  "video_id": "tib_008",
+  "video_title": "Probability Theory for Data Science",
+  "speaker": "Dr. Ahmed Khan",
+  "domain": "mathematics",
+  "duration": 4500,
+  "total_chapters": 5,
+  "chapter_summaries": [
+    {
+      "chapter_id": "tib_008_ch1",
+      "chapter_index": 1,
+      "title": "Basic Probability Concepts",
+      "start_time": 0,
+      "end_time": 800,
+      "duration_seconds": 800,
+      "summary_short": "This lecture introduces basic probability concepts, including sample space, events, and probability axioms.",
+      "summary_medium": "The core message of this chapter involves understanding the principles of sample spaces, events, and probabilities between 0 and 1. The sum of all possible outcomes is equal to 1, as per the probability axioms. Graphical representations like Venn diagrams might be used for visualization.",
+      "summary_long": "In this chapter, students will learn about fundamental concepts in probability theory. First, they'll explore the notion of sample space – the collection of all possible outcomes when an experiment is performed. Next, events – subsets of sample spaces, are introduced. The lecture also covers probability axioms, which describe properties that the probabilities of events must follow. Specifically, the probability of an event A (denoted P(A)) lies between 0 and 1. Moreover, the sum over all possible outcomes equals 1. Coin tosses can be used to illustrate some of these concepts.",
+      "key_concepts": [
+        "sample space",
+        "events",
+        "probability axioms"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to define sample spaces and events in probability theory.",
+        "Students will understand the basic properties (axioms) that govern probabilities of events."
+      ],
+      "has_visuals": true,
+      "visual_description": "Venn diagrams, probability scale, and a coin toss are visualized to aid understanding.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_008_ch2",
+      "chapter_index": 2,
+      "title": "Random Variables and Distributions",
+      "start_time": 800,
+      "end_time": 2000,
+      "duration_seconds": 1200,
+      "summary_short": "Introduction to discrete and continuous random variables, explaining PDF and CDF for various distributions.",
+      "summary_medium": "The lecture discusses the fundamental types of random variables, both discrete (Bernoulli, Binomial, Poisson) and continuous (Uniform, Gaussian, Exponential). It explains these distribution's Probability Density Functions (PDF) and Cumulative Distribution Functions (CDF), providing visual examples through PMF bar charts, Gaussian bell curves, and CDF step functions.",
+      "summary_long": "The chapter begins with an overview of the main types of random variables: discrete and continuous. Discrete variables are further broken down into Bernoulli, Binomial, and Poisson distributions. Continuous variables include Uniform, Gaussian, and Exponential distributions. The lecture focuses on understanding each distribution's Probability Density Function (PDF) and Cumulative Distribution Function (CDF). Visual representations aid comprehension by using PMF bar charts for discrete variables and Gaussian bell curves and CDF step functions for continuous ones.",
+      "key_concepts": [
+        "random variables",
+        "discrete distributions",
+        "continuous distributions",
+        "Probability Density Function (PDF)",
+        "Cumulative Distribution Function (CDF)"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to define random variables and the main types of discrete and continuous distributions.",
+        "They will also understand Probability Density Functions (PDF) and Cumulative Distribution Functions (CDF) for each type of distribution."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes diagrams showing PMF bar charts, Gaussian bell curves, and CDF step functions.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_008_ch3",
+      "chapter_index": 3,
+      "title": "Expectation, Variance, Covariance",
+      "start_time": 2000,
+      "end_time": 3200,
+      "duration_seconds": 1200,
+      "summary_short": "Learns about the expected value (average), variance (spread) and covariance (linear relationship between variables).",
+      "summary_medium": "The lecture introduces three fundamental statistical concepts: Expected Value, Variance, and Covariance. The Expected Value is the average, Variance measures the spread or dispersion of a set of values, and Covariance measures the linear relationship between two variables. For example, variance can help understand the risk in investment portfolios, while covariance can predict how two stocks move together.",
+      "summary_long": "In this chapter, students will learn about three important statistical concepts that are crucial for understanding data and making informed decisions. The Expected Value (E[X]) is calculated as the sum of all possible outcomes multiplied by their probabilities, giving us an average value. Variance measures the spread or dispersion of a set of values from the mean and can help understand the risk in investment portfolios. Covariance (Cov(X,Y)) quantifies the relationship between two variables X and Y, where a positive covariance indicates that the variables tend to increase or decrease together, while a negative covariance suggests they move in opposite directions.",
+      "key_concepts": [
+        "Expected Value",
+        "Variance",
+        "Covariance"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to calculate the Expected Value and Variance for a given set of data, understand how Covariance is used to measure the relationship between variables, and apply these concepts in real-world scenarios."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes diagrams displaying the formulas for Expected Value, Variance, and Covariance.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_008_ch4",
+      "chapter_index": 4,
+      "title": "Bayes' Theorem",
+      "start_time": 3200,
+      "end_time": 4000,
+      "duration_seconds": 800,
+      "summary_short": "Learns Bayes' Theorem, a method for updating beliefs based on new data using the formula P(A|B) = P(B|A)P(A)/P(B).",
+      "summary_medium": "This lecture introduces Bayes' Theorem, a mathematical approach used to update beliefs with data. The theorem is presented in a tree diagram and demonstrated through a Naive Bayes example. Students will understand how Bayesian inference works and its application in Naive Bayes classifier.",
+      "summary_long": "The lecture begins by presenting Bayes' Theorem, which is a method for updating beliefs based on new data using the formula P(A|B) = P(B|A)P(A)/P(B). The theorem is graphically represented in a tree diagram that shows the relationships between events A and B. Subsequently, a Naive Bayes example is provided to demonstrate the application of Bayes' Theorem in a classification problem. Students will learn how this theorem helps update beliefs with data, leading to the development of the Naive Bayes classifier.",
+      "key_concepts": [
+        "Bayes' Theorem",
+        "Prior",
+        "Posterior",
+        "Update",
+        "Naive Bayes Classifier"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the concept of Bayes' Theorem and its application in Naive Bayes classifier.",
+        "After this chapter, students will be able to perform calculations using Bayes' Theorem."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture shows a Bayes theorem tree diagram and a diagram explaining the concept of prior posterior update. Additionally, there is a visual representation of the Naive Bayes example.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_008_ch5",
+      "chapter_index": 5,
+      "title": "Law of Large Numbers and CLT",
+      "start_time": 4000,
+      "end_time": 4500,
+      "duration_seconds": 500,
+      "summary_short": "The Law of Large Numbers (LLN) states that the sample mean converges to the true mean. The Central Limit Theorem (CLT) explains that the sum of many independent and identically distributed (iid) variables approaches a normal distribution.",
+      "summary_medium": "The Law of Large Numbers (LLN) states that as the size of a dataset increases, the sample mean converges to the true mean. This means that for a large enough dataset, the sample mean will be very close to the population mean. The Central Limit Theorem (CLT) is a more general theorem that explains the distribution of sums or averages of many iid variables. According to CLT, regardless of the shape of the original distribution, if we have enough data, the sum or average will follow a normal distribution.",
+      "summary_long": "The Central Limit Theorem (CLT) is a powerful theorem that explains the distribution of sums or averages of many iid variables. According to CLT, regardless of the shape of the original distribution, if we have enough data, the sum or average will follow a normal distribution. This result holds even if the original distribution is skewed or has heavy tails. The key condition for CLT is that the variables are independent and identically distributed (iid).",
+      "key_concepts": [
+        "Law of Large Numbers",
+        "Central Limit Theorem",
+        "Independent and Identically Distributed"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to explain the Law of Large Numbers and Central Limit Theorem.",
+        "Students will be able to apply the Law of Large Numbers and CLT in statistical analysis."
+      ],
+      "has_visuals": true,
+      "visual_description": "The visual content includes a simulation showing the LLN, a histogram demonstrating the CLT, and a diagram illustrating the normal approximation.",
+      "difficulty_level": "intermediate",
+      "estimated_read_time_seconds": 90
+    }
+  ]
+}

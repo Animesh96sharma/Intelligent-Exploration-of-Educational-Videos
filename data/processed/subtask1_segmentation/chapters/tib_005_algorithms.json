@@ -1,0 +1,67 @@
+{
+  "video_id": "tib_005",
+  "video_title": "Algorithms and Data Structures: Sorting, Trees, and Graphs",
+  "video_url": "https://av.tib.eu/media/tib_005",
+  "duration": 3600,
+  "language": "en",
+  "speaker": "Prof. Lena Fischer",
+  "domain": "algorithms",
+  "chapters": [
+    {
+      "chapter_id": "tib_005_ch1", "chapter_index": 1,
+      "title": "Algorithm Analysis and Big-O Notation",
+      "start_time": 0, "end_time": 480,
+      "transcript": "Welcome to Algorithms and Data Structures. Before we dive into specific algorithms, we need a way to compare them. Big-O notation describes the upper bound on the growth rate of an algorithm's time or space requirements as a function of input size n. O(1) is constant time — accessing an array element. O(log n) is logarithmic — binary search. O(n) is linear — scanning an array. O(n log n) is linearithmic — efficient sorting algorithms. O(n squared) is quadratic — naive sorting. O(2^n) is exponential — brute-force combinatorial problems. We also use Omega notation for lower bounds and Theta for tight bounds. When analyzing algorithms we focus on worst-case, average-case, and best-case behavior.",
+      "frame_captions": ["Big-O growth rate comparison chart", "Table: algorithm examples per complexity class", "Best, average, worst case diagram", "Big-O, Omega, Theta definitions"],
+      "keywords": ["Big-O notation", "time complexity", "space complexity", "logarithmic", "linear", "quadratic", "algorithm analysis"]
+    },
+    {
+      "chapter_id": "tib_005_ch2", "chapter_index": 2,
+      "title": "Sorting Algorithms",
+      "start_time": 480, "end_time": 1080,
+      "transcript": "Sorting is one of the most fundamental algorithmic problems. Bubble sort repeatedly swaps adjacent elements — O(n squared) and rarely used in practice. Insertion sort builds the sorted array one element at a time — O(n squared) worst case but O(n) for nearly sorted data, good for small arrays. Merge sort divides the array in half recursively and merges — O(n log n) guaranteed, stable, but requires O(n) extra space. Quick sort partitions around a pivot — O(n log n) average but O(n squared) worst case, in-place, cache-friendly. Heap sort uses a binary heap — O(n log n) guaranteed, in-place. The comparison sort lower bound is Omega(n log n). Counting sort, radix sort, and bucket sort can achieve O(n) for specific types of data by not using comparisons.",
+      "frame_captions": ["Bubble sort visualization step by step", "Merge sort divide and conquer diagram", "Quick sort partition diagram with pivot", "Sorting algorithms comparison table: time, space, stable"],
+      "keywords": ["sorting", "bubble sort", "merge sort", "quick sort", "heap sort", "O(n log n)", "comparison sort", "stable sort", "divide and conquer"]
+    },
+    {
+      "chapter_id": "tib_005_ch3", "chapter_index": 3,
+      "title": "Binary Search Trees",
+      "start_time": 1080, "end_time": 1680,
+      "transcript": "A binary search tree stores elements such that for every node, all elements in the left subtree are smaller and all elements in the right subtree are larger. This property enables efficient search, insertion, and deletion in O(log n) average case. However, a naive BST can degenerate to O(n) if insertions happen in sorted order, creating a linked list shape. Self-balancing trees solve this. AVL trees maintain the balance factor — the height difference between left and right subtrees is at most 1. Red-black trees use color properties to ensure the tree remains balanced within a factor of 2. B-trees generalize binary trees to allow more than two children per node, reducing tree height and optimizing disk access patterns — they are used extensively in database indexes.",
+      "frame_captions": ["Binary search tree with search path highlighted", "Degenerate BST vs balanced BST comparison", "AVL tree rotation diagrams: left and right rotation", "B-tree node structure with multiple keys"],
+      "keywords": ["binary search tree", "BST", "AVL tree", "red-black tree", "B-tree", "tree balancing", "rotation", "database index"]
+    },
+    {
+      "chapter_id": "tib_005_ch4", "chapter_index": 4,
+      "title": "Hash Tables",
+      "start_time": 1680, "end_time": 2220,
+      "transcript": "Hash tables provide O(1) average-case insertion, deletion, and lookup. A hash function maps keys to array indices. Collisions occur when two keys hash to the same index. Two main collision resolution strategies: chaining, where each bucket holds a linked list of all colliding elements, and open addressing, where we probe for the next empty slot using linear probing, quadratic probing, or double hashing. Load factor is the ratio of elements to buckets — when it exceeds a threshold we resize the table by doubling its size and rehashing. A good hash function distributes keys uniformly, is fast to compute, and is deterministic. Cryptographic hash functions add the property of being one-way.",
+      "frame_captions": ["Hash function mapping keys to array indices", "Chaining collision resolution diagram", "Open addressing linear probing", "Load factor and rehashing diagram"],
+      "keywords": ["hash table", "hash function", "collision resolution", "chaining", "open addressing", "load factor", "rehashing", "O(1)"]
+    },
+    {
+      "chapter_id": "tib_005_ch5", "chapter_index": 5,
+      "title": "Graph Representations and BFS/DFS",
+      "start_time": 2220, "end_time": 2820,
+      "transcript": "A graph consists of vertices and edges. Graphs can be directed or undirected, weighted or unweighted. Two main representations: adjacency matrix uses an n by n matrix where entry i,j is 1 if there is an edge — O(n squared) space, O(1) edge lookup. Adjacency list stores for each vertex a list of its neighbors — O(V plus E) space, better for sparse graphs. Breadth-First Search explores all neighbors at distance 1 before moving to distance 2, using a queue. BFS finds shortest paths in unweighted graphs. Depth-First Search explores as far as possible along each branch before backtracking, using a stack or recursion. DFS is used for topological sorting, cycle detection, and connected components.",
+      "frame_captions": ["Graph with vertices and edges, directed and undirected", "Adjacency matrix vs adjacency list comparison", "BFS exploration order with queue visualization", "DFS exploration order with recursion stack"],
+      "keywords": ["graph", "vertex", "edge", "adjacency matrix", "adjacency list", "BFS", "DFS", "shortest path", "topological sort"]
+    },
+    {
+      "chapter_id": "tib_005_ch6", "chapter_index": 6,
+      "title": "Shortest Path Algorithms",
+      "start_time": 2820, "end_time": 3360,
+      "transcript": "For weighted graphs we need shortest path algorithms. Dijkstra's algorithm finds the shortest path from a single source to all vertices in graphs with non-negative edge weights. It uses a priority queue and greedily selects the unvisited vertex with the smallest tentative distance. Time complexity is O(V plus E log V) with a binary heap. Bellman-Ford handles negative edge weights and detects negative cycles in O(VE). Floyd-Warshall finds all-pairs shortest paths in O(V cubed). A-star algorithm uses a heuristic to guide search toward the target, making it much faster in practice for point-to-point shortest path — it is widely used in GPS navigation and game pathfinding.",
+      "frame_captions": ["Dijkstra step-by-step on example graph", "Priority queue state during Dijkstra", "Bellman-Ford relaxation diagram with negative edges", "A-star heuristic visualization on grid"],
+      "keywords": ["Dijkstra", "Bellman-Ford", "Floyd-Warshall", "A-star", "shortest path", "priority queue", "negative edges", "heuristic"]
+    },
+    {
+      "chapter_id": "tib_005_ch7", "chapter_index": 7,
+      "title": "Dynamic Programming",
+      "start_time": 3360, "end_time": 3600,
+      "transcript": "Dynamic programming solves complex problems by breaking them into overlapping subproblems and storing results to avoid recomputation. Two approaches: top-down with memoization stores results of recursive calls. Bottom-up tabulation fills a table iteratively. Classic problems: Fibonacci sequence, longest common subsequence, knapsack problem, edit distance, matrix chain multiplication. The key insight is optimal substructure — the optimal solution to the problem contains optimal solutions to subproblems. We summarize today: Big-O analysis, sorting algorithms, binary search trees, hash tables, graph traversal, shortest paths, and dynamic programming.",
+      "frame_captions": ["Fibonacci memoization table", "Longest common subsequence DP table", "Knapsack problem grid", "Summary slide with all data structures and complexities"],
+      "keywords": ["dynamic programming", "memoization", "tabulation", "Fibonacci", "knapsack", "longest common subsequence", "optimal substructure", "edit distance"]
+    }
+  ]
+}

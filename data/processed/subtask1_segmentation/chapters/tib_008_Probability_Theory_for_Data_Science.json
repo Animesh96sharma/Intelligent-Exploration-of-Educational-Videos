@@ -1,0 +1,16 @@
+{
+"video_id": "tib_008",
+"video_title": "Probability Theory for Data Science",
+"video_url": "https://av.tib.eu/media/tib_008",
+"duration": 4500,
+"language": "en",
+"speaker": "Dr. Ahmed Khan",
+"domain": "mathematics",
+"chapters": [
+{"chapter_id": "tib_008_ch1", "chapter_index": 1, "title": "Basic Probability Concepts", "start_time": 0, "end_time": 800, "transcript": "Sample space, events, probability axioms. P(A) between 0 and 1. Sum over all outcomes equals 1.", "frame_captions": ["Venn diagram", "Probability scale", "Coin toss"], "keywords": ["probability", "sample space", "axioms"]},
+{"chapter_id": "tib_008_ch2", "chapter_index": 2, "title": "Random Variables and Distributions", "start_time": 800, "end_time": 2000, "transcript": "Discrete (Bernoulli, Binomial, Poisson) and continuous (Uniform, Gaussian, Exponential) random variables. PDF and CDF.", "frame_captions": ["PMF bar chart", "Gaussian bell curve", "CDF step function"], "keywords": ["random variables", "PDF", "CDF", "binomial", "normal"]},
+{"chapter_id": "tib_008_ch3", "chapter_index": 3, "title": "Expectation, Variance, Covariance", "start_time": 2000, "end_time": 3200, "transcript": "Expected value is average. Variance measures spread. Covariance measures linear relationship between two variables.", "frame_captions": ["E[X] formula", "Variance formula", "Covariance scatter"], "keywords": ["expectation", "variance", "covariance", "correlation"]},
+{"chapter_id": "tib_008_ch4", "chapter_index": 4, "title": "Bayes' Theorem", "start_time": 3200, "end_time": 4000, "transcript": "P(A|B) = P(B|A)P(A)/P(B). Bayesian inference updates beliefs with data. Naive Bayes classifier.", "frame_captions": ["Bayes theorem tree diagram", "Prior posterior update", "Naive Bayes example"], "keywords": ["Bayes theorem", "posterior", "prior", "naive Bayes"]},
+{"chapter_id": "tib_008_ch5", "chapter_index": 5, "title": "Law of Large Numbers and CLT", "start_time": 4000, "end_time": 4500, "transcript": "Sample mean converges to true mean. Central Limit Theorem: sum of many iid variables approaches normal distribution.", "frame_captions": ["LLN simulation", "CLT histogram", "Normal approximation"], "keywords": ["LLN", "CLT", "normal distribution", "sampling"]}
+]
+}

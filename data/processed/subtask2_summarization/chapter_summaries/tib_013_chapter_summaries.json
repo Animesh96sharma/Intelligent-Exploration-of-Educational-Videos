@@ -1,0 +1,123 @@
+{
+  "video_id": "tib_013",
+  "video_title": "Systems Biology: Networks and Dynamics",
+  "speaker": "Prof. Yuki Tanaka",
+  "domain": "biology",
+  "duration": 5400,
+  "total_chapters": 5,
+  "chapter_summaries": [
+    {
+      "chapter_id": "tib_013_ch1",
+      "chapter_index": 1,
+      "title": "Biological Networks",
+      "start_time": 0,
+      "end_time": 1000,
+      "duration_seconds": 1000,
+      "summary_short": "This chapter discusses the concepts of protein-protein interaction networks and gene regulatory networks with scale-free properties.",
+      "summary_medium": "The lecture focuses on two types of biological networks: protein-protein interaction (PPI) networks and gene regulatory networks. PPI networks reveal how proteins interact within a cell, while gene regulatory networks illustrate the relationships between genes and their products. Both network structures often exhibit scale-free properties, meaning they have a large number of nodes with few connections and a small number of nodes with many connections.",
+      "summary_long": "The first part of the chapter delves into protein-protein interaction (PPI) networks, which provide insights into how proteins function in a cell by interacting with one another. The second part focuses on gene regulatory networks, which showcase the interactions between genes and their products. These networks help understand how genes influence each other's expression levels and ultimately impact various biological processes. Both PPI and gene regulatory networks can have scale-free properties, making them efficient in terms of resources. Scale-free networks have a large number of nodes with few connections and a small number of highly connected nodes (hubs).",
+      "key_concepts": [
+        "Protein-protein interaction network",
+        "Gene regulatory network",
+        "Scale-free properties"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to understand the concepts of protein-protein interaction networks and gene regulatory networks.",
+        "They will also learn about scale-free properties in biological networks."
+      ],
+      "has_visuals": true,
+      "visual_description": "The lecture includes visuals such as diagrams representing PPI network, gene regulatory network, and degree distribution.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_013_ch2",
+      "chapter_index": 2,
+      "title": "Ordinary Differential Equations in Biology",
+      "start_time": 1000,
+      "end_time": 2300,
+      "duration_seconds": 1300,
+      "summary_short": "The lecture explores the application of Ordinary Differential Equations (ODEs) in biology, focusing on the Lotka-Volterra predator-prey model and Michaelis-Menten enzyme kinetics.",
+      "summary_medium": "In this chapter, students learn about two important models in biological systems: the Lotka-Volterra cycles and the Michaelis-Menten curve. The Lotka-Volterra predator-prey model demonstrates how populations of predators and prey interact, represented by a system of ODEs. On the other hand, the Michaelis-Menten curve is used to describe enzyme kinetics, which helps understand the rate of reactions in biochemistry. A phase portrait of ODEs might also be presented for visual understanding.",
+      "summary_long": "The Lotka-Volterra predator-prey model and Michaelis-Menten enzyme kinetics are two essential applications of Ordinary Differential Equations (ODEs) in biology. The Lotka-Volterra system, consisting of a pair of ODEs, represents the dynamic relationship between populations of predators and prey, exhibiting cyclic behavior known as cycles. In contrast, the Michaelis-Menten curve is a graphical representation that describes enzyme kinetics, which reveals how the rate of an enzymatic reaction depends on the substrate concentration. The curve follows a saturation pattern where at high substrate concentrations, the reaction rate levels off due to limited active sites on the enzyme molecule. A phase portrait of ODEs may be shown for visual understanding, demonstrating the stability and behavior of solutions over time.",
+      "key_concepts": [
+        "Lotka-Volterra cycles",
+        "Michaelis-Menten curve",
+        "ODE phase portrait",
+        "Ordinary Differential Equations in biology",
+        "Enzyme kinetics"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to understand the Lotka-Volterra predator-prey model and its application in biological systems.",
+        "After this chapter, students will be able to explain Michaelis-Menten enzyme kinetics and apply it to biochemical reactions."
+      ],
+      "has_visuals": true,
+      "visual_description": [
+        "Lotka-Volterra cycles diagram, Michaelis-Menten curve graph, ODE phase portrait"
+      ],
+      "difficulty_level": "intermediate",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_013_ch3",
+      "chapter_index": 3,
+      "title": "Stochastic Models",
+      "start_time": 2300,
+      "end_time": 3500,
+      "duration_seconds": 1200,
+      "error": "JSON parse failed",
+      "raw_llm_output": "{\n  \"summary_short\": \"Learn about Gillespie simulation and the chemical master equation for understanding low copy number effects in stochastic models.\",\n  \"summary_medium\": \"The lecture covers two key approaches to modeling stochastic systems with a low number of copies: the Gillespie algorithm and the Chemical Master Equation. The Gillespie algorithm is a numerical method that simulates chemical reactions, while the Chemical Master Equation provides an analytical approach for predicting the pr"
+    },
+    {
+      "chapter_id": "tib_013_ch4",
+      "chapter_index": 4,
+      "title": "Metabolic Networks",
+      "start_time": 3500,
+      "end_time": 4600,
+      "duration_seconds": 1100,
+      "summary_short": "This lecture discusses Flux Balance Analysis (FBA) in metabolic engineering, using a stoichiometric matrix to optimize metabolic pathways.",
+      "summary_medium": "Flux balance analysis (FBA) is a systems biology approach used to predict the optimal distribution of intracellular metabolite flows within an organism. It relies on a stoichiometric matrix, which represents the relationships between reactions in a metabolic network. This information can be used for metabolic engineering by optimizing the matrix to achieve desired cell properties or products.",
+      "summary_long": "The lecture begins with an introduction to Flux Balance Analysis (FBA), a computational method used in systems biology to model and predict the optimal distribution of intracellular metabolite flows within an organism. The core concept of FBA is based on the assumption that cell growth maximizes its own rate, leading to the formulation of linear programming problems to find the steady-state fluxes through metabolic reactions. These problems are solved using a stoichiometric matrix, which represents the relationships between reactions in a metabolic network. The optimal solution provides the predicted intracellular metabolite flows within the organism. FBA is an important tool in metabolic engineering as it allows researchers to manipulate metabolic pathways by optimizing the stoichiometric matrix to achieve desired cell properties or products.",
+      "key_concepts": [
+        "Flux Balance Analysis (FBA)",
+        "Stoichiometric Matrix",
+        "Metabolic Engineering"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to understand Flux Balance Analysis and its application in metabolic engineering.",
+        "Students will learn how the stoichiometric matrix is used in FBA to predict intracellular metabolite flows."
+      ],
+      "has_visuals": true,
+      "visual_description": "The visual content includes diagrams of a metabolic pathway and a representation of the stoichiometric matrix.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    },
+    {
+      "chapter_id": "tib_013_ch5",
+      "chapter_index": 5,
+      "title": "Parameter Estimation",
+      "start_time": 4600,
+      "end_time": 5400,
+      "duration_seconds": 800,
+      "summary_short": "This lecture focuses on parameter estimation in the context of inverse problems and omics data fitting, highlighting sensitivity analysis.",
+      "summary_medium": "The chapter delves into inverse problems and the practice of fitting models to omics data. Key topics covered include parameter fitting, sensitivity indices, and the comparison between data and model. Students are expected to gain an understanding of how to approach these issues, such as assessing the reliability of a model by comparing it with the provided data.",
+      "summary_long": "The lecture commences with an overview of inverse problems, where models are fitted to omics data for parameter estimation. This process is crucial for understanding complex biological systems. The chapter proceeds to introduce sensitivity analysis as a means of determining how changes in model parameters influence results. By examining sensitivity indices, scientists can make informed decisions about the reliability and validity of their models. Lastly, the comparison between data and model is discussed, demonstrating the importance of this step in ensuring the accuracy of the fitted model.",
+      "key_concepts": [
+        "inverse problems",
+        "parameter fitting",
+        "sensitivity analysis",
+        "omics data",
+        "model validation"
+      ],
+      "learning_objectives": [
+        "After this chapter, students will be able to understand inverse problems and their application in omics data fitting.",
+        "Students will learn how to analyze the sensitivity of models by assessing sensitivity indices.",
+        "Students will be able to compare data with a fitted model to validate its accuracy."
+      ],
+      "has_visuals": true,
+      "visual_description": "Diagrams and illustrations are used to demonstrate parameter fitting, sensitivity analysis, and the comparison between data and model.",
+      "difficulty_level": "beginner",
+      "estimated_read_time_seconds": 90
+    }
+  ]
+}
