@@ -62,9 +62,9 @@ def run_pipeline(video_path):
     base_name = os.path.splitext(os.path.basename(video_path))[0]
 
     # Define paths
-    transcript_path = f"data/processed/subtask1_segmentation/transcripts/{base_name}_transcripts.json"
-    captions_path   = f"data/processed/subtask1_segmentation/captions/{base_name}_captions.json"
-    chapters_path   = f"data/processed/subtask1_segmentation/chapters/{base_name}_chapters.json"
+    transcript_path = f"/home/umwise2526studentproj/Group3ProjectWork/data/processed/subtask1_segmentation/transcripts/{base_name}_transcripts.json"
+    captions_path   = f"/home/umwise2526studentproj/Group3ProjectWork/data/processed/subtask1_segmentation/captions/{base_name}_captions.json"
+    chapters_path   = f"/home/umwise2526studentproj/Group3ProjectWork/data/processed/subtask1_segmentation/chapters/{base_name}_chapters.json"
 
     print(f"\n{'='*60}")
     print(f"Processing: {base_name}")
@@ -89,6 +89,9 @@ def run_pipeline(video_path):
     # Kill any leftover Python/PyTorch processes holding GPU memory
     sp.run("fuser -k /dev/nvidia0 2>/dev/null || true", shell=True)
     time.sleep(5)   # wait for VRAM to fully release before loading next model
+    transcript_path = f"/home/umwise2526studentproj/Group3ProjectWork/data/processed/subtask1_segmentation/transcripts/{base_name}_transcripts.json"
+    captions_path = f"/home/umwise2526studentproj/Group3ProjectWork/data/processed/subtask1_segmentation/captions/{base_name}_captions.json"
+    chapters_path = f"/home/umwise2526studentproj/Group3ProjectWork/data/processed/subtask1_segmentation/chapters/{base_name}_chapters.json"
 
     # Step 1: ASR
     print("Running ASR...")
@@ -166,7 +169,7 @@ if __name__ == "__main__":
 
     for video_path in video_files:
         base_name     = os.path.splitext(os.path.basename(video_path))[0]
-        chapters_path = f"data/processed/subtask1_segmentation/chapters/{base_name}_chapters.json"
+        chapters_path = f"/home/umwise2526studentproj/Group3ProjectWork/data/processed/subtask1_segmentation/chapters/{base_name}_chapters.json"
 
         # Skip if already processed
         if args.skip_existing and os.path.exists(chapters_path):
