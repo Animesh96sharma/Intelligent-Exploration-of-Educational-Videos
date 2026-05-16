@@ -116,6 +116,7 @@ export default function VideoExplorer({
       <div className="video-explorer__layout">
         <div className="video-explorer__main">
           <VideoPlayer
+            videoId={video.id}
             src={video.videoSrc}
             title={video.title}
             currentTime={currentTime}
