@@ -1,0 +1,122 @@
+{
+  "video_id": "tib_005",
+  "video_title": "Natural Language Processing: Understanding Text",
+  "video_url": "https://av.tib.eu/media/tib_005",
+  "duration": 3840,
+  "language": "en",
+  "speaker": "Prof. Sarah Johnson",
+  "domain": "nlp",
+  "chapters": [
+    {
+      "chapter_id": "tib_005_ch1",
+      "chapter_index": 1,
+      "title": "Introduction to NLP: Why Language is Hard for Computers",
+      "start_time": 0,
+      "end_time": 540,
+      "transcript": "Welcome to Natural Language Processing. I'm Professor Sarah Johnson. NLP sits at the intersection of computer science, artificial intelligence, and linguistics. It's about enabling computers to understand, interpret, and generate human language. Think about the NLP applications you use every day: search engines that understand your queries, spam filters that protect your inbox, autocorrect and grammar checkers, voice assistants like Siri and Alexa, machine translation like Google Translate, and chatbots that handle customer service. Language is incredibly complex for computers because it's ambiguous, context-dependent, and constantly evolving. Consider the sentence: 'I saw a man on a hill with a telescope.' Who has the telescope? The man? Me? The hill? Humans resolve this ambiguity effortlessly, but computers struggle. Or consider sarcasm: 'Great, another meeting.' The literal meaning is positive, but the intended meaning is negative. Language also has many levels of structure: sounds (phonology), word formation (morphology), sentence structure (syntax), meaning (semantics), and context (pragmatics). In this course, we'll start with fundamental text processing, then move to classical machine learning approaches, and finally dive into modern deep learning methods like transformers and large language models. By the end, you'll be able to build systems for text classification, named entity recognition, sentiment analysis, and even text generation. Today, we'll begin with the basics: tokenization, stemming, and vector space models.",
+      "frame_captions": [
+        "Title slide: Natural Language Processing - Understanding Text, Prof. Sarah Johnson",
+        "NLP applications collage: Google Translate, ChatGPT, Siri, Gmail smart reply",
+        "Ambiguity example: 'I saw a man on a hill with a telescope' with multiple parse trees",
+        "Linguistics hierarchy diagram: phonology → morphology → syntax → semantics → pragmatics"
+      ],
+      "keywords": ["NLP", "natural language processing", "ambiguity", "linguistics", "applications", "introduction"]
+    },
+    {
+      "chapter_id": "tib_005_ch2",
+      "chapter_index": 2,
+      "title": "Text Preprocessing: Tokenization, Stemming, and Lemmatization",
+      "start_time": 540,
+      "end_time": 1160,
+      "transcript": "Raw text is messy. Before we can apply any machine learning, we need to clean and normalize our text data. Tokenization is the first step: splitting text into individual tokens, usually words or punctuation. Sounds simple, but it's surprisingly complex. In English, we typically split on whitespace and punctuation, but what about contractions like 'don't'? Should that be one token or two? What about 'New York' - is that one token or two? What about hashtags, URLs, or emojis? Different tokenizers make different choices. The Natural Language Toolkit, or NLTK, and spaCy are popular Python libraries for tokenization. After tokenization, we often normalize tokens by converting to lowercase so that 'The', 'the', and 'THE' are treated the same. Then we remove stop words - common words like 'the', 'a', 'an', 'and', 'of' that carry little meaning and can be safely removed for many tasks. However, be careful: stop word removal isn't always appropriate. For sentiment analysis, words like 'not' are crucial. Stemming reduces words to their root form by chopping off suffixes. For example, 'running', 'runner', 'ran', and 'runs' all become 'run'. The Porter stemmer is a common algorithm that applies a series of rules. Stemming is fast but sometimes produces non-words. Lemmatization is more sophisticated. It uses vocabulary and morphological analysis to return the dictionary form, or lemma, of a word. 'Better' becomes 'good', 'running' becomes 'run', 'went' becomes 'go'. Lemmatization is slower but produces valid words. Which should you use? Stemming is fine for many tasks and faster. Lemmatization is better when you need actual words. For most modern deep learning approaches, we often skip stemming and lemmatization altogether and let the model learn word relationships from data. But for classical methods, these preprocessing steps are essential.",
+      "frame_captions": [
+        "Tokenization example: 'Don't forget to visit New York!' → ['Don', ''t', 'forget', 'to', 'visit', 'New', 'York', '!']",
+        "Stop word list example: 'the', 'a', 'an', 'and', 'of', 'to', 'is', 'are'",
+        "Stemming example: running→run, runner→runner, ran→ran (Porter stemmer)",
+        "Lemmatization example: better→good, went→go, running→run, mice→mouse",
+        "Comparison table: Raw vs Tokenized vs Stopped vs Stemmed vs Lemmatized"
+      ],
+      "keywords": ["tokenization", "stemming", "lemmatization", "stop words", "text preprocessing", "NLTK", "spaCy"]
+    },
+    {
+      "chapter_id": "tib_005_ch3",
+      "chapter_index": 3,
+      "title": "Bag of Words and TF-IDF: Text Vectorization",
+      "start_time": 1160,
+      "end_time": 1800,
+      "transcript": "Machine learning algorithms work with numbers, not strings. So we need to convert text into numerical vectors. The simplest approach is the Bag of Words, or BoW, model. We create a vocabulary of all unique words in our corpus. Then each document is represented as a vector where each dimension corresponds to a word, and the value is the count of that word in the document. For example, suppose our vocabulary is ['cat', 'dog', 'mouse']. The sentence 'cat cat dog' becomes [2, 1, 0]. Bag of Words completely ignores word order - hence 'bag' - but surprisingly works well for many tasks like spam detection and topic classification. The problem with BoW is that common words like 'the' appear in every document and dominate the vector, while rare but informative words get drowned out. TF-IDF, or Term Frequency-Inverse Document Frequency, solves this. Term Frequency measures how often a word appears in a document, usually just the raw count or logarithm of the count. Inverse Document Frequency measures how rare a word is across the corpus. IDF is computed as log(total documents divided by number of documents containing the word). Words that appear in many documents have low IDF, words that appear in few documents have high IDF. The TF-IDF score is TF multiplied by IDF. This gives higher weight to words that are frequent in a specific document but rare overall. For example, in a collection of news articles, 'the' has high TF but very low IDF, so its TF-IDF is low. A technical term like 'transformer' has medium TF but high IDF, so its TF-IDF is high. The resulting vectors are sparse - most entries are zero because most words don't appear in a given document. We can use cosine similarity to measure how similar two documents are. The cosine of the angle between their vectors. Values near 1 mean very similar, near 0 means unrelated. Negative values mean opposite directions, but with non-negative TF-IDF, cosine similarity is always between 0 and 1.",
+      "frame_captions": [
+        "Bag of Words example: vocabulary building and vector representation",
+        "TF-IDF formula: TF(t,d) × IDF(t,D) = TF-IDF(t,d,D)",
+        "IDF calculation table: word 'the' appears in 1000/1000 docs → IDF=0, word 'transformer' appears in 5/1000 docs → IDF≈5.3",
+        "Document vectors as sparse matrix visualization",
+        "Cosine similarity formula and geometric interpretation"
+      ],
+      "keywords": ["bag of words", "TF-IDF", "term frequency", "inverse document frequency", "vectorization", "cosine similarity", "sparse vectors"]
+    },
+    {
+      "chapter_id": "tib_005_ch4",
+      "chapter_index": 4,
+      "title": "Word Embeddings: Word2Vec and GloVe",
+      "start_time": 1800,
+      "end_time": 2440,
+      "transcript": "Bag of Words and TF-IDF treat words as atomic units with no relationship between them. 'Good' and 'great' are completely different vectors, even though they have similar meanings. Word embeddings solve this by learning dense, low-dimensional representations where semantically similar words have similar vectors. Word2Vec, introduced by Mikolov at Google in 2013, was a breakthrough. It learns embeddings by predicting a word from its context, or context from a word. There are two architectures: CBOW, or Continuous Bag of Words, predicts the target word from surrounding context words. Skip-gram does the opposite - predicts context words from the target word. Skip-gram works better for rare words and is more common. Word2Vec learns through a shallow neural network with one hidden layer. The hidden layer weights become the word embeddings. After training, we get a vector for each word, typically 100-300 dimensions. These vectors capture semantic relationships. The classic example: vector('king') - vector('man') + vector('woman') ≈ vector('queen'). Embeddings also capture analogies: Paris is to France as Tokyo is to Japan. GloVe, or Global Vectors for Word Representation, from Stanford, combines the benefits of Word2Vec with global matrix factorization. It uses co-occurrence statistics from the entire corpus. The intuition is that the ratio of co-occurrence probabilities is meaningful. For example, the ratio of probabilities that 'ice' co-occurs with 'solid' vs 'gas' is high, while for 'steam' it's low. Both Word2Vec and GloVe produce static embeddings - each word has one vector regardless of context. This fails for polysemy, words with multiple meanings. 'Bank' as a financial institution vs river bank should have different vectors. More recent methods like ELMo, BERT, and GPT produce contextualized embeddings where the representation depends on surrounding words. But for many tasks, Word2Vec or GloVe embeddings are still a great starting point, especially when you have limited data.",
+      "frame_captions": [
+        "Word2Vec architecture: CBOW (predict center from context) vs Skip-gram (predict context from center)",
+        "Neural network diagram for Word2Vec: input → hidden (embedding) → output",
+        "Vector arithmetic visualization: king - man + woman = queen",
+        "t-SNE visualization of word embeddings showing clusters of related words",
+        "GloVe co-occurrence matrix and ratio example for ice/steam with solid/gas"
+      ],
+      "keywords": ["word embeddings", "Word2Vec", "CBOW", "skip-gram", "GloVe", "semantic similarity", "analogies", "dense vectors"]
+    },
+    {
+      "chapter_id": "tib_005_ch5",
+      "chapter_index": 5,
+      "title": "Recurrent Neural Networks for Sequence Modeling",
+      "start_time": 2440,
+      "end_time": 3080,
+      "transcript": "Language is sequential - word order matters. 'Dog bites man' and 'Man bites dog' have very different meanings. Standard feedforward neural networks don't account for sequence. Recurrent Neural Networks, or RNNs, were designed for sequential data. An RNN processes one token at a time and maintains a hidden state that gets passed from one step to the next. This hidden state acts as memory, capturing information from previous tokens. At each time step, the RNN takes the current input and the previous hidden state, computes a new hidden state, and optionally produces an output. The same weights are reused at every time step, which is why we say the network is recurrent. This parameter sharing allows RNNs to handle variable-length sequences. The mathematical formulation: h_t = tanh(W_xh * x_t + W_hh * h_{t-1} + b_h). Simple RNNs suffer from the vanishing gradient problem - gradients become exponentially small as they propagate backwards through time, making it hard to learn long-range dependencies. For example, learning that 'the cat that chased the mouse that ate the cheese that was in the fridge was hungry' refers to the cat from 20 words ago is difficult. LSTM, or Long Short-Term Memory, networks solve this with a more sophisticated architecture. LSTMs have a cell state that runs through the entire sequence, and three gates: forget gate (what to discard), input gate (what to add), and output gate (what to output). This allows LSTMs to learn dependencies over hundreds of steps. GRUs, or Gated Recurrent Units, are a simplified version with two gates. Bidirectional RNNs process sequences in both forward and backward directions, which is useful when context from both sides matters. For text classification, we typically use the final hidden state or pool across all time steps. For sequence labeling like named entity recognition, we use the output at each time step. RNNs and LSTMs were the state of the art for NLP before transformers, and they're still useful for many tasks, especially when sequence length is moderate.",
+      "frame_captions": [
+        "RNN unrolled diagram: x1→h1→x2→h2→... with shared weights",
+        "Vanishing gradient visualization: gradients shrink exponentially through time",
+        "LSTM cell diagram with forget gate, input gate, output gate, and cell state",
+        "LSTM vs GRU comparison: GRU has two gates instead of three",
+        "Bidirectional RNN diagram: forward pass + backward pass → combined representation"
+      ],
+      "keywords": ["RNN", "recurrent neural network", "LSTM", "long short-term memory", "GRU", "vanishing gradient", "bidirectional RNN", "sequence modeling"]
+    },
+    {
+      "chapter_id": "tib_005_ch6",
+      "chapter_index": 6,
+      "title": "Transformers and Attention: The Revolution",
+      "start_time": 3080,
+      "end_time": 3640,
+      "transcript": "In 2017, the paper 'Attention Is All You Need' introduced the Transformer architecture, which completely revolutionized NLP. The key innovation is the attention mechanism. Attention allows a model to focus on relevant parts of the input when producing each output. For example, when translating 'I love you' to French, when generating the word 'aime' (love), the model should pay most attention to 'love' and less to 'I' and 'you'. Self-attention is a special case where each position attends to all positions in the same sequence. This allows the model to capture relationships between words regardless of distance. For 'the cat... was hungry', self-attention can directly connect 'cat' and 'was', even if there are many words in between. The Transformer consists of an encoder and decoder, each with multiple layers. Each layer has multi-head self-attention and feed-forward networks, with residual connections and layer normalization. Multi-head attention runs several attention operations in parallel, allowing the model to focus on different types of relationships. Unlike RNNs, Transformers process all tokens in parallel, which is much faster on GPUs. However, they have O(n²) complexity in sequence length due to each token attending to all others. This makes them expensive for very long sequences. BERT, or Bidirectional Encoder Representations from Transformers, uses only the encoder and is pre-trained using masked language modeling - predicting masked words in a sentence. This bidirectional context makes BERT excellent for understanding tasks. GPT, or Generative Pre-trained Transformer, uses only the decoder and is trained for next token prediction, making it great for generation. Pre-trained transformer models like BERT, RoBERTa, GPT, T5, and more recently Llama, Mistral, and GPT-4 can be fine-tuned for specific tasks with relatively little data. This has democratized NLP - you can now achieve state-of-the-art results without training from scratch. In the next lecture, we'll cover practical fine-tuning and modern applications.",
+      "frame_captions": [
+        "Attention mechanism visualization: query-key dot product → softmax → weighted sum of values",
+        "Transformer architecture diagram: Encoder (multi-head attention + FFN) and Decoder (masked attention + cross attention)",
+        "Multi-head attention diagram: multiple attention heads in parallel, each focusing on different relationships",
+        "BERT pre-training: masking 15% of tokens, predicting original",
+        "GPT auto-regressive generation: predicting next token one by one"
+      ],
+      "keywords": ["transformer", "attention", "self-attention", "multi-head attention", "BERT", "GPT", "pre-training", "fine-tuning"]
+    },
+    {
+      "chapter_id": "tib_005_ch7",
+      "chapter_index": 7,
+      "title": "NLP Applications and Summary",
+      "start_time": 3640,
+      "end_time": 3840,
+      "transcript": "Let's conclude today's lecture by reviewing the main applications of NLP and what we've covered. Text Classification includes sentiment analysis (positive/negative reviews), spam detection, and topic categorization. Named Entity Recognition, or NER, finds and classifies entities like people, organizations, locations, dates, and monetary values. Machine Translation translates text from one language to another. Modern systems use transformer-based sequence-to-sequence models. Question Answering systems can answer questions based on a provided context document. SQuAD is a popular benchmark. Text Summarization can be extractive (selecting important sentences) or abstractive (generating new text). Large language models excel at abstractive summarization. Part-of-Speech Tagging labels each word as noun, verb, adjective, etc. Dependency Parsing identifies grammatical relationships between words. Let me summarize what we covered today. We started with why language is hard and basic text preprocessing: tokenization, stemming, and lemmatization. We learned about text vectorization with Bag of Words and TF-IDF. We explored word embeddings: Word2Vec and GloVe. We covered RNNs, LSTMs, and why they're useful for sequences. Finally, we dove into Transformers and attention, the current state of the art. In the next lecture, we'll build a practical sentiment analysis system using a pre-trained transformer. We'll also cover ethical considerations: bias in language models, privacy concerns, and responsible deployment. Your assignment is to implement a text classifier using either TF-IDF with logistic regression or fine-tune a small transformer. Code and a Colab notebook are on the course website.",
+      "frame_captions": [
+        "NLP applications grid: sentiment analysis, NER, translation, QA, summarization",
+        "NER example: 'Apple CEO Tim Cook visited Paris' → [ORG:Apple] [PERSON:Tim Cook] [LOC:Paris]",
+        "Sentiment analysis: 'This movie was amazing!' → positive",
+        "Summary slide with all topics covered today",
+        "Ethics slide: bias, fairness, privacy in NLP systems"
+      ],
+      "keywords": ["text classification", "NER", "machine translation", "question answering", "summarization", "ethics", "summary"]
+    }
+  ]
+}

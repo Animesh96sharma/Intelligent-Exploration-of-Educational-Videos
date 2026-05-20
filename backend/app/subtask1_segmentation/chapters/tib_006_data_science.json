@@ -1,0 +1,129 @@
+{
+  "video_id": "tib_006",
+  "video_title": "Data Science: From Data to Decisions",
+  "video_url": "https://av.tib.eu/media/tib_006",
+  "duration": 4020,
+  "language": "en",
+  "speaker": "Prof. Michael Brown",
+  "domain": "data_science",
+  "chapters": [
+    {
+      "chapter_id": "tib_006_ch1",
+      "chapter_index": 1,
+      "title": "What is Data Science? The Data Science Pipeline",
+      "start_time": 0,
+      "end_time": 560,
+      "transcript": "Welcome to Data Science. I'm Professor Michael Brown. Data science has been called the sexiest job of the 21st century, but what exactly is it? Data science is an interdisciplinary field that uses scientific methods, algorithms, and systems to extract insights and knowledge from structured and unstructured data. It combines statistics, computer science, and domain expertise. A data scientist is someone who can wrangle data, build models, and communicate findings to stakeholders. The data science pipeline typically has several stages. First, data collection and acquisition: gathering data from databases, APIs, web scraping, or sensors. Second, data cleaning and preprocessing: handling missing values, removing duplicates, fixing inconsistencies. This often takes 80% of the time! Third, exploratory data analysis, or EDA: visualizing distributions, identifying patterns, generating hypotheses. Fourth, feature engineering: creating new features from existing data that better represent the underlying problem. Fifth, model building and selection: choosing algorithms, training models, tuning hyperparameters. Sixth, model evaluation and validation: assessing performance on held-out data. Seventh, deployment and monitoring: putting models into production and tracking their performance over time. Eighth, communication and visualization: presenting findings to stakeholders in an understandable way. Throughout this course, we'll cover each of these stages in depth. We'll work with real datasets, including the Titanic survival data, housing prices, and customer churn. By the end, you'll be able to conduct end-to-end data science projects. Today, we'll focus on the foundational skills: working with data using pandas, understanding basic statistics, and creating effective visualizations.",
+      "frame_captions": [
+        "Title slide: Data Science - From Data to Decisions, Prof. Michael Brown",
+        "Data science pipeline diagram: Collection → Cleaning → EDA → Modeling → Deployment",
+        "Data science Venn diagram: Statistics + Computer Science + Domain Expertise",
+        "80/20 graphic showing data cleaning takes most time"
+      ],
+      "keywords": ["data science", "pipeline", "data cleaning", "EDA", "modeling", "deployment", "communication"]
+    },
+    {
+      "chapter_id": "tib_006_ch2",
+      "chapter_index": 2,
+      "title": "Pandas: Data Manipulation in Python",
+      "start_time": 560,
+      "end_time": 1220,
+      "transcript": "If you're going to do data science in Python, you need to master pandas. Pandas is the go-to library for data manipulation and analysis. It provides two primary data structures: Series (one-dimensional labeled array) and DataFrame (two-dimensional labeled data structure, like a spreadsheet or SQL table). Let me show you the essential pandas operations. First, reading data: pd.read_csv() for CSV files, pd.read_excel() for Excel, pd.read_sql() for databases. Once you have a DataFrame, you'll want to inspect it: df.head() shows first 5 rows, df.info() shows data types and missing values, df.describe() gives summary statistics for numeric columns. Selecting data: df['column'] selects a column, df[['col1', 'col2']] selects multiple columns, df.loc[] selects by label, df.iloc[] selects by position. Filtering is powerful: df[df['age'] > 30] returns rows where age > 30. You can combine conditions with & (and) and | (or). Grouping and aggregation: df.groupby('category')['value'].mean() calculates mean per category. Common aggregations: sum, mean, median, count, min, max, std. Handling missing values: df.isnull() identifies missing values, df.dropna() removes rows with missing values, df.fillna(value) fills missing values. Creating new columns: df['new_col'] = df['col1'] + df['col2']. Apply functions: df['col'].apply(lambda x: x**2) applies a function to each element. Merging DataFrames: pd.merge(df1, df2, on='key') works like SQL JOIN. The most common types: inner, left, right, outer. Pivot tables: pd.pivot_table(df, values='sales', index='region', columns='product', aggfunc='sum'). Pandas is incredibly powerful, and becoming proficient will make you much more productive. In the next lecture, we'll work through a real example with the Titanic dataset.",
+      "frame_captions": [
+        "pandas logo and DataFrame visualization",
+        "df.head() output showing first 5 rows of Titanic dataset",
+        "Filtering example: df[df['age'] > 30 & df['sex'] == 'female']",
+        "Group by visualization: groupby('class')['fare'].mean()",
+        "Merge diagram showing inner, left, right, outer joins",
+        "Pivot table example: sales by region and product"
+      ],
+      "keywords": ["pandas", "DataFrame", "data manipulation", "filtering", "group by", "merge", "missing values", "Python"]
+    },
+    {
+      "chapter_id": "tib_006_ch3",
+      "chapter_index": 3,
+      "title": "Exploratory Data Analysis and Visualization",
+      "start_time": 1220,
+      "end_time": 1880,
+      "transcript": "Exploratory Data Analysis, or EDA, is the process of understanding your data before building models. It's both an art and a science. The goal is to discover patterns, spot anomalies, test hypotheses, and check assumptions. Good EDA leads to better models and more reliable insights. Let's start with univariate analysis - examining one variable at a time. For numerical variables, we use histograms to see the distribution, box plots to see spread and outliers, and density plots for smooth distributions. Key statistics: mean, median, mode, variance, standard deviation, skewness, and kurtosis. For categorical variables, we use bar charts and pie charts. Frequency tables show counts and percentages. For bivariate analysis - examining relationships between two variables. Numerical vs numerical: scatter plots show correlation. We compute Pearson correlation for linear relationships, Spearman for monotonic relationships. Numerical vs categorical: box plots show distribution across categories. Violin plots combine box plot with density. Categorical vs categorical: stacked bar charts, mosaic plots. A heatmap of the correlation matrix is excellent for seeing all pairwise correlations at once. For multivariate analysis, we use faceting (small multiples), color encoding, and interactive plots. Tools like Seaborn make beautiful statistical visualizations with little code. Some key plots: pairplot shows scatter plots for all numeric columns; heatmap shows correlation matrix; clustermap adds hierarchical clustering. One of the most famous examples is Anscombe's quartet - four datasets with identical summary statistics but very different distributions. This shows why visualization is essential - you can't rely on numbers alone. Always visualize your data. Real-world example: analyzing the Titanic dataset. We'd look at survival rate by class, sex, age, embarkation port. We might discover that women and children had higher survival rates, first class passengers survived more, and certain embarkation ports had different outcomes. These insights guide feature engineering and model selection.",
+      "frame_captions": [
+        "EDA process diagram: Understand → Clean → Visualize → Hypothesize",
+        "Histogram and box plot examples for age distribution",
+        "Scatter plot with correlation line showing positive/negative/no correlation",
+        "Titanic survival analysis: bar charts by class, sex, age groups",
+        "Seaborn pairplot showing all pairwise relationships",
+        "Anscombe's quartet: four datasets with same stats but different visualizations"
+      ],
+      "keywords": ["EDA", "exploratory data analysis", "histogram", "box plot", "scatter plot", "correlation", "Seaborn", "visualization"]
+    },
+    {
+      "chapter_id": "tib_006_ch4",
+      "chapter_index": 4,
+      "title": "Statistical Inference and Hypothesis Testing",
+      "start_time": 1880,
+      "end_time": 2520,
+      "transcript": "Statistics is the foundation of data science. It helps us make decisions under uncertainty. Let's start with descriptive statistics: measures of central tendency (mean, median, mode) and measures of dispersion (range, variance, standard deviation, interquartile range). Inferential statistics allows us to draw conclusions about populations from samples. The key idea is that we rarely have data on an entire population, so we take a random sample and use it to estimate population parameters. The Central Limit Theorem is fundamental: the distribution of sample means approaches a normal distribution as sample size increases, regardless of the underlying population distribution. This allows us to make probability statements about sample estimates. Hypothesis testing is a formal procedure for making decisions. We start with a null hypothesis (H0), typically that there's no effect or no difference. And an alternative hypothesis (H1), that there is an effect. We calculate a test statistic and p-value. The p-value is the probability of observing data as extreme as what we saw, assuming the null hypothesis is true. If the p-value is below a significance threshold (usually 0.05), we reject the null. Common tests include: t-test for comparing means of two groups; ANOVA for comparing means of three or more groups; chi-square test for categorical variables; correlation test for relationships. Important concepts: Type I error (false positive - rejecting a true null), Type II error (false negative - failing to reject a false null). Statistical power is the probability of correctly rejecting a false null. Confidence intervals provide a range of plausible values for a population parameter. A 95% confidence interval means that if we repeated the sampling process many times, 95% of the intervals would contain the true parameter. In A/B testing, we use hypothesis testing to decide if a treatment is better than control. For example, testing whether a new website design increases conversion rate. We calculate the p-value and decide whether the improvement is statistically significant, not just due to random chance.",
+      "frame_captions": [
+        "Normal distribution curve showing mean, median, mode",
+        "Central Limit Theorem animation: sampling distribution becomes normal as n increases",
+        "Hypothesis testing flowchart: H0 → Test statistic → p-value → Reject/Fail to reject",
+        "t-test formula and interpretation",
+        "Type I and Type II errors table",
+        "Confidence interval visualization: 95% CI around sample mean"
+      ],
+      "keywords": ["statistics", "hypothesis testing", "p-value", "t-test", "confidence interval", "central limit theorem", "A/B testing", "Type I error", "Type II error"]
+    },
+    {
+      "chapter_id": "tib_006_ch5",
+      "chapter_index": 5,
+      "title": "Regression Analysis: Linear and Logistic",
+      "start_time": 2520,
+      "end_time": 3180,
+      "transcript": "Regression is perhaps the most important tool in a data scientist's toolkit. Linear regression models the relationship between a continuous dependent variable and one or more independent variables. The simplest form is simple linear regression: Y = β0 + β1*X + ε, where β0 is the intercept, β1 is the slope, and ε is error. We estimate β0 and β1 by minimizing the sum of squared residuals - this is called Ordinary Least Squares, or OLS. The R-squared value tells us how much variance in Y is explained by X. For multiple linear regression with several predictors, the interpretation changes: each coefficient represents the effect of that predictor holding others constant. Assumptions of linear regression: linearity, independence of errors, homoscedasticity (constant variance of errors), normality of errors, and no perfect multicollinearity. We check these with residual plots and variance inflation factors. Feature selection is important: too many predictors leads to overfitting; too few leads to underfitting. Regularization techniques like Ridge (L2) and Lasso (L1) add penalties to coefficients, reducing overfitting. Lasso can shrink coefficients to zero, performing feature selection. Logistic regression is used for binary classification. It models the probability of an event occurring: log(p/(1-p)) = β0 + β1*X. The left side is the log-odds. We use maximum likelihood estimation instead of least squares. The decision boundary is linear in the log-odds space. Model evaluation for logistic regression: confusion matrix (true positives, false positives, true negatives, false negatives), accuracy, precision, recall, F1 score, and ROC curve. The ROC curve plots true positive rate vs false positive rate. AUC (Area Under the Curve) summarizes performance - 0.5 is random, 1.0 is perfect. Example: predicting customer churn. Features might include usage frequency, customer service calls, contract type. Logistic regression tells us which factors are most predictive. Both linear and logistic regression are interpretable, fast, and often work well as baselines before trying more complex models.",
+      "frame_captions": [
+        "Linear regression scatter plot with best fit line",
+        "OLS minimization: sum of squared residuals visualization",
+        "Multiple regression coefficients interpretation table",
+        "Residual plots for assumption checking: homoscedasticity, normality, independence",
+        "Logistic regression S-curve: probability vs feature value",
+        "Confusion matrix with TP, FP, TN, FN",
+        "ROC curve with AUC value"
+      ],
+      "keywords": ["linear regression", "logistic regression", "OLS", "R-squared", "regularization", "Ridge", "Lasso", "confusion matrix", "ROC curve", "AUC"]
+    },
+    {
+      "chapter_id": "tib_006_ch6",
+      "chapter_index": 6,
+      "title": "Tree-Based Models: Random Forests and Gradient Boosting",
+      "start_time": 3180,
+      "end_time": 3740,
+      "transcript": "Decision trees are intuitive and powerful models. A decision tree splits data recursively based on feature values. For classification, each leaf node predicts a class; for regression, a numerical value. The splits are chosen to maximize information gain or minimize impurity. Common splitting criteria: Gini impurity and entropy for classification; variance reduction for regression. Decision trees have several advantages: easy to interpret and visualize, handle non-linear relationships, no need for feature scaling, handle mixed data types. But they also have major disadvantages: prone to overfitting, high variance (small changes in data can create completely different trees), and instability. Random Forests solve the overfitting and variance problems by building many trees and averaging their predictions. It uses two key techniques: bootstrap aggregating (bagging) and random feature selection. For each tree, we take a bootstrap sample (sample with replacement) of the data. At each split, we only consider a random subset of features. This decorrelates the trees. The final prediction is the average for regression or majority vote for classification. Random forests are robust, handle high dimensions well, and provide feature importance scores. Gradient Boosting is another ensemble method, but instead of building trees independently, it builds them sequentially. Each new tree tries to correct the errors of the previous ensemble. It starts with a simple model (usually predicting the mean), then computes residuals (errors), then fits a tree to predict those residuals, and adds it to the model with a small learning rate. This process repeats many times. Popular implementations include XGBoost, LightGBM, and CatBoost. XGBoost (eXtreme Gradient Boosting) is widely used in Kaggle competitions because it often achieves state-of-the-art results. It adds regularization, handles missing values, and is highly optimized. Compared to random forests, gradient boosting usually achieves higher accuracy but requires more careful tuning and can overfit if too many trees are used. Key hyperparameters: number of trees, learning rate (shrinkage), tree depth, minimum samples per leaf, and subsample ratio. Feature importance can be computed as the average reduction in impurity across all splits for each feature. This tells us which features are most predictive. Example: predicting house prices. Important features might include square footage, number of bedrooms, location, and year built.",
+      "frame_captions": [
+        "Decision tree diagram: root node → splits → leaf nodes with predictions",
+        "Gini impurity vs entropy formulas and example calculations",
+        "Random Forest diagram: multiple trees trained on bootstrap samples with random features",
+        "Gradient Boosting diagram: sequentially adding trees to correct residuals",
+        "XGBoost vs Random Forest comparison table",
+        "Feature importance bar chart from Random Forest or XGBoost"
+      ],
+      "keywords": ["decision tree", "random forest", "gradient boosting", "XGBoost", "bagging", "boosting", "feature importance", "ensemble learning"]
+    },
+    {
+      "chapter_id": "tib_006_ch7",
+      "chapter_index": 7,
+      "title": "Model Evaluation and Summary",
+      "start_time": 3740,
+      "end_time": 4020,
+      "transcript": "How do we know if our model is good? Model evaluation is crucial. First, we must split our data: training set (typically 60-80%), validation set (10-20%) for tuning, and test set (10-20%) for final evaluation. Never look at the test set until the very end! Cross-validation is even better, especially with small datasets. K-fold cross-validation splits data into K folds, trains on K-1 folds, validates on the held-out fold, and repeats K times. Common values are 5 or 10. For regression metrics: Mean Absolute Error (MAE) is average absolute difference between predictions and actuals - easy to interpret. Mean Squared Error (MSE) penalizes large errors more heavily. Root Mean Squared Error (RMSE) is in the same units as the target. R-squared measures proportion of variance explained. For classification metrics: accuracy is overall correctness but can be misleading with imbalanced classes. Precision is how many predicted positives are actually positive. Recall (sensitivity) is how many actual positives were captured. F1 score is harmonic mean of precision and recall. The confusion matrix shows all four categories. For imbalanced problems, consider precision-recall curves and average precision instead of ROC. Overfitting occurs when a model performs well on training but poorly on test. Signs: training accuracy much higher than validation accuracy. Solutions: more data, regularization, simpler model, early stopping. Underfitting occurs when performance is poor on both. Solutions: more complex model, better features, train longer. The bias-variance tradeoff: high bias = underfitting, high variance = overfitting. We want the sweet spot. Let me summarize today's lecture. We started with what data science is and the pipeline. We learned pandas for data manipulation. We covered EDA and visualization for understanding data. We explored statistical inference and hypothesis testing. We studied linear and logistic regression. We learned about tree-based models: random forests and gradient boosting. Finally, we covered model evaluation. In the next lecture, we'll cover clustering, dimensionality reduction with PCA, and introduction to deep learning for data science. Your assignment is to complete an end-to-end analysis on the Titanic dataset: load data, clean it, perform EDA, build a classification model, and evaluate it. Code template is on the course website.",
+      "frame_captions": [
+        "Train/validation/test split diagram: 60/20/20",
+        "K-fold cross-validation visualization: 5 folds, each used as validation once",
+        "Regression metrics formulas: MAE, MSE, RMSE, R-squared",
+        "Confusion matrix with precision, recall, F1 formulas",
+        "Bias-variance tradeoff graph: U-shaped total error curve",
+        "Summary slide with all topics covered today"
+      ],
+      "keywords": ["cross-validation", "MAE", "RMSE", "R-squared", "precision", "recall", "F1", "overfitting", "underfitting", "bias-variance tradeoff", "summary"]
+    }
+  ]
+}
