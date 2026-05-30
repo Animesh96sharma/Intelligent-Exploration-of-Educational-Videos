@@ -2,11 +2,14 @@
 
 import { useMemo, useState } from "react";
 import type { VideoRecord } from "../types/video";
+import { normalizeConceptLabel } from "../lib/analytics";
 
 type NetworkViewProps = {
   videos: VideoRecord[];
   selectedVideoId: string | null;
   onOpenVideo: (videoId: string) => void;
+  onSelectConcept: (concept: string | null) => void;
+  selectedConcept: string | null;
 };
 
 type VideoEdge = {
@@ -16,7 +19,11 @@ type VideoEdge = {
   weight: number;
 };
 
-function buildEdges(videos: VideoRecord[]): VideoEdge[] {
+function buildEdges(videos: VideoRecord[], selectedConcept: string | null): VideoEdge[] {
+  const normalizedSelectedConcept = selectedConcept
+    ? normalizeConceptLabel(selectedConcept)
+    : null;
+
   const edges: VideoEdge[] = [];
 
   for (let i = 0; i < videos.length; i += 1) {
@@ -25,12 +32,16 @@ function buildEdges(videos: VideoRecord[]): VideoEdge[] {
       const right = videos[j];
 
       const leftConceptMap = new Map(
-        left.keyConcepts.map((concept) => [concept.toLowerCase(), concept])
+        left.keyConcepts.map((concept) => [normalizeConceptLabel(concept), concept])
       );
 
-      const sharedConcepts = right.keyConcepts.filter((concept) =>
-        leftConceptMap.has(concept.toLowerCase())
-      );
+      const sharedConcepts = right.keyConcepts.filter((concept) => {
+        const normalized = normalizeConceptLabel(concept);
+        const matchesLeft = leftConceptMap.has(normalized);
+        const matchesSelected =
+          !normalizedSelectedConcept || normalized === normalizedSelectedConcept;
+        return matchesLeft && matchesSelected;
+      });
 
       if (sharedConcepts.length > 0) {
         edges.push({
@@ -54,11 +65,16 @@ export default function NetworkView({
   videos,
   selectedVideoId,
   onOpenVideo,
+  onSelectConcept,
+  selectedConcept,
 }: NetworkViewProps) {
   const [minimumOverlap, setMinimumOverlap] = useState(1);
   const [focusedVideoId, setFocusedVideoId] = useState<string | null>(selectedVideoId);
 
-  const edges = useMemo(() => buildEdges(videos), [videos]);
+  const edges = useMemo(
+    () => buildEdges(videos, selectedConcept),
+    [videos, selectedConcept]
+  );
 
   const maxOverlap = useMemo(() => {
     if (edges.length === 0) return 1;
@@ -82,7 +98,6 @@ export default function NetworkView({
 
   const visibleVideos = useMemo(() => {
     if (filteredEdges.length === 0) return videos;
-
     return videos.filter((video) => connectedVideoIds.has(video.id));
   }, [videos, filteredEdges, connectedVideoIds]);
 
@@ -115,7 +130,9 @@ export default function NetworkView({
         <div className="network-hero">
           <p className="eyebrow">Network exploration</p>
           <h2>No videos match the current filters</h2>
-          <p>Adjust the active search or filters to see concept relationships between videos.</p>
+          <p>
+            Adjust the active search or filters to see concept relationships between videos.
+          </p>
         </div>
       </section>
     );
@@ -131,7 +148,16 @@ export default function NetworkView({
             This view connects videos through shared key concepts. Increase the
             overlap threshold to focus on stronger conceptual relationships.
           </p>
+          {selectedConcept && (
+            <p className="section-note">Focused concept: {selectedConcept}</p>
+          )}
         </div>
+
+        {selectedConcept && (
+          <button className="secondary-btn" onClick={() => onSelectConcept(null)}>
+            Clear concept
+          </button>
+        )}
       </div>
 
       <div className="stats-grid">
@@ -206,7 +232,7 @@ export default function NetworkView({
                 ).length;
 
                 return (
-                  <button
+                  <article
                     key={video.id}
                     className={[
                       "node-card",
@@ -215,7 +241,6 @@ export default function NetworkView({
                     ]
                       .filter(Boolean)
                       .join(" ")}
-                    onClick={() => setFocusedVideoId(video.id)}
                   >
                     <div className="node-card__head">
                       <p className="eyebrow">{video.domain ?? "General"}</p>
@@ -227,25 +252,35 @@ export default function NetworkView({
 
                     <div className="chip-group compact">
                       {video.keyConcepts.slice(0, 4).map((concept) => (
-                        <span key={concept} className="chip">
+                        <button
+                          key={concept}
+                          type="button"
+                          className={`chip ${selectedConcept === concept ? "active" : ""}`}
+                          onClick={() => onSelectConcept(concept)}
+                        >
                           {concept}
-                        </span>
+                        </button>
                       ))}
                     </div>
 
                     <div className="node-card__actions">
                       <span>{video.totalChapters} chapters</span>
                       <button
+                        type="button"
+                        className="secondary-btn"
+                        onClick={() => setFocusedVideoId(video.id)}
+                      >
+                        Focus node
+                      </button>
+                      <button
+                        type="button"
                         className="inline-link"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onOpenVideo(video.id);
-                        }}
+                        onClick={() => onOpenVideo(video.id)}
                       >
                         Open video
                       </button>
                     </div>
-                  </button>
+                  </article>
                 );
               })}
             </div>
@@ -268,7 +303,10 @@ export default function NetworkView({
                   if (!source || !target) return null;
 
                   return (
-                    <article key={`${edge.sourceId}-${edge.targetId}`} className="relationship-card">
+                    <article
+                      key={`${edge.sourceId}-${edge.targetId}`}
+                      className="relationship-card"
+                    >
                       <div className="relationship-card__head">
                         <div>
                           <strong>{source.title}</strong>
@@ -282,9 +320,14 @@ export default function NetworkView({
 
                       <div className="chip-group compact">
                         {edge.sharedConcepts.map((concept) => (
-                          <span key={concept} className="chip">
+                          <button
+                            key={concept}
+                            type="button"
+                            className={`chip ${selectedConcept === concept ? "active" : ""}`}
+                            onClick={() => onSelectConcept(concept)}
+                          >
                             {concept}
-                          </span>
+                          </button>
                         ))}
                       </div>
 
@@ -324,9 +367,14 @@ export default function NetworkView({
 
                 <div className="chip-group compact">
                   {focusedVideo.keyConcepts.map((concept) => (
-                    <span key={concept} className="chip">
+                    <button
+                      key={concept}
+                      type="button"
+                      className={`chip ${selectedConcept === concept ? "active" : ""}`}
+                      onClick={() => onSelectConcept(concept)}
+                    >
                       {concept}
-                    </span>
+                    </button>
                   ))}
                 </div>
 

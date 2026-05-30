@@ -9,6 +9,10 @@ type VideoExplorerProps = {
   video: VideoRecord;
   allVideos: VideoRecord[];
   onSelectVideo: (videoId: string) => void;
+  onToggleCompareVideo: (videoId: string) => void;
+  onSelectConcept: (concept: string) => void;
+  selectedConcept: string | null;
+  onOpenComparison: (videoId?: string) => void;
 };
 
 function getBestChapterSummary(
@@ -26,7 +30,10 @@ function getBestChapterSummary(
   return chapter.summaryShort;
 }
 
-function getActiveChapter(chapters: ChapterRecord[], currentTime: number): ChapterRecord | null {
+function getActiveChapter(
+  chapters: ChapterRecord[],
+  currentTime: number
+): ChapterRecord | null {
   return (
     chapters.find(
       (chapter) => currentTime >= chapter.startTime && currentTime < chapter.endTime
@@ -38,6 +45,10 @@ export default function VideoExplorer({
   video,
   allVideos,
   onSelectVideo,
+  onToggleCompareVideo,
+  onSelectConcept,
+  selectedConcept,
+  onOpenComparison,
 }: VideoExplorerProps) {
   const [selectedChapterIndex, setSelectedChapterIndex] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
@@ -100,16 +111,33 @@ export default function VideoExplorer({
           </p>
         </div>
 
-        <div className="summary-toggle" role="tablist" aria-label="Summary detail">
-          {(["short", "medium", "long"] as SummaryDetailLevel[]).map((level) => (
+        <div className="video-explorer__header-actions">
+          <div className="summary-toggle" role="tablist" aria-label="Summary detail">
+            {(["short", "medium", "long"] as SummaryDetailLevel[]).map((level) => (
+              <button
+                key={level}
+                className={summaryLevel === level ? "active" : ""}
+                onClick={() => setSummaryLevel(level)}
+              >
+                {level}
+              </button>
+            ))}
+          </div>
+
+          <div className="hero-actions">
             <button
-              key={level}
-              className={summaryLevel === level ? "active" : ""}
-              onClick={() => setSummaryLevel(level)}
+              className="secondary-btn"
+              onClick={() => onToggleCompareVideo(video.id)}
             >
-              {level}
+              Add to compare
             </button>
-          ))}
+            <button
+              className="primary-btn"
+              onClick={() => onOpenComparison(video.id)}
+            >
+              Open comparison
+            </button>
+          </div>
         </div>
       </div>
 
@@ -129,6 +157,7 @@ export default function VideoExplorer({
             selectedChapterId={selectedChapter.id}
             currentTime={currentTime}
             duration={video.duration}
+            summaryLevel={summaryLevel}
             onSelectChapter={(chapter) =>
               handleSelectChapter(video.chapters.findIndex((item) => item.id === chapter.id))
             }
@@ -172,9 +201,14 @@ export default function VideoExplorer({
 
             <div className="chip-group">
               {selectedChapter.keyConcepts.map((concept) => (
-                <span key={concept} className="chip">
+                <button
+                  key={concept}
+                  type="button"
+                  className={`chip ${selectedConcept === concept ? "active" : ""}`}
+                  onClick={() => onSelectConcept(concept)}
+                >
                   {concept}
-                </span>
+                </button>
               ))}
             </div>
           </article>
@@ -202,6 +236,22 @@ export default function VideoExplorer({
               <li>Math content: {video.hasMathematicalContent ? "Yes" : "No"}</li>
               <li>Diagrams: {video.hasDiagrams ? "Yes" : "No"}</li>
             </ul>
+          </section>
+
+          <section className="sidebar-card">
+            <h3>Video concepts</h3>
+            <div className="chip-group">
+              {video.keyConcepts.map((concept) => (
+                <button
+                  key={concept}
+                  type="button"
+                  className={`chip ${selectedConcept === concept ? "active" : ""}`}
+                  onClick={() => onSelectConcept(concept)}
+                >
+                  {concept}
+                </button>
+              ))}
+            </div>
           </section>
 
           <section className="sidebar-card">

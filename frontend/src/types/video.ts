@@ -1,5 +1,3 @@
-// src/types/video.ts
-
 export type SummaryDetailLevel = "short" | "medium" | "long";
 
 export interface RawChapterTimelineItem {
@@ -138,3 +136,26 @@ export interface AppDataset {
   videos: VideoRecord[];
   collectionAnalysis?: CollectionAnalysisRecord;
 }
+
+export interface ConceptOverlapRecord {
+  concept: string;
+  normalized: string;
+}
+
+export interface VideoSimilarityRecord {
+  sourceVideoId: string;
+  targetVideoId: string;
+  sharedConcepts: string[];
+  score: number;
+}
+
+export interface VideoComparisonRecord {
+  leftVideoId: string;
+  rightVideoId: string;
+  sharedConcepts: string[];
+  leftUniqueConcepts: string[];
+  rightUniqueConcepts: string[];
+  similarityScore: number;
+}
+
+export type ComparisonSelection = [string, string] | [];

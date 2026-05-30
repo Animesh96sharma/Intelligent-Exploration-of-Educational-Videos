@@ -5,17 +5,23 @@ import type { VideoRecord } from "../types/video";
 type HomePageProps = {
   videos: VideoRecord[];
   selectedVideoId: string | null;
+  comparisonVideoIds: string[];
   onOpenVideo: (videoId: string) => void;
   onOpenCollection: () => void;
   onOpenNetwork: () => void;
+  onToggleCompareVideo: (videoId: string) => void;
+  onSelectConcept: (concept: string) => void;
 };
 
 export default function HomePage({
   videos,
   selectedVideoId,
+  comparisonVideoIds,
   onOpenVideo,
   onOpenCollection,
   onOpenNetwork,
+  onToggleCompareVideo,
+  onSelectConcept,
 }: HomePageProps) {
   return (
     <section className="home-page">
@@ -31,10 +37,10 @@ export default function HomePage({
         </div>
 
         <div className="hero-actions">
-          <button className="primary-btn" onClick={onOpenCollection}>
+          <button type="button" className="primary-btn" onClick={onOpenCollection}>
             Open collection analysis
           </button>
-          <button className="secondary-btn" onClick={onOpenNetwork}>
+          <button type="button" className="secondary-btn" onClick={onOpenNetwork}>
             Open network view
           </button>
         </div>
@@ -45,41 +51,66 @@ export default function HomePage({
         <span>{videos.length} results</span>
       </div>
 
-<div className="video-grid">
-  {videos.length === 0 ? (
-    <div className="empty-state">
-      <h3>No matching videos</h3>
-      <p>Try a different search term or reset the filters.</p>
-    </div>
-  ) : (
-    videos.map((video) => (
-      <button
-        key={video.id}
-        className={`video-card ${selectedVideoId === video.id ? "selected" : ""}`}
-        onClick={() => onOpenVideo(video.id)}
-      >
-        <p className="eyebrow">{video.domain ?? "General"}</p>
-        <h3>{video.title}</h3>
-        <p>{video.summaryShort}</p>
+      <div className="video-grid">
+        {videos.length === 0 ? (
+          <div className="empty-state">
+            <h3>No matching videos</h3>
+            <p>Try a different search term, concept, or reset the filters.</p>
+          </div>
+        ) : (
+          videos.map((video) => {
+            const isSelected = selectedVideoId === video.id;
+            const isInComparison = comparisonVideoIds.includes(video.id);
 
-        <div className="video-card__meta">
-          <span>{video.speaker ?? "Unknown speaker"}</span>
-          <span>{Math.round(video.duration / 60)} min</span>
-          <span>{video.totalChapters} chapters</span>
-          <span>{video.difficultyLevel ?? "N/A"}</span>
-        </div>
+            return (
+              <article
+                key={video.id}
+                className={`video-card ${isSelected ? "selected" : ""}`}
+              >
+                <button
+                  type="button"
+                  className="video-card__surface"
+                  onClick={() => onOpenVideo(video.id)}
+                >
+                  <p className="eyebrow">{video.domain ?? "General"}</p>
+                  <h3>{video.title}</h3>
+                  <p>{video.summaryShort}</p>
 
-        <div className="chip-group compact">
-          {video.keyConcepts.slice(0, 4).map((concept) => (
-            <span key={concept} className="chip">
-              {concept}
-            </span>
-          ))}
-        </div>
-      </button>
-    ))
-  )}
-</div>
+                  <div className="video-card__meta">
+                    <span>{video.speaker ?? "Unknown speaker"}</span>
+                    <span>{Math.round(video.duration / 60)} min</span>
+                    <span>{video.totalChapters} chapters</span>
+                    <span>{video.difficultyLevel ?? "N/A"}</span>
+                  </div>
+                </button>
+
+                <div className="chip-group compact">
+                  {video.keyConcepts.slice(0, 4).map((concept) => (
+                    <button
+                      key={concept}
+                      type="button"
+                      className="chip concept-chip"
+                      onClick={() => onSelectConcept(concept)}
+                    >
+                      {concept}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="video-card__actions">
+                  <button
+                    type="button"
+                    className={isInComparison ? "primary-btn" : "secondary-btn"}
+                    onClick={() => onToggleCompareVideo(video.id)}
+                  >
+                    {isInComparison ? "Selected for compare" : "Compare"}
+                  </button>
+                </div>
+              </article>
+            );
+          })
+        )}
+      </div>
     </section>
   );
 }

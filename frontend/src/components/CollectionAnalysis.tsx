@@ -7,6 +7,10 @@ type CollectionAnalysisProps = {
   analysis: CollectionAnalysisRecord;
   videos: VideoRecord[];
   onOpenVideo: (videoId: string) => void;
+  onToggleCompareVideo: (videoId: string) => void;
+  onSelectConcept: (concept: string | null) => void;
+  selectedConcept: string | null;
+  onOpenComparison: (videoId?: string) => void;
 };
 
 function formatMinutes(seconds: number) {
@@ -17,6 +21,10 @@ export default function CollectionAnalysis({
   analysis,
   videos,
   onOpenVideo,
+  onToggleCompareVideo,
+  onSelectConcept,
+  selectedConcept,
+  onOpenComparison,
 }: CollectionAnalysisProps) {
   const visibleVideoIds = useMemo(() => {
     return new Set(videos.map((video) => video.id));
@@ -65,8 +73,8 @@ export default function CollectionAnalysis({
             <p className="eyebrow">Collection intelligence</p>
             <h2>No videos match the current filters</h2>
             <p>
-              Clear or adjust the active search and filter settings to explore
-              collection-level analysis again.
+              Clear or adjust the active search, concept, and filter settings to
+              explore collection-level analysis again.
             </p>
           </div>
         </div>
@@ -90,6 +98,12 @@ export default function CollectionAnalysis({
             {visibleCount === 1 ? "" : "s"} out of {totalCollectionCount}.
           </p>
         </div>
+
+        {selectedConcept && (
+          <button className="secondary-btn" onClick={() => onSelectConcept(null)}>
+            Clear concept filter
+          </button>
+        )}
       </div>
 
       <div className="stats-grid">
@@ -130,9 +144,14 @@ export default function CollectionAnalysis({
                     <h4>Main themes</h4>
                     <div className="chip-group">
                       {analysis.overview.main_themes.map((theme) => (
-                        <span key={theme} className="chip">
+                        <button
+                          key={theme}
+                          type="button"
+                          className={`chip ${selectedConcept === theme ? "active" : ""}`}
+                          onClick={() => onSelectConcept(theme)}
+                        >
                           {theme}
-                        </span>
+                        </button>
                       ))}
                     </div>
                   </>
@@ -176,7 +195,15 @@ export default function CollectionAnalysis({
                 {commonConceptEntries.map(([concept, videoIds]) => (
                   <article key={concept} className="concept-card">
                     <div className="concept-card__head">
-                      <h4>{concept}</h4>
+                      <div className="concept-card__title-block">
+                        <button
+                          type="button"
+                          className={`chip concept-chip ${selectedConcept === concept ? "active" : ""}`}
+                          onClick={() => onSelectConcept(concept)}
+                        >
+                          {concept}
+                        </button>
+                      </div>
                       <span>{videoIds.length} videos</span>
                     </div>
 
@@ -186,17 +213,39 @@ export default function CollectionAnalysis({
                         if (!video) return null;
 
                         return (
-                          <button
-                            key={videoId}
-                            className="related-card"
-                            onClick={() => onOpenVideo(videoId)}
-                          >
-                            <strong>{video.title}</strong>
-                            <span>{video.domain ?? "General"}</span>
-                          </button>
+                          <div key={videoId} className="related-card related-card--actions">
+                            <div>
+                              <strong>{video.title}</strong>
+                              <span>{video.domain ?? "General"}</span>
+                            </div>
+
+                            <div className="related-card__actions">
+                              <button
+                                className="secondary-btn"
+                                onClick={() => onToggleCompareVideo(videoId)}
+                              >
+                                Compare
+                              </button>
+                              <button
+                                className="primary-btn"
+                                onClick={() => onOpenVideo(videoId)}
+                              >
+                                Open
+                              </button>
+                            </div>
+                          </div>
                         );
                       })}
                     </div>
+
+                    {videoIds.length >= 2 && (
+                      <button
+                        className="secondary-btn"
+                        onClick={() => onOpenComparison()}
+                      >
+                        Open comparison workspace
+                      </button>
+                    )}
                   </article>
                 ))}
               </div>
@@ -228,12 +277,20 @@ export default function CollectionAnalysis({
                       return (
                         <tr key={videoId}>
                           <td>
-                            <button
-                              className="inline-link"
-                              onClick={() => onOpenVideo(videoId)}
-                            >
-                              {group.video_title || video.title}
-                            </button>
+                            <div className="table-video-actions">
+                              <button
+                                className="inline-link"
+                                onClick={() => onOpenVideo(videoId)}
+                              >
+                                {group.video_title || video.title}
+                              </button>
+                              <button
+                                className="secondary-btn"
+                                onClick={() => onToggleCompareVideo(videoId)}
+                              >
+                                Compare
+                              </button>
+                            </div>
                           </td>
                           <td>{formatMinutes(video.duration)}</td>
                           <td>{video.chapters.length}</td>
@@ -241,9 +298,14 @@ export default function CollectionAnalysis({
                           <td>
                             <div className="chip-group compact">
                               {group.unique_concepts.slice(0, 6).map((concept) => (
-                                <span key={concept} className="chip">
+                                <button
+                                  key={concept}
+                                  type="button"
+                                  className={`chip ${selectedConcept === concept ? "active" : ""}`}
+                                  onClick={() => onSelectConcept(concept)}
+                                >
                                   {concept}
-                                </span>
+                                </button>
                               ))}
                               {group.unique_concepts.length > 6 && (
                                 <span className="chip muted">
