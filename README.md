@@ -50,3 +50,10 @@ python -m pip install -r requirements.txt
 # Verify that all the requirements are satisfied-
 python -m pip install -r requirements.txt
 
+Sprint 1: comparison page, shared selection state, video-internal search, timeline hover cards.
+
+Sprint 2: similarity matrix or heat map, richer concept filtering, bookmarks/notes.
+
+Sprint 3: player upgrades, subtitles, playback speed, screenshot capture, polish and accessibility fixes.
+
+Sprint 4: usability evaluation, documentation, demo preparation.
