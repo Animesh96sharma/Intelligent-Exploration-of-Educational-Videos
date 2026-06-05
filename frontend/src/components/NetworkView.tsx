@@ -19,6 +19,8 @@ type VideoEdge = {
   weight: number;
 };
 
+
+
 function buildEdges(videos: VideoRecord[], selectedConcept: string | null): VideoEdge[] {
   const normalizedSelectedConcept = selectedConcept
     ? normalizeConceptLabel(selectedConcept)
@@ -123,7 +125,6 @@ export default function NetworkView({
   }, [focusEdges, focusedVideoId, videos]);
 
   const focusedVideo = focusedVideoId ? getVideoById(videos, focusedVideoId) : null;
-
   if (videos.length === 0) {
     return (
       <section className="network-page">
