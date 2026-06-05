@@ -5,13 +5,20 @@ import type { AppDataset, VideoRecord } from "./types/video";
 import { loadAppDataset } from "./lib/dataLoader";
 import { videoMatchesConcept } from "./lib/analytics";
 
+import LandingPage from "./components/LandingPage";
 import HomePage from "./components/HomePage";
 import VideoExplorer from "./components/VideoExplorer";
 import CollectionAnalysis from "./components/CollectionAnalysis";
 import NetworkView from "./components/NetworkView";
 import ComparisonView from "./components/ComparisonView";
 
-type ViewMode = "home" | "video" | "collection" | "network" | "compare";
+type ViewMode =
+  | "home"
+  | "browse"
+  | "video"
+  | "collection"
+  | "network"
+  | "compare";
 
 export default function App() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -83,7 +90,8 @@ export default function App() {
 
       const matchesDifficulty =
         selectedDifficulty === "all" ||
-        (video.difficultyLevel ?? "").toLowerCase() === selectedDifficulty.toLowerCase();
+        (video.difficultyLevel ?? "").toLowerCase() ===
+          selectedDifficulty.toLowerCase();
 
       const matchesSelectedConcept = videoMatchesConcept(video, selectedConcept);
 
@@ -123,9 +131,21 @@ export default function App() {
     ) as string[];
   }, [dataset]);
 
+  function handleOpenBrowse() {
+    setView("browse");
+  }
+
   function handleOpenVideo(videoId: string) {
     setSelectedVideoId(videoId);
     setView("video");
+  }
+
+  function handleOpenCollection() {
+    setView("collection");
+  }
+
+  function handleOpenNetwork() {
+    setView("network");
   }
 
   function handleSelectConcept(concept: string | null) {
@@ -147,7 +167,7 @@ export default function App() {
       if (next.length >= 2) {
         setView("compare");
       } else if (view === "compare") {
-        setView("home");
+        setView("browse");
       }
 
       return next;
@@ -197,7 +217,13 @@ export default function App() {
             <div className="brand-logo" aria-hidden="true">
               <svg viewBox="0 0 64 64" className="brand-logo__svg" role="img">
                 <defs>
-                  <linearGradient id="eduvidStatsGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <linearGradient
+                    id="eduvidStatsGradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="100%"
+                  >
                     <stop offset="0%" stopColor="#2563eb" />
                     <stop offset="55%" stopColor="#14b8a6" />
                     <stop offset="100%" stopColor="#7c3aed" />
@@ -241,140 +267,128 @@ export default function App() {
           </div>
         </div>
 
-        <nav className="topbar-nav">
-          <button className={view === "home" ? "active" : ""} onClick={() => setView("home")}>
+        <nav className="topbar-nav" aria-label="Primary">
+          <button
+            type="button"
+            className={view === "home" ? "active" : ""}
+            onClick={() => setView("home")}
+          >
             Home
           </button>
+
           <button
-            className={view === "video" ? "active" : ""}
-            onClick={() => setView("video")}
-            disabled={!selectedVideo}
+            type="button"
+            className={view === "browse" ? "active" : ""}
+            onClick={handleOpenBrowse}
           >
-            Video Explorer
+            Homepage
           </button>
+
           <button
+            type="button"
             className={view === "collection" ? "active" : ""}
-            onClick={() => setView("collection")}
+            onClick={handleOpenCollection}
           >
             Collection
           </button>
+
           <button
+            type="button"
             className={view === "network" ? "active" : ""}
-            onClick={() => setView("network")}
+            onClick={handleOpenNetwork}
           >
             Network
           </button>
+
           <button
+            type="button"
             className={view === "compare" ? "active" : ""}
             onClick={() => setView("compare")}
-            disabled={comparisonVideos.length < 2}
           >
-            Compare {comparisonVideos.length > 0 ? `(${comparisonVideos.length}/2)` : ""}
+            Compare
+          </button>
+
+          <button
+            type="button"
+            className={view === "compare" ? "active" : ""}
+            onClick={() => setView("compare")}
+          >
+            About
           </button>
         </nav>
 
-        <div className="topbar-right">
-          <button
-            type="button"
-            className="theme-toggle"
-            onClick={toggleTheme}
-            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            {theme === "dark" ? (
-              <svg viewBox="0 0 24 24" className="theme-toggle__icon" aria-hidden="true">
-                <path
-                  d="M12 3.75V2m0 20v-1.75M4.75 12H3m18 0h-1.75M6.22 6.22 5 5m14 14-1.22-1.22M6.22 17.78 5 19m14-14-1.22 1.22M12 16.25A4.25 4.25 0 1 0 12 7.75a4.25 4.25 0 0 0 0 8.5Z"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" className="theme-toggle__icon" aria-hidden="true">
-                <path
-                  d="M20.2 14.2A8.5 8.5 0 0 1 9.8 3.8a8.75 8.75 0 1 0 10.4 10.4Z"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            )}
-          </button>
-        </div>
       </header>
 
-      <section className="filters-bar">
-        <input
-          type="text"
-          placeholder="Search by title, speaker, concept, or summary..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
+      {view !== "home" && (
+        <section className="filters-bar">
+          <input
+            type="search"
+            placeholder="Search by title, speaker, summary, or concept"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+          />
 
-        <select value={selectedDomain} onChange={(e) => setSelectedDomain(e.target.value)}>
-          <option value="all">All domains</option>
-          {availableDomains.map((domain) => (
-            <option key={domain} value={domain}>
-              {domain}
-            </option>
-          ))}
-        </select>
+          <select
+            value={selectedDomain}
+            onChange={(event) => setSelectedDomain(event.target.value)}
+          >
+            <option value="all">All domains</option>
+            {availableDomains.map((domain) => (
+              <option key={domain} value={domain}>
+                {domain}
+              </option>
+            ))}
+          </select>
 
-        <select
-          value={selectedDifficulty}
-          onChange={(e) => setSelectedDifficulty(e.target.value)}
-        >
-          <option value="all">All difficulty levels</option>
-          {availableDifficulties.map((difficulty) => (
-            <option key={difficulty} value={difficulty}>
-              {difficulty}
-            </option>
-          ))}
-        </select>
-      </section>
-
-      {selectedConcept && (
-        <section className="active-concept-bar">
-          <span>
-            Active concept filter: <strong>{selectedConcept}</strong>
-          </span>
-          <button className="secondary-btn" onClick={() => handleSelectConcept(null)}>
-            Clear concept
-          </button>
+          <select
+            value={selectedDifficulty}
+            onChange={(event) => setSelectedDifficulty(event.target.value)}
+          >
+            <option value="all">All difficulty levels</option>
+            {availableDifficulties.map((difficulty) => (
+              <option key={difficulty} value={difficulty}>
+                {difficulty}
+              </option>
+            ))}
+          </select>
         </section>
       )}
 
       <main className="main-content">
         {view === "home" && (
+          <LandingPage
+            onEnterHomepage={handleOpenBrowse}
+            onOpenCollection={handleOpenCollection}
+            onOpenNetwork={handleOpenNetwork}
+          />
+        )}
+
+        {view === "browse" && (
           <HomePage
             videos={filteredVideos}
             selectedVideoId={selectedVideoId}
             comparisonVideoIds={comparisonVideoIds}
             onOpenVideo={handleOpenVideo}
-            onOpenCollection={() => setView("collection")}
-            onOpenNetwork={() => setView("network")}
+            onOpenCollection={handleOpenCollection}
+            onOpenNetwork={handleOpenNetwork}
             onToggleCompareVideo={handleToggleCompareVideo}
-            onSelectConcept={handleSelectConcept}
+            onSelectConcept={(concept) => handleSelectConcept(concept)}
           />
         )}
 
         {view === "video" && selectedVideo && (
-  <VideoExplorer
-    key={selectedVideo.id}
-    video={selectedVideo}
-    allVideos={dataset.videos}
-    onSelectVideo={handleOpenVideo}
-    onToggleCompareVideo={handleToggleCompareVideo}
-    onSelectConcept={handleSelectConcept}
-    selectedConcept={selectedConcept}
-    onOpenComparison={handleOpenComparison}
-  />
-)}
+          <VideoExplorer
+            video={selectedVideo}
+            relatedVideos={filteredVideos.filter((video) => video.id !== selectedVideo.id)}
+            selectedConcept={selectedConcept}
+            onSelectConcept={handleSelectConcept}
+            onOpenVideo={handleOpenVideo}
+            onToggleCompareVideo={handleToggleCompareVideo}
+            comparisonVideoIds={comparisonVideoIds}
+            onOpenCollection={handleOpenCollection}
+            onOpenComparison={handleOpenComparison}
+          />
+        )}
 
         {view === "collection" && dataset.collectionAnalysis && (
           <CollectionAnalysis
@@ -401,7 +415,7 @@ export default function App() {
         {view === "compare" && (
           <ComparisonView
             videos={comparisonVideos}
-            allVideos={dataset.videos}
+            allVideos={filteredVideos}
             selectedConcept={selectedConcept}
             onOpenVideo={handleOpenVideo}
             onSelectConcept={handleSelectConcept}
