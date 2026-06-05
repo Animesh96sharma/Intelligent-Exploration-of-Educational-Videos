@@ -65,9 +65,13 @@ animesh
 │   │   │   ├──react.svg
 │   │   │   └──vite.svg
 │   │   ├──components
+│   │   │   ├──AboutPage.tsx
 │   │   │   ├──CollectionAnalysis.tsx
 │   │   │   ├──ComparisonView.tsx
 │   │   │   ├──HomePage.tsx
+│   │   │   ├──LandingPage.tsx
+│   │   │   ├──Logo.tsx
+│   │   │   ├──MetadataPage.tsx
 │   │   │   ├──NetworkView.tsx
 │   │   │   ├──VideoExplorer.tsx
 │   │   │   ├──VideoPlayer.tsx
@@ -77,8 +81,7 @@ animesh
 │   │   ├──App.css
 │   │   ├──App.tsx
 │   │   ├──index.css
-│   │   ├──main.tsx
-│   │   └──Markdown.md
+│   │   └──main.tsx
 │   ├──eslint.config.js
 │   ├──index.html
 │   ├──package-lock.json
@@ -103,7 +106,8 @@ animesh
 ├──pyrightconfig.json
 ├──README.md
 ├──requirements.txt
-└──.gitignore```
+└──.gitignore
+```
 
 
 # SubTask 3 Details-Interactive Visualization Interface
