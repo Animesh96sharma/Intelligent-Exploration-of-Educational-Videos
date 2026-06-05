@@ -250,3 +250,7 @@ node_modules/
 dist/
 .env
 *.log
+
+*.Markdown.md
+
+/home/umwise2526studentproj/Group3ProjectWork/project/animesh/frontend/src/Markdown.md
