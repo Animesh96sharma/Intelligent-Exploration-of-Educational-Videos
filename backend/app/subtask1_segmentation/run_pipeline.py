@@ -75,7 +75,7 @@ def run_pipeline(video_path):
     # 2. Clear any leftover PyTorch cache from previous video
     import urllib.request, json, time, subprocess as sp
     try:
-        payload = json.dumps({"model": "llama3.1:8b", "keep_alive": 0}).encode()
+        payload = json.dumps({"model": "llama3.2:latest", "keep_alive": 0}).encode()
         req = urllib.request.Request(
             "http://localhost:11434/api/generate",
             data=payload,

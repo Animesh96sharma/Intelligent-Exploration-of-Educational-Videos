@@ -63,6 +63,29 @@ def check_ffmpeg() -> None:
         log.error("FFmpeg not found. Install it: https://ffmpeg.org/download.html")
         sys.exit(1)
 
+def free_ollama_vram() -> None:
+    """
+    Ask Ollama to unload its model from VRAM before we run.
+    Fire-and-forget — silently does nothing if Ollama is not running.
+    """
+    import urllib.request
+
+    payload = json.dumps({
+        "model":      "llama3.2:latest",
+        "keep_alive": 0,
+    }).encode("utf-8")
+
+    req = urllib.request.Request(
+        "http://localhost:11434/api/generate",
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        urllib.request.urlopen(req, timeout=5)
+        log.info("Ollama model unloaded from VRAM ✓")
+    except Exception:
+        pass
 
 def extract_audio(video_path: Path, cache_dir: Path) -> Path:
 
@@ -232,6 +255,7 @@ def run(
     keep_audio: bool = False,
 ) -> list[Segment]:
     check_ffmpeg()
+    free_ollama_vram()
 
     video = Path(video_path).resolve()
     if not video.exists():

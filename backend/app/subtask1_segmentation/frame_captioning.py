@@ -92,6 +92,29 @@ def fmt(sec: float) -> str:
     h  =  total_ms // 3_600_000
     return f"{h:02d}:{m:02d}:{s:02d}.{ms:03d}"
 
+def free_ollama_vram() -> None:
+    """
+    Ask Ollama to unload its model from VRAM before we run.
+    Fire-and-forget — silently does nothing if Ollama is not running.
+    """
+    import urllib.request
+
+    payload = json.dumps({
+        "model":      "llama3.2:latest",
+        "keep_alive": 0,
+    }).encode("utf-8")
+
+    req = urllib.request.Request(
+        "http://localhost:11434/api/generate",
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        urllib.request.urlopen(req, timeout=5)
+        log.info("Ollama model unloaded from VRAM ✓")
+    except Exception:
+        pass
 
 def load_transcript(path: Path) -> list[dict]:
     with open(path, encoding="utf-8") as f:
@@ -585,6 +608,7 @@ def run(
 ) -> list[dict]:
 
     import torch
+    free_ollama_vram()
 
     video  = Path(video_path).resolve()
     transc = Path(transcript_path).resolve()
