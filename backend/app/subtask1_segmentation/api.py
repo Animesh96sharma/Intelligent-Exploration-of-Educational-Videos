@@ -1,21 +1,4 @@
-"""
-Intelligent Exploration of Educational Videos
-FastAPI — Subtask 1: Segmentation Pipeline
-==========================================
-Endpoints:
-  POST /transcript          — transcribe a video → JSON
-  POST /captions            — extract frame captions → JSON
-  POST /chapters            — run chapter segmentation → JSON
-  POST /pipeline            — run full pipeline (transcript + captions + chapters)
-  GET  /status              — health check
 
-Run locally:
-  pip install fastapi uvicorn python-multipart
-  uvicorn api:app --reload --port 8000
-
-Docs available at:
-  http://localhost:8000/docs
-"""
 
 import json
 import logging
@@ -227,10 +210,11 @@ def extract_frame_captions(
             ]
             context_text = " ".join(nearby[:3])
 
-        caption = (
-            f"[Frame at {ts}s] "
-            + (f"Speaker is discussing: {context_text[:120]}..." if context_text else "No transcript context available.")
-        )
+        # ── CAPTIONING BLOCK ──────────────────────────────────────────────
+        import sys
+        sys.path.append("backend/app/subtask1_segmentation")
+        from frame_captioning import caption_frame
+        caption = caption_frame(frame_path, context_text)
         # ── END CAPTIONING BLOCK ──────────────────────────────────────────
 
         captions.append(CaptionModel(
@@ -261,36 +245,27 @@ def run_chaptering(
     t0 = time.time()
 
     # ── CHAPTERING BLOCK ──────────────────────────────────────────────────
-    # Replace this with your LLM chaptering call, e.g.:
-    #   chapters = chapter_llama.predict(transcript_segments, captions)
-    #
-    # Placeholder: split into equal 10-minute chunks
     if not transcript_segments:
         return [], 0.0
 
-    total_duration = transcript_segments[-1].end
-    chapter_duration = 600  # 10 minutes
-    num_chapters = max(1, int(total_duration // chapter_duration))
-
-    chapters: list[ChapterModel] = []
-    for i in range(num_chapters):
-        start = i * chapter_duration
-        end = min((i + 1) * chapter_duration, total_duration)
-
-        def fmt(s):
-            h, r = divmod(int(s), 3600)
-            m, sec = divmod(r, 60)
-            return f"{h:02d}:{m:02d}:{sec:02d}"
-
-        chapters.append(ChapterModel(
+    from chaptering import predict_chapters
+    raw_chapters = predict_chapters(
+        transcript_segments=transcript_segments,
+        captions=captions,
+        model="llama3.2:latest"
+    )
+    chapters = [
+        ChapterModel(
             chapter_number=i + 1,
-            start_seconds=start,
-            end_seconds=end,
-            start_timestamp=fmt(start),
-            end_timestamp=fmt(end),
-            title=f"Chapter {i + 1}",   # replace with LLM-generated title
-            summary=None,               # optionally fill with summary text
-        ))
+            start_seconds=c["start"],
+            end_seconds=c["end"],
+            start_timestamp=c["start_timestamp"],
+            end_timestamp=c["end_timestamp"],
+            title=c["title"],
+            summary=c.get("summary"),
+        )
+        for i, c in enumerate(raw_chapters)
+    ]
     # ── END CHAPTERING BLOCK ─────────────────────────────────────────────
 
     elapsed = time.time() - t0
