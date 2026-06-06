@@ -250,12 +250,21 @@ export default function App() {
         </div>
 
         <nav className="topbar-nav" aria-label="Primary">
-          {view === "home" ? (
+          {(view === 'home' || view === 'about' || view === 'metadata') ? (
             <>
               <button
                 type="button"
-                className={view === "about" ? "active" : ""}
-                onClick={() => setView("about")}
+                className={view === 'home' ? 'active' : ''}
+                onClick={() => setView('home')}
+              >
+                <NavIcon path={NAV_ICONS.home} />
+                Home
+              </button>
+
+              <button
+                type="button"
+                className={view === 'about' ? 'active' : ''}
+                onClick={() => setView('about')}
               >
                 <NavIcon path={NAV_ICONS.about} />
                 About
@@ -263,8 +272,8 @@ export default function App() {
 
               <button
                 type="button"
-                className={view === "metadata" ? "active" : ""}
-                onClick={() => setView("metadata")}
+                className={view === 'metadata' ? 'active' : ''}
+                onClick={() => setView('metadata')}
               >
                 <NavIcon path={NAV_ICONS.metadata} />
                 Metadata
@@ -316,24 +325,6 @@ export default function App() {
               >
                 <NavIcon path={NAV_ICONS.compare} />
                 Compare {comparisonVideos.length > 0 ? `(${comparisonVideos.length}/2)` : ""}
-              </button>
-
-              <button
-                type="button"
-                className={view === "about" ? "active" : ""}
-                onClick={() => setView("about")}
-              >
-                <NavIcon path={NAV_ICONS.about} />
-                About
-              </button>
-
-              <button
-                type="button"
-                className={view === "metadata" ? "active" : ""}
-                onClick={() => setView("metadata")}
-              >
-                <NavIcon path={NAV_ICONS.metadata} />
-                Metadata
               </button>
             </>
           )}
