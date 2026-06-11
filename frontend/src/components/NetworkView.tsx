@@ -233,31 +233,46 @@ export default function NetworkView({
   }, [conceptSummaryEdges])
 
   if (videos.length === 0) {
-    return (
-      <section className="network-page">
-        <div className="network-hero">
-          <p className="eyebrow">Network exploration</p>
-          <h2>No videos match the current filters</h2>
-          <p>Adjust the active search or filters to see concept relationships between videos.</p>
-        </div>
-      </section>
-    )
-  }
-
   return (
     <section className="network-page">
-      <div className="network-hero">
-        <div>
-          <p className="eyebrow">Network exploration</p>
-          <h2>Explore concept overlap across the visible video set</h2>
+      <div className="page-intro">
+        <div className="page-intro-copy">
+          <p className="eyebrow">Network Exploration</p>
+          <h2>
+            Relationship Mapping
+            <span>Across Educational Videos</span>
+          </h2>
           <p>
-            This view connects videos through shared key concepts. Increase the overlap threshold
-            to focus on stronger conceptual relationships.
+            Discover concept-based relationships between videos through network-style
+            exploration of shared topics and conceptual overlap.
           </p>
-          {selectedConcept ? (
-            <p className="section-note">Focused concept: {selectedConcept}</p>
-          ) : null}
+          <p className="section-note">
+            Adjust the active search or filters to see concept relationships between
+            videos.
+          </p>
         </div>
+      </div>
+    </section>
+  )
+}
+
+return (
+  <section className="network-page">
+    <div className="page-intro">
+      <div className="page-intro-copy">
+        <p className="eyebrow">Network Exploration</p>
+        <h2>
+          Relationship Mapping
+          <span>Across Educational Videos</span>
+        </h2>
+        <p>
+          Discover concept-based relationships between videos through shared key
+          concepts, visible overlap patterns, and interactive network navigation.
+        </p>
+        {selectedConcept ? (
+          <p className="section-note">Focused concept: {selectedConcept}</p>
+        ) : null}
+      </div>
 
         <div className="hero-actions">
           {selectedConcept ? (

@@ -1,24 +1,24 @@
-import type { VideoRecord } from '../types/video'
+import type { VideoRecord } from "../types/video";
 
 type HomePageProps = {
-  videos: VideoRecord[]
-  selectedVideoId: string | null
-  comparisonVideoIds: string[]
-  onOpenVideo: (videoId: string) => void
-  onOpenCollection: () => void
-  onOpenNetwork: () => void
-  onToggleCompareVideo: (videoId: string) => void
-  onSelectConcept: (concept: string) => void
-}
+  videos: VideoRecord[];
+  selectedVideoId: string | null;
+  comparisonVideoIds: string[];
+  onOpenVideo: (videoId: string) => void;
+  onOpenCollection: () => void;
+  onOpenNetwork: () => void;
+  onToggleCompareVideo: (videoId: string) => void;
+  onSelectConcept: (concept: string) => void;
+};
 
 function formatDuration(seconds: number) {
-  return `${Math.round(seconds / 60)} min`
+  return `${Math.round(seconds / 60)} min`;
 }
 
 function getPreviewLabel(video: VideoRecord) {
   return video.totalChapters
     ? `${video.totalChapters} chapters`
-    : 'Preview available'
+    : "Preview available";
 }
 
 export default function HomePage({
@@ -35,27 +35,16 @@ export default function HomePage({
     <section className="home-page">
       <div className="home-hero">
         <div>
-          <p className="eyebrow">Educational video intelligence</p>
-          <h2>Browse videos, chapter summaries, and concept-level relationships</h2>
+          <h1>Browse videos, chapter summaries, and important concept-level relationships</h1>
           <p>
-            This interface supports search, chapter-based exploration, collection comparison,
-            and network-style topic discovery across the processed educational video dataset.
+            This interface supports timeline & chapter-based exploration, including the hierarchical-based summaries across the processed educational video dataset.
           </p>
         </div>
 
-        <div className="hero-actions">
-          <button type="button" className="primary-btn" onClick={onOpenCollection}>
-            Open collection analysis
-          </button>
-          <button type="button" className="secondary-btn" onClick={onOpenNetwork}>
-            Open network view
-          </button>
-        </div>
       </div>
 
       <div className="results-head">
-        <h3>Available videos</h3>
-        <span>{videos.length} results</span>
+        <h3>Available videos:        <span>{videos.length} results</span></h3>
       </div>
 
       <div className="video-grid">
@@ -66,19 +55,26 @@ export default function HomePage({
           </div>
         ) : (
           videos.map((video) => {
-            const isSelected = selectedVideoId === video.id
-            const isInComparison = comparisonVideoIds.includes(video.id)
-            const concepts = video.keyConcepts.slice(0, 3)
+            const isSelected = selectedVideoId === video.id;
+            const isInComparison = comparisonVideoIds.includes(video.id);
+
+            const visibleConcepts = video.keyConcepts.slice(0, 5);
+            const remainingConceptCount = Math.max(video.keyConcepts.length - 5, 0);
+
             const previewSrc =
-              video.thumbnailUrl || video.thumbnail || video.previewImage || video.posterUrl || ''
-            const videoSrc = video.videoUrl || video.previewUrl || video.src || ''
+              video.thumbnailUrl ||
+              video.thumbnail ||
+              video.previewImage ||
+              video.posterUrl;
+
+            const videoSrc = video.videoUrl || video.previewUrl || video.src;
 
             return (
               <article
                 key={video.id}
-                className={['video-card', isSelected ? 'selected' : '']
+                className={["video-card", isSelected ? "selected" : ""]
                   .filter(Boolean)
-                  .join(' ')}
+                  .join(" ")}
               >
                 <button
                   type="button"
@@ -113,51 +109,66 @@ export default function HomePage({
                   </div>
 
                   <div className="video-card-content">
-                    <p className="eyebrow">{video.domain ?? 'General'}</p>
-                    <h3>{video.title}</h3>
+  <p className="eyebrow">{video.domain ?? "General"}</p>
+  <h3>{video.title}</h3>
 
-                    <div className="video-card-pills">
-                      <span className="meta-pill">{video.speaker ?? 'Unknown speaker'}</span>
-                      <span className="meta-pill">{getPreviewLabel(video)}</span>
-                      <span className="meta-pill">{video.difficultyLevel ?? 'N/A'}</span>
-                    </div>
+  <div className="video-card-toprow">
+    <div className="video-card-pills">
+      <span className="meta-pill">{video.speaker ?? "Unknown speaker"}</span>
+      <span className="meta-pill">{getPreviewLabel(video)}</span>
+      <span className="meta-pill">{video.difficultyLevel ?? "NA"}</span>
+    </div>
+
+    <div className="video-card-sideactions">
+      <button
+        type="button"
+        className={isInComparison ? "primary-btn" : "secondary-btn"}
+        onClick={(event) => {
+          event.stopPropagation();
+          onToggleCompareVideo(video.id);
+        }}
+      >
+        {isInComparison ? "Selected for compare" : "Compare"}
+      </button>
+    </div>
+  </div>
+                   
 
                     <p className="video-card-summary">{video.summaryShort}</p>
 
-                    {concepts.length > 0 ? (
+                    {video.keyConcepts.length > 0 ? (
                       <div className="chip-group compact">
-                        {concepts.map((concept) => (
+                        {visibleConcepts.map((concept) => (
                           <button
                             key={concept}
                             type="button"
                             className="chip concept-chip"
                             onClick={(event) => {
-                              event.stopPropagation()
-                              onSelectConcept(concept)
+                              event.stopPropagation();
+                              onSelectConcept(concept);
                             }}
                           >
                             {concept}
                           </button>
                         ))}
+
+                        {remainingConceptCount > 0 ? (
+                          <span
+                            className="chip muted static"
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            +{remainingConceptCount} more
+                          </span>
+                        ) : null}
                       </div>
                     ) : null}
                   </div>
                 </button>
-
-                <div className="video-cardactions">
-                  <button
-                    type="button"
-                    className={isInComparison ? 'primary-btn' : 'secondary-btn'}
-                    onClick={() => onToggleCompareVideo(video.id)}
-                  >
-                    {isInComparison ? 'Selected for compare' : 'Compare'}
-                  </button>
-                </div>
               </article>
-            )
+            );
           })
         )}
       </div>
     </section>
-  )
+  );
 }

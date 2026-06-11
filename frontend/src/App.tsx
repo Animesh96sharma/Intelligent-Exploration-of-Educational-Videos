@@ -331,7 +331,7 @@ export default function App() {
         </nav>
       </header>
 
-      {view !== "home" && view !== "about" && view !== "metadata" && (
+      {view !== "home" && view !== "about" && view !== "metadata" && view !== "video" &&(
         <section className="filters-bar">
           <input
             type="search"
@@ -394,19 +394,18 @@ export default function App() {
           />
         )}
 
-        {view === "video" && selectedVideo && (
-          <VideoExplorer
-            video={selectedVideo}
-            relatedVideos={filteredVideos.filter((video) => video.id !== selectedVideo.id)}
-            selectedConcept={selectedConcept}
-            onSelectConcept={handleSelectConcept}
-            onOpenVideo={handleOpenVideo}
-            onToggleCompareVideo={handleToggleCompareVideo}
-            comparisonVideoIds={comparisonVideoIds}
-            onOpenCollection={handleOpenCollection}
-            onOpenComparison={handleOpenComparison}
-          />
-        )}
+        {view === "video" && selectedVideo ? (
+  <VideoExplorer
+    video={selectedVideo}
+    allVideos={dataset?.videos ?? []}
+    selectedConcept={selectedConcept}
+    onSelectConcept={handleSelectConcept}
+    onSelectVideo={handleOpenVideo}
+    onToggleCompareVideo={handleToggleCompareVideo}
+    onOpenComparison={handleOpenComparison}
+    onBrowseMoreVideos={handleOpenBrowse}
+  />
+) : null}
 
         {view === "collection" && dataset.collectionAnalysis && (
           <CollectionAnalysis
