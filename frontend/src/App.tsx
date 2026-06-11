@@ -1,41 +1,44 @@
-import { useEffect, useMemo, useState } from "react";
-import "./App.css";
+import { useEffect, useMemo, useState } from 'react'
+import './App.css'
 
-import type { AppDataset, VideoRecord } from "./types/video";
-import { loadAppDataset } from "./lib/dataLoader";
-import { videoMatchesConcept } from "./lib/analytics";
+import type { UserVideoState, VideoBookmark, VideoNote } from './types/userState'
+import { buildProgress, createPlaylist, loadUserState, saveUserState } from './lib/userState'
 
-import Logo from "./components/Logo";
-import LandingPage from "./components/LandingPage";
-import AboutPage from "./components/AboutPage";
-import MetadataPage from "./components/MetadataPage";
-import HomePage from "./components/HomePage";
-import VideoExplorer from "./components/VideoExplorer";
-import CollectionAnalysis from "./components/CollectionAnalysis";
-import NetworkView from "./components/NetworkView";
-import ComparisonView from "./components/ComparisonView";
+import type { AppDataset, VideoRecord } from './types/video'
+import { loadAppDataset } from './lib/dataLoader'
+import { videoMatchesConcept } from './lib/analytics'
+
+import Logo from './components/Logo'
+import LandingPage from './components/LandingPage'
+import AboutPage from './components/AboutPage'
+import MetadataPage from './components/MetadataPage'
+import HomePage from './components/HomePage'
+import VideoExplorer from './components/VideoExplorer'
+import CollectionAnalysis from './components/CollectionAnalysis'
+import NetworkView from './components/NetworkView'
+import ComparisonView from './components/ComparisonView'
 
 type ViewMode =
-  | "home"
-  | "about"
-  | "metadata"
-  | "browse"
-  | "video"
-  | "collection"
-  | "network"
-  | "compare";
+  | 'home'
+  | 'about'
+  | 'metadata'
+  | 'browse'
+  | 'video'
+  | 'collection'
+  | 'network'
+  | 'compare'
 
 const NAV_ICONS = {
-  home: "M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5",
+  home: 'M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5',
   video:
-    "M4 6h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm13 4 5-3v10l-5-3",
-  collection: "M4 6.5h16M4 12h16M4 17.5h16",
+    'M4 6h11a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm13 4 5-3v10l-5-3',
+  collection: 'M4 6.5h16M4 12h16M4 17.5h16',
   network:
-    "M8 6a2 2 0 1 1-4 0a2 2 0 0 1 4 0Zm12 0a2 2 0 1 1-4 0a2 2 0 0 1 4 0Zm-6 12a2 2 0 1 1-4 0a2 2 0 0 1 4 0ZM7.5 7.5l3 8M16.5 7.5l-3 8",
-  compare: "M4 7h6M4 12h6M4 17h6M14 7h6M14 12h6M14 17h6",
-  about: "M12 8h.01M11 12h1v5h1M12 22a10 10 0 1 0 0-20a10 10 0 0 0 0 20Z",
-  metadata: "M5 4h14M5 9h14M5 14h14M5 19h14"
-} as const;
+    'M8 6a2 2 0 1 1-4 0a2 2 0 0 1 4 0Zm12 0a2 2 0 1 1-4 0a2 2 0 0 1 4 0Zm-6 12a2 2 0 1 1-4 0a2 2 0 0 1 4 0ZM7.5 7.5l3 8M16.5 7.5l-3 8',
+  compare: 'M4 7h6M4 12h6M4 17h6M14 7h6M14 12h6M14 17h6',
+  about: 'M12 8h.01M11 12h1v5h1M12 22a10 10 0 1 0 0-20a10 10 0 0 0 0 20Z',
+  metadata: 'M5 4h14M5 9h14M5 14h14M5 19h14',
+} as const
 
 function NavIcon({ path }: { path: string }) {
   return (
@@ -50,187 +53,287 @@ function NavIcon({ path }: { path: string }) {
         />
       </svg>
     </span>
-  );
+  )
 }
 
 export default function App() {
-  const [dataset, setDataset] = useState<AppDataset | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [dataset, setDataset] = useState<AppDataset | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const [view, setView] = useState<ViewMode>("home");
-  const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
-  const [selectedConcept, setSelectedConcept] = useState<string | null>(null);
-  const [comparisonVideoIds, setComparisonVideoIds] = useState<string[]>([]);
+  const [userState, setUserState] = useState<UserVideoState>(() => loadUserState())
+  const [view, setView] = useState<ViewMode>('home')
+  const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null)
+  const [selectedConcept, setSelectedConcept] = useState<string | null>(null)
+  const [comparisonVideoIds, setComparisonVideoIds] = useState<string[]>([])
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDomain, setSelectedDomain] = useState("all");
-  const [selectedDifficulty, setSelectedDifficulty] = useState("all");
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedDomain, setSelectedDomain] = useState('all')
+  const [selectedDifficulty, setSelectedDifficulty] = useState('all')
 
   useEffect(() => {
-    let mounted = true;
+    saveUserState(userState)
+  }, [userState])
+
+  useEffect(() => {
+    let mounted = true
 
     async function init() {
       try {
-        setLoading(true);
-        const data = await loadAppDataset();
-        if (!mounted) return;
+        setLoading(true)
+        const data = await loadAppDataset()
+        if (!mounted) return
 
-        setDataset(data);
-        setSelectedVideoId(data.videos[0]?.id ?? null);
+        setDataset(data)
+        setSelectedVideoId(data.videos[0]?.id ?? null)
       } catch (err) {
-        if (!mounted) return;
-        setError(err instanceof Error ? err.message : "Failed to load dataset.");
+        if (!mounted) return
+        setError(err instanceof Error ? err.message : 'Failed to load dataset.')
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) setLoading(false)
       }
     }
 
-    init();
+    init()
 
     return () => {
-      mounted = false;
-    };
-  }, []);
+      mounted = false
+    }
+  }, [])
 
   const filteredVideos = useMemo(() => {
-    if (!dataset) return [];
+    if (!dataset) return []
 
-    const q = searchQuery.trim().toLowerCase();
+    const q = searchQuery.trim().toLowerCase()
 
     return dataset.videos.filter((video) => {
       const matchesQuery =
-        q === "" ||
+        q === '' ||
         video.title.toLowerCase().includes(q) ||
-        (video.speaker ?? "").toLowerCase().includes(q) ||
-        (video.domain ?? "").toLowerCase().includes(q) ||
-        (video.summaryShort ?? "").toLowerCase().includes(q) ||
-        video.keyConcepts.some((concept) => concept.toLowerCase().includes(q));
+        (video.speaker ?? '').toLowerCase().includes(q) ||
+        (video.domain ?? '').toLowerCase().includes(q) ||
+        (video.summaryShort ?? '').toLowerCase().includes(q) ||
+        video.keyConcepts.some((concept) => concept.toLowerCase().includes(q))
 
       const matchesDomain =
-        selectedDomain === "all" ||
-        (video.domain ?? "").toLowerCase() === selectedDomain.toLowerCase();
+        selectedDomain === 'all' ||
+        (video.domain ?? '').toLowerCase() === selectedDomain.toLowerCase()
 
       const matchesDifficulty =
-        selectedDifficulty === "all" ||
-        (video.difficultyLevel ?? "").toLowerCase() ===
-          selectedDifficulty.toLowerCase();
+        selectedDifficulty === 'all' ||
+        (video.difficultyLevel ?? '').toLowerCase() === selectedDifficulty.toLowerCase()
 
-      const matchesSelectedConcept = videoMatchesConcept(video, selectedConcept);
+      const matchesSelectedConcept = videoMatchesConcept(video, selectedConcept)
 
       return (
         matchesQuery &&
         matchesDomain &&
         matchesDifficulty &&
         matchesSelectedConcept
-      );
-    });
-  }, [dataset, searchQuery, selectedDomain, selectedDifficulty, selectedConcept]);
+      )
+    })
+  }, [dataset, searchQuery, selectedDomain, selectedDifficulty, selectedConcept])
 
   const selectedVideo: VideoRecord | null = useMemo(() => {
-    if (!dataset || !selectedVideoId) return null;
-    return dataset.videos.find((video) => video.id === selectedVideoId) ?? null;
-  }, [dataset, selectedVideoId]);
+    if (!dataset || !selectedVideoId) return null
+    return dataset.videos.find((video) => video.id === selectedVideoId) ?? null
+  }, [dataset, selectedVideoId])
 
   const comparisonVideos = useMemo(() => {
-    if (!dataset || comparisonVideoIds.length === 0) return [];
+    if (!dataset || comparisonVideoIds.length === 0) return []
 
     return comparisonVideoIds
       .map((id) => dataset.videos.find((video) => video.id === id) ?? null)
-      .filter(Boolean) as VideoRecord[];
-  }, [dataset, comparisonVideoIds]);
+      .filter(Boolean) as VideoRecord[]
+  }, [dataset, comparisonVideoIds])
 
   const availableDomains = useMemo(() => {
-    if (!dataset) return [];
+    if (!dataset) return []
     return Array.from(
       new Set(dataset.videos.map((video) => video.domain).filter(Boolean))
-    ) as string[];
-  }, [dataset]);
+    ) as string[]
+  }, [dataset])
 
   const availableDifficulties = useMemo(() => {
-    if (!dataset) return [];
+    if (!dataset) return []
     return Array.from(
       new Set(dataset.videos.map((video) => video.difficultyLevel).filter(Boolean))
-    ) as string[];
-  }, [dataset]);
+    ) as string[]
+  }, [dataset])
 
+  function addBookmark(bookmark: VideoBookmark) {
+    setUserState((current) => ({
+      ...current,
+      bookmarks: [bookmark, ...current.bookmarks],
+    }))
+  }
+
+  function removeBookmark(bookmarkId: string) {
+    setUserState((current) => ({
+      ...current,
+      bookmarks: current.bookmarks.filter((item) => item.id !== bookmarkId),
+    }))
+  }
+
+  function addNote(note: VideoNote) {
+    setUserState((current) => ({
+      ...current,
+      notes: [note, ...current.notes],
+    }))
+  }
+
+  function updateNote(noteId: string, text: string) {
+    setUserState((current) => ({
+      ...current,
+      notes: current.notes.map((note) =>
+        note.id === noteId
+          ? { ...note, text, updatedAt: new Date().toISOString() }
+          : note
+      ),
+    }))
+  }
+
+  function removeNote(noteId: string) {
+    setUserState((current) => ({
+      ...current,
+      notes: current.notes.filter((note) => note.id !== noteId),
+    }))
+  }
+
+  function createNewPlaylist(name: string) {
+    const trimmed = name.trim()
+    if (!trimmed) return
+
+    const playlist = createPlaylist(trimmed)
+    setUserState((current) => ({
+      ...current,
+      playlists: [playlist, ...current.playlists],
+    }))
+  }
+
+  function addVideoToPlaylist(playlistId: string, videoId: string) {
+    setUserState((current) => ({
+      ...current,
+      playlists: current.playlists.map((playlist) => {
+        if (playlist.id !== playlistId) return playlist
+
+        const alreadyExists = playlist.items.some((item) => item.videoId === videoId)
+        if (alreadyExists) return playlist
+
+        return {
+          ...playlist,
+          items: [
+            ...playlist.items,
+            {
+              videoId,
+              addedAt: new Date().toISOString(),
+            },
+          ],
+        }
+      }),
+    }))
+  }
+
+  function removeVideoFromPlaylist(playlistId: string, videoId: string) {
+    setUserState((current) => ({
+      ...current,
+      playlists: current.playlists.map((playlist) =>
+        playlist.id === playlistId
+          ? {
+              ...playlist,
+              items: playlist.items.filter((item) => item.videoId !== videoId),
+            }
+          : playlist
+      ),
+    }))
+  }
+
+  function updateVideoProgress(videoId: string, currentTime: number, duration: number) {
+    setUserState((current) => ({
+      ...current,
+      progress: {
+        ...current.progress,
+        [videoId]: buildProgress(videoId, currentTime, duration),
+      },
+    }))
+  }
 
   function handleOpenBrowse() {
-    setView("browse");
+    setView('browse')
   }
 
   function handleOpenVideo(videoId: string) {
-    setSelectedVideoId(videoId);
-    setView("video");
+    setSelectedVideoId(videoId)
+    setView('video')
   }
 
   function handleOpenCollection() {
-    setView("collection");
+    setView('collection')
   }
 
   function handleOpenNetwork() {
-    setView("network");
+    setView('network')
   }
 
   function handleSelectConcept(concept: string | null) {
-    setSelectedConcept(concept);
+    setSelectedConcept(concept)
   }
 
   function handleToggleCompareVideo(videoId: string) {
     setComparisonVideoIds((current) => {
-      let next: string[];
+      let next: string[]
 
       if (current.includes(videoId)) {
-        next = current.filter((id) => id !== videoId);
+        next = current.filter((id) => id !== videoId)
       } else if (current.length >= 2) {
-        next = [current[1], videoId];
+        next = [current[1], videoId]
       } else {
-        next = [...current, videoId];
+        next = [...current, videoId]
       }
 
       if (next.length >= 2) {
-        setView("compare");
-      } else if (view === "compare") {
-        setView("browse");
+        setView('compare')
+      } else if (view === 'compare') {
+        setView('browse')
       }
 
-      return next;
-    });
+      return next
+    })
   }
 
   function handleOpenComparison(videoId?: string) {
     if (!videoId) {
       if (comparisonVideoIds.length >= 2) {
-        setView("compare");
+        setView('compare')
       }
-      return;
+      return
     }
 
     setComparisonVideoIds((current) => {
-      let next: string[];
+      let next: string[]
 
       if (current.includes(videoId)) {
-        next = current;
+        next = current
       } else if (current.length >= 2) {
-        next = [current[1], videoId];
+        next = [current[1], videoId]
       } else {
-        next = [...current, videoId];
+        next = [...current, videoId]
       }
 
       if (next.length >= 2) {
-        setView("compare");
+        setView('compare')
       }
 
-      return next;
-    });
+      return next
+    })
   }
 
   if (loading) {
-    return <div className="app-shell">Loading EduVid Explorer...</div>;
+    return <div className="app-shell">Loading EduVid Explorer...</div>
   }
 
   if (error || !dataset) {
-    return <div className="app-shell">Error: {error ?? "Unknown error"}</div>;
+    return <div className="app-shell">Error: {error ?? 'Unknown error'}</div>
   }
 
   return (
@@ -242,15 +345,13 @@ export default function App() {
 
             <div className="brand-copy">
               <h1 className="brand-gradient">EduVid Explorer</h1>
-              <p className="brand-tagline">
-                Intelligent Video Analysis Platform
-              </p>
+              <p className="brand-tagline">Intelligent Video Analysis Platform</p>
             </div>
           </div>
         </div>
 
         <nav className="topbar-nav" aria-label="Primary">
-          {(view === 'home' || view === 'about' || view === 'metadata') ? (
+          {view === 'home' || view === 'about' || view === 'metadata' ? (
             <>
               <button
                 type="button"
@@ -283,8 +384,8 @@ export default function App() {
             <>
               <button
                 type="button"
-                className={view === "home" ? "active" : ""}
-                onClick={() => setView("home")}
+                className={view === 'home' ? 'active' : ''}
+                onClick={() => setView('home')}
               >
                 <NavIcon path={NAV_ICONS.home} />
                 Home
@@ -292,7 +393,7 @@ export default function App() {
 
               <button
                 type="button"
-                className={view === "browse" ? "active" : ""}
+                className={view === 'browse' ? 'active' : ''}
                 onClick={handleOpenBrowse}
               >
                 <NavIcon path={NAV_ICONS.video} />
@@ -301,7 +402,7 @@ export default function App() {
 
               <button
                 type="button"
-                className={view === "collection" ? "active" : ""}
+                className={view === 'collection' ? 'active' : ''}
                 onClick={handleOpenCollection}
               >
                 <NavIcon path={NAV_ICONS.collection} />
@@ -310,7 +411,7 @@ export default function App() {
 
               <button
                 type="button"
-                className={view === "network" ? "active" : ""}
+                className={view === 'network' ? 'active' : ''}
                 onClick={handleOpenNetwork}
               >
                 <NavIcon path={NAV_ICONS.network} />
@@ -319,19 +420,19 @@ export default function App() {
 
               <button
                 type="button"
-                className={view === "compare" ? "active" : ""}
-                onClick={() => setView("compare")}
+                className={view === 'compare' ? 'active' : ''}
+                onClick={() => setView('compare')}
                 disabled={comparisonVideos.length < 2}
               >
                 <NavIcon path={NAV_ICONS.compare} />
-                Compare {comparisonVideos.length > 0 ? `(${comparisonVideos.length}/2)` : ""}
+                Compare {comparisonVideos.length > 0 ? `(${comparisonVideos.length}/2)` : ''}
               </button>
             </>
           )}
         </nav>
       </header>
 
-      {view !== "home" && view !== "about" && view !== "metadata" && view !== "video" &&(
+      {view !== 'home' && view !== 'about' && view !== 'metadata' && view !== 'video' && (
         <section className="filters-bar">
           <input
             type="search"
@@ -367,21 +468,19 @@ export default function App() {
       )}
 
       <main className="main-content">
-        {view === "home" && (
+        {view === 'home' && (
           <LandingPage
             onEnterHomepage={handleOpenBrowse}
-            onOpenAbout={() => setView("about")}
+            onOpenAbout={() => setView('about')}
             onOpenNetwork={handleOpenNetwork}
           />
         )}
 
-        {view === "about" && (
-          <AboutPage onStartExploring={handleOpenBrowse} />
-        )}
+        {view === 'about' && <AboutPage onStartExploring={handleOpenBrowse} />}
 
-        {view === "metadata" && <MetadataPage />}
+        {view === 'metadata' && <MetadataPage />}
 
-        {view === "browse" && (
+        {view === 'browse' && (
           <HomePage
             videos={filteredVideos}
             selectedVideoId={selectedVideoId}
@@ -390,24 +489,34 @@ export default function App() {
             onOpenCollection={handleOpenCollection}
             onOpenNetwork={handleOpenNetwork}
             onToggleCompareVideo={handleToggleCompareVideo}
-            onSelectConcept={(concept) => handleSelectConcept(concept)}
+            onSelectConcept={handleSelectConcept}
           />
         )}
 
-        {view === "video" && selectedVideo ? (
-  <VideoExplorer
-    video={selectedVideo}
-    allVideos={dataset?.videos ?? []}
-    selectedConcept={selectedConcept}
-    onSelectConcept={handleSelectConcept}
-    onSelectVideo={handleOpenVideo}
-    onToggleCompareVideo={handleToggleCompareVideo}
-    onOpenComparison={handleOpenComparison}
-    onBrowseMoreVideos={handleOpenBrowse}
-  />
-) : null}
+        {view === 'video' && selectedVideo && (
+          <VideoExplorer
+            video={selectedVideo}
+            allVideos={dataset.videos ?? []}
+            selectedConcept={selectedConcept}
+            onSelectConcept={handleSelectConcept}
+            onSelectVideo={handleOpenVideo}
+            onToggleCompareVideo={handleToggleCompareVideo}
+            onOpenComparison={handleOpenComparison}
+            onBrowseMoreVideos={handleOpenBrowse}
+            userState={userState}
+            onAddBookmark={addBookmark}
+            onRemoveBookmark={removeBookmark}
+            onAddNote={addNote}
+            onUpdateNote={updateNote}
+            onRemoveNote={removeNote}
+            onCreatePlaylist={createNewPlaylist}
+            onAddVideoToPlaylist={addVideoToPlaylist}
+            onRemoveVideoFromPlaylist={removeVideoFromPlaylist}
+            onUpdateVideoProgress={updateVideoProgress}
+          />
+        )}
 
-        {view === "collection" && dataset.collectionAnalysis && (
+        {view === 'collection' && dataset.collectionAnalysis && (
           <CollectionAnalysis
             analysis={dataset.collectionAnalysis}
             videos={filteredVideos}
@@ -419,7 +528,7 @@ export default function App() {
           />
         )}
 
-        {view === "network" && (
+        {view === 'network' && (
           <NetworkView
             videos={filteredVideos}
             selectedVideoId={selectedVideoId}
@@ -429,7 +538,7 @@ export default function App() {
           />
         )}
 
-        {view === "compare" && (
+        {view === 'compare' && (
           <ComparisonView
             videos={comparisonVideos}
             allVideos={filteredVideos}
@@ -450,5 +559,5 @@ export default function App() {
         </div>
       </footer>
     </div>
-  );
+  )
 }

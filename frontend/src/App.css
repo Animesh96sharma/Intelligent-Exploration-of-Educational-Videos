@@ -2514,6 +2514,347 @@ input[type="range"]:focus {
   padding: 8px 12px;
 }
 
+
+.video-explorer-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.9fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.video-explorer-main,
+.video-explorer-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.video-title-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.video-progress-inline {
+  margin: 8px 0 0;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+.video-player-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.player-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--divider);
+  background: var(--surface-soft);
+  border-radius: 16px;
+}
+
+.player-toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.player-toolbar-group--actions {
+  margin-left: auto;
+}
+
+.player-toolbar-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-soft);
+}
+
+.player-select,
+.playlist-create input,
+.notes-compose textarea,
+.note-card textarea {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px 12px;
+  color: var(--text);
+}
+
+.video-progress-bar {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--surface-soft-2);
+  overflow: hidden;
+}
+
+.video-progress-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2563eb, #0f172a);
+}
+
+.timeline-chapter-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 260px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid var(--divider);
+  background: var(--surface);
+}
+
+.timeline-chapter-card-main {
+  border: none;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+}
+
+.timeline-chapter-card.active {
+  border-color: rgba(37, 99, 235, 0.35);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.08);
+}
+
+.timeline-chapter-card.selected {
+  border-color: rgba(0, 0, 0, 0.18);
+}
+
+.timeline-chapter-card-meta,
+.timeline-chapter-card-actions,
+.timeline-marker-row,
+.bookmark-card-actions,
+.note-card-head,
+.playlist-card,
+.export-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.timeline-marker {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.badge-bookmark {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.badge-note {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.bookmark-list,
+.notes-list,
+.playlist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bookmark-card,
+.note-card,
+.playlist-card {
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--divider);
+  background: var(--surface-soft);
+}
+
+.notes-compose,
+.playlist-create {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chapter-panel,
+.sidebar-card {
+  background: var(--surface);
+  border: 1px solid var(--divider);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: var(--shadow-sm);
+}
+
+.chapter-panel-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.secondary-btn.small,
+.primary-btn.small {
+  min-height: auto;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+}
+
+@media (max-width: 1080px) {
+  .video-explorer-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .player-toolbar-group--actions {
+    margin-left: 0;
+  }
+}
+
+.playlist-create {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.playlist-create input,
+.note-composer textarea,
+.note-card textarea,
+.sidebar-card select {
+  width: 100%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 12px;
+  padding: 10px 12px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.playlist-list,
+.playlist-items,
+.note-list,
+.bookmark-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.playlist-card,
+.note-card {
+  border: 1px solid var(--divider);
+  background: var(--surface-soft);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+.playlist-card-head,
+.playlist-item-row,
+.note-card-head,
+.bookmark-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.playlist-card-head > div:first-child,
+.playlist-item-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.playlist-card-head span,
+.playlist-item-copy span,
+.progress-mini p,
+.meta {
+  color: var(--text-faint);
+  font-size: 0.84rem;
+}
+
+.playlist-card-actions,
+.playlist-item-actions,
+.related-cardactions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.progress-mini {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.progress-mini-bar {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--surface-soft-2);
+  overflow: hidden;
+}
+
+.progress-mini-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4b5563 0, #111827 70%, #000000 100%);
+}
+
+.note-composer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.playback-toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.more-video-cardpreview {
+  border: none;
+  padding: 0;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+
+.more-video-cardfallback {
+  width: 100%;
+  min-height: 140px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--surface-soft), var(--surface-soft-2));
+  color: var(--text-soft);
+  text-align: center;
+  padding: 1rem;
+}
+
+@media (max-width: 900px) {
+  .playlist-card-head,
+  .playlist-item-row,
+  .note-card-head,
+  .bookmark-row {
+    flex-direction: column;
+  }
+}
+
 /* =========================================
    Collection analytics upgrade
 ========================================= */
