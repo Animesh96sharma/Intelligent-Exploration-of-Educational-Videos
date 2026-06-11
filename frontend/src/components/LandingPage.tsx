@@ -17,7 +17,7 @@ export default function LandingPage({
           <h2 className="landing-title-varient">of Educational Videos</h2>
 
           <h2 className="landing-eyebrow">
-            A comprehensive system for exploring educational video collections
+            A comprehensive dashboard for exploring educational video collections
             through automatic segmentation, multi-level summarization, and
             interactive visualization
           </h2>

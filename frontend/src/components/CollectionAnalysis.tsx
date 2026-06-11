@@ -160,46 +160,52 @@ export default function CollectionAnalysis({
   const totalCollectionCount = analysis.totalVideos
 
   if (safeVideos.length === 0) {
-    return (
-      <section className="collection-page">
-        <div className="collection-hero">
-          <div>
-            <p className="eyebrow">Collection intelligence</p>
-            <h2>No videos match the current filters</h2>
-            <p>
-              Clear or adjust the active search, concept, and filter settings to explore
-              collection-level analysis again.
-            </p>
-          </div>
-        </div>
-      </section>
-    )
-  }
-
   return (
     <section className="collection-page">
-      <div className="collection-hero">
-        <div>
-          <p className="eyebrow">Collection intelligence</p>
-          <h2>Cross-video themes, overlap patterns, and guided learning flow</h2>
+      <div className="page-intro">
+        <div className="page-intro-copy">
+          <p className="eyebrow">Collection Intelligence</p>
+          <h2>
+            Collection Analysis
+            <span>Across Educational Videos</span>
+          </h2>
           <p>
-            Explore pairwise similarity, topic coverage, shared concepts, and the recommended
-            viewing path derived from the processed collection analysis outputs.
+            Explore collection-level structure through shared concepts, similarity
+            patterns, topic coverage, and guided learning flow across the visible
+            video set.
           </p>
           <p className="section-note">
-            Showing analysis for {visibleCount} visible video{visibleCount === 1 ? '' : 's'} out of{' '}
-            {totalCollectionCount}.
+            No videos match the current filter. Clear or adjust the active search,
+            concept, and filter settings to explore collection-level analysis again.
           </p>
         </div>
-
-        <div className="hero-actions">
-          {selectedConcept ? (
-            <button className="secondary-btn" onClick={() => onSelectConcept(null)}>
-              Clear concept filter
-            </button>
-          ) : null}
-        </div>
       </div>
+    </section>
+  )
+}
+
+return (
+  <section className="collection-page">
+    <div className="page-intro">
+      <div className="page-intro-copy">
+        <p className="eyebrow">Collection Intelligence</p>
+        <h2>
+          Collection Analysis
+          <span>Across Educational Videos</span>
+        </h2>
+        <p>
+          Explore collection-level structure through shared concepts, similarity
+          patterns, topic coverage, and guided learning flow across the processed
+          educational video set.
+        </p>
+        <p className="section-note">
+          Showing analysis for {visibleCount} visible video{visibleCount === 1 ? '' : 's'} out of{' '}
+          {totalCollectionCount}.
+        </p>
+      </div>
+    </div>
+
+    {/* keep the rest of the component unchanged */}
 
       <div className="stats-grid">
         <article className="stat-card">

@@ -1,3 +1,5 @@
+import type { SubtitleTrack } from './userState'
+
 export type SummaryDetailLevel = "short" | "medium" | "long";
 
 export interface RawChapterTimelineItem {
@@ -102,27 +104,28 @@ export interface ChapterRecord {
 }
 
 export interface VideoRecord {
-  id: string;
-  title: string;
-  speaker?: string;
-  domain?: string;
-  duration: number;
-  totalChapters: number;
-  videoSrc: string;
-  posterSrc?: string;
-  summaryShort?: string;
-  summaryMedium?: string;
-  summaryLong?: string;
-  keyConcepts: string[];
-  learningObjectives: string[];
-  prerequisites: string[];
-  topicProgression?: string;
-  difficultyLevel?: string;
-  domainTags: string[];
-  hasCodeExamples: boolean;
-  hasMathematicalContent: boolean;
-  hasDiagrams: boolean;
-  chapters: ChapterRecord[];
+  id: string
+  title: string
+  speaker?: string
+  domain?: string
+  duration: number
+  totalChapters: number
+  videoSrc: string
+  posterSrc?: string
+  subtitleTracks?: SubtitleTrack[]
+  summaryShort?: string
+  summaryMedium?: string
+  summaryLong?: string
+  keyConcepts: string[]
+  learningObjectives: string[]
+  prerequisites: string[]
+  topicProgression?: string
+  difficultyLevel?: string
+  domainTags: string[]
+  hasCodeExamples: boolean
+  hasMathematicalContent: boolean
+  hasDiagrams: boolean
+  chapters: ChapterRecord[]
 }
 
 export interface CollectionAnalysisRecord {

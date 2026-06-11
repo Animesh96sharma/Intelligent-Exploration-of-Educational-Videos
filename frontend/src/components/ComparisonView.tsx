@@ -29,23 +29,26 @@ export default function ComparisonView({
   }, [leftVideo, rightVideo]);
 
   if (!leftVideo || !rightVideo || leftVideo.id === rightVideo.id) {
-    return (
-      <section className="comparison-page">
-        <div className="comparison-hero">
-          <div>
-            <p className="eyebrow">Comparison view</p>
-            <h2>Select two different videos to compare</h2>
-            <p>
-              Choose videos from the home page, explorer, or collection analysis
-              to compare summaries, chapters, and concept overlap side by side.
-            </p>
-          </div>
+  return (
+    <section className="comparison-page">
+      <div className="page-intro">
+        <div className="page-intro-copy">
+          <p className="eyebrow">Comparison View</p>
+          <h2>
+            Side-by-Side Comparison
+            <span>of Educational Videos</span>
+          </h2>
+          <p>
+            Compare summaries, chapter structure, learning objectives, and concept
+            overlap across two selected videos in one workspace.
+          </p>
         </div>
+      </div>
 
-        <div className="results-head">
-          <h3>Available videos for comparison</h3>
-          <span>{allVideos.length} videos</span>
-        </div>
+      <div className="results-head">
+        <h3>Available videos for comparison</h3>
+        <span>{allVideos.length} videos</span>
+      </div>
 
         <div className="video-grid">
           {allVideos.map((video) => {
@@ -74,24 +77,24 @@ export default function ComparisonView({
     );
   }
 
-  return (
-    <section className="comparison-page">
-      <div className="comparison-hero">
-        <div>
-          <p className="eyebrow">Comparison view</p>
-          <h2>Compare videos side by side</h2>
-          <p>
-            Inspect overlap, unique concepts, chapter structure, and summary
-            differences across two selected videos.
-          </p>
-        </div>
-
-        {selectedConcept && (
-          <button className="secondary-btn" onClick={() => onSelectConcept(null)}>
-            Clear concept filter
-          </button>
-        )}
+ return (
+  <section className="comparison-page">
+    <div className="page-intro">
+      <div className="page-intro-copy">
+        <p className="eyebrow">Comparison View</p>
+        <h2>
+          Side-by-Side Comparison
+          <span>of Educational Videos</span>
+        </h2>
+        <p>
+          Inspect overlap, unique concepts, chapter structure, and summary
+          differences across two selected educational videos.
+        </p>
+        {selectedConcept ? (
+          <p className="section-note">Focused concept: {selectedConcept}</p>
+        ) : null}
       </div>
+    </div>
 
       <div className="stats-grid">
         <article className="stat-card">
