@@ -363,11 +363,26 @@ export default function VideoExplorer({
             <VideoPlayer
               videoId={video.id}
               src={getVideoSource(video)}
-              title={video.title ?? 'Untitled video'}
+              title={video.title}
               currentTime={currentTime}
+              chapters={chapters}
+              transcript={(video.transcript?.segments ?? []).map((segment) => ({
+                id: segment.id,
+                text: segment.text,
+                startTime: segment.startTime,
+              }))}
+              playbackRate={playbackRate}
+              subtitlesEnabled={subtitlesEnabled}
+              captions={video.captions?.segments ?? []}
               onTimeUpdate={(time) => {
                 setCurrentTime(time)
                 onUpdateVideoProgress(video.id, time, video.duration ?? 0)
+              }}
+              onPlaybackRateChange={setPlaybackRate}
+              onSubtitlesToggle={setSubtitlesEnabled}
+              onChapterSelect={(chapter, index) => {
+                setSelectedChapterIndex(index)
+                setCurrentTime(chapter.startTime)
               }}
             />
           </section>

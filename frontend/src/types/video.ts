@@ -2,6 +2,24 @@ import type { SubtitleTrack } from './userState'
 
 export type SummaryDetailLevel = "short" | "medium" | "long";
 
+export interface TranscriptSegment {
+  id: string;
+  startTime: number;
+  endTime: number;
+  startTimestamp: string;
+  endTimestamp: string;
+  text: string;
+  confidence?: number;
+}
+
+export interface VideoTranscript {
+  language?: string;
+  durationSeconds?: number;
+  model?: string;
+  numSegments?: number;
+  segments: TranscriptSegment[];
+}
+
 export interface RawChapterTimelineItem {
   chapter_index: number;
   title: string;
@@ -113,6 +131,7 @@ export interface VideoRecord {
   videoSrc: string
   posterSrc?: string
   subtitleTracks?: SubtitleTrack[]
+  transcript?: VideoTranscript;
   summaryShort?: string
   summaryMedium?: string
   summaryLong?: string
