@@ -8,6 +8,7 @@ import {
   Shrink,
   ChevronRight,
 } from 'lucide-react'
+import type { SummaryDetailLevel } from '../types/video'
 
 type ChapterItem = {
   id: string
@@ -22,6 +23,12 @@ type TranscriptItem = {
   startTime: number
 }
 
+type VideoSummaryContent = {
+  short?: string
+  medium?: string
+  long?: string
+}
+
 type VideoPlayerProps = {
   videoId: string
   src: string
@@ -29,6 +36,9 @@ type VideoPlayerProps = {
   currentTime: number
   chapters?: ChapterItem[]
   transcript?: TranscriptItem[]
+  summary?: VideoSummaryContent
+  summaryLevel?: SummaryDetailLevel
+  onSummaryLevelChange?: (level: SummaryDetailLevel) => void
   playbackRate?: number
   onTimeUpdate: (time: number) => void
   onPlaybackRateChange?: (rate: number) => void
@@ -36,6 +46,7 @@ type VideoPlayerProps = {
 }
 
 const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
+const SUMMARY_LEVELS: SummaryDetailLevel[] = ['short', 'medium', 'long']
 
 function formatTime(totalSeconds: number) {
   const safe = Math.max(0, Math.floor(totalSeconds || 0))
@@ -59,6 +70,20 @@ function downloadBlob(blob: Blob, filename: string) {
   URL.revokeObjectURL(url)
 }
 
+function getSummaryText(summary: VideoSummaryContent | undefined, level: SummaryDetailLevel) {
+  if (!summary) return 'No summary available.'
+
+  if (level === 'long') {
+    return summary.long ?? summary.medium ?? summary.short ?? 'No summary available.'
+  }
+
+  if (level === 'medium') {
+    return summary.medium ?? summary.short ?? 'No summary available.'
+  }
+
+  return summary.short ?? 'No summary available.'
+}
+
 export default function VideoPlayer({
   videoId,
   src,
@@ -66,6 +91,9 @@ export default function VideoPlayer({
   currentTime,
   chapters = [],
   transcript = [],
+  summary,
+  summaryLevel = 'medium',
+  onSummaryLevelChange,
   playbackRate = 1,
   onTimeUpdate,
   onPlaybackRateChange,
@@ -80,9 +108,14 @@ export default function VideoPlayer({
   const [isPlaying, setIsPlaying] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [panelOpen, setPanelOpen] = useState(false)
-  const [panelTab, setPanelTab] = useState<'chapters' | 'transcript'>('chapters')
+  const [panelTab, setPanelTab] = useState<'chapters' | 'transcript' | 'summary'>('chapters')
   const [speedMenuOpen, setSpeedMenuOpen] = useState(false)
   const [isScrubbing, setIsScrubbing] = useState(false)
+
+  const resolvedSummary = useMemo(
+    () => getSummaryText(summary, summaryLevel),
+    [summary, summaryLevel]
+  )
 
   useEffect(() => {
     const video = videoRef.current
@@ -366,11 +399,11 @@ export default function VideoPlayer({
                   type="button"
                   className={`video-control-btn video-control-btn-panel ${panelOpen ? 'active' : ''}`}
                   onClick={() => setPanelOpen((current) => !current)}
-                  aria-label={panelOpen ? 'Close chapters panel' : 'Open chapters panel'}
-                  title="Chapters panel"
+                  aria-label={panelOpen ? 'Close video details panel' : 'Open video details panel'}
+                  title="Video details panel"
                 >
                   <ListVideo size={18} />
-                  <span className="video-control-label">More Section</span>
+                  <span className="video-control-label">More</span>
                   <ChevronRight size={16} className={panelOpen ? 'rotate-open' : ''} />
                 </button>
 
@@ -453,6 +486,13 @@ export default function VideoPlayer({
               >
                 Transcript
               </button>
+              <button
+                type="button"
+                className={panelTab === 'summary' ? 'active' : ''}
+                onClick={() => setPanelTab('summary')}
+              >
+                Summary
+              </button>
             </div>
 
             <div className="video-side-panel-body">
@@ -474,22 +514,42 @@ export default function VideoPlayer({
                 ) : (
                   <p className="video-panel-empty">No chapters available.</p>
                 )
-              ) : transcript.length > 0 ? (
-                <div className="video-panel-list">
-                  {transcript.map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      className={`video-panel-item ${Math.abs(currentTime - item.startTime) < 3 ? 'active' : ''}`}
-                      onClick={() => handleSeek(item.startTime)}
-                    >
-                      <span>{item.text}</span>
-                      <strong>{formatTime(item.startTime)}</strong>
-                    </button>
-                  ))}
-                </div>
+              ) : panelTab === 'transcript' ? (
+                transcript.length > 0 ? (
+                  <div className="video-panel-list">
+                    {transcript.map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        className={`video-panel-item ${Math.abs(currentTime - item.startTime) < 3 ? 'active' : ''}`}
+                        onClick={() => handleSeek(item.startTime)}
+                      >
+                        <span>{item.text}</span>
+                        <strong>{formatTime(item.startTime)}</strong>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="video-panel-empty">No transcript available.</p>
+                )
               ) : (
-                <p className="video-panel-empty">No transcript available.</p>
+                <div className="video-panel-summary">
+                  <div className="video-panel-summary__header">
+                    <div className="summary-toggle" role="tablist" aria-label="Summary detail level">
+                      {SUMMARY_LEVELS.map((level) => (
+                        <button
+                          key={level}
+                          type="button"
+                          className={summaryLevel === level ? 'active' : ''}
+                          onClick={() => onSummaryLevelChange?.(level)}
+                        >
+                          {level}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <p>{resolvedSummary}</p>
+                </div>
               )}
             </div>
           </aside>

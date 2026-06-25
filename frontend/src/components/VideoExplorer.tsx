@@ -64,16 +64,6 @@ function getBestChapterSummary(chapter: ChapterRecord | null, level: SummaryDeta
   return chapter.summaryShort ?? 'No chapter summary available.'
 }
 
-function getBestVideoSummary(video: VideoRecord, level: SummaryDetailLevel): string {
-  if (level === 'long') {
-    return video.summaryLong ?? video.summaryMedium ?? video.summaryShort ?? 'No video summary available.'
-  }
-  if (level === 'medium') {
-    return video.summaryMedium ?? video.summaryShort ?? 'No video summary available.'
-  }
-  return video.summaryShort ?? 'No video summary available.'
-}
-
 function getActiveChapter(chapters: ChapterRecord[], currentTime: number): ChapterRecord | null {
   if (chapters.length === 0) return null
 
@@ -375,6 +365,13 @@ export default function VideoExplorer({
                 text: segment.text,
                 startTime: segment.startTime,
               }))}
+              summary={{
+                short: video.summaryShort,
+                medium: video.summaryMedium,
+                long: video.summaryLong,
+              }}
+              summaryLevel={summaryLevel}
+              onSummaryLevelChange={setSummaryLevel}
               playbackRate={playbackRate}
               onTimeUpdate={(time) => {
                 setCurrentTime(time)
@@ -506,25 +503,6 @@ export default function VideoExplorer({
         </div>
 
         <aside className="video-explorersidebar">
-          <section className="sidebar-card">
-            <div className="results-head">
-              <h3>Video Summary</h3>
-              <div className="summary-toggle" role="tablist" aria-label="Summary detail level">
-                {(['short', 'medium', 'long'] as SummaryDetailLevel[]).map((level) => (
-                  <button
-                    key={level}
-                    type="button"
-                    className={summaryLevel === level ? 'active' : ''}
-                    onClick={() => setSummaryLevel(level)}
-                  >
-                    {level}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <p>{getBestVideoSummary(video, summaryLevel)}</p>
-          </section>
-
           <section className="sidebar-card">
             <div className="results-head">
               <h3>Playback tools</h3>
@@ -690,7 +668,6 @@ export default function VideoExplorer({
                         {overlap.length > 0 ? overlap.slice(0, 4).join(', ') : 'No shared concepts'}
                       </small>
                     </div>
-
                     <div className="related-cardactions">
                       <button
                         className="secondary-btn"
