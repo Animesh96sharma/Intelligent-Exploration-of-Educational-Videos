@@ -1,16 +1,14 @@
-import { useEffect, useMemo, useRef, useState, type MouseEvent, type PointerEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react'
 import {
   Play,
   Pause,
   ListVideo,
-  Captions,
   Camera,
   Expand,
   Shrink,
   ChevronRight,
 } from 'lucide-react'
 
-import type { CaptionSegment } from "../types/video";
 type ChapterItem = {
   id: string
   title: string
@@ -32,11 +30,8 @@ type VideoPlayerProps = {
   chapters?: ChapterItem[]
   transcript?: TranscriptItem[]
   playbackRate?: number
-  subtitlesEnabled?: boolean
-  captions?: CaptionSegment[];
   onTimeUpdate: (time: number) => void
   onPlaybackRateChange?: (rate: number) => void
-  onSubtitlesToggle?: (enabled: boolean) => void
   onChapterSelect?: (chapter: ChapterItem, index: number) => void
 }
 
@@ -72,16 +67,14 @@ export default function VideoPlayer({
   chapters = [],
   transcript = [],
   playbackRate = 1,
-  subtitlesEnabled = false,
-  captions = [],
   onTimeUpdate,
   onPlaybackRateChange,
-  onSubtitlesToggle,
   onChapterSelect,
 }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const playerRef = useRef<HTMLDivElement | null>(null)
   const seekRef = useRef<HTMLDivElement | null>(null)
+  const activePointerIdRef = useRef<number | null>(null)
 
   const [duration, setDuration] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -89,6 +82,7 @@ export default function VideoPlayer({
   const [panelOpen, setPanelOpen] = useState(false)
   const [panelTab, setPanelTab] = useState<'chapters' | 'transcript'>('chapters')
   const [speedMenuOpen, setSpeedMenuOpen] = useState(false)
+  const [isScrubbing, setIsScrubbing] = useState(false)
 
   useEffect(() => {
     const video = videoRef.current
@@ -99,16 +93,6 @@ export default function VideoPlayer({
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-
-    if (Math.abs(video.currentTime - currentTime) > 1.5) {
-      video.currentTime = currentTime
-    }
-  }, [currentTime])
-
-  useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
-
     video.playbackRate = playbackRate
   }, [playbackRate])
 
@@ -123,8 +107,6 @@ export default function VideoPlayer({
     }
   }, [])
 
-  const [isScrubbing, setIsScrubbing] = useState(false)
-
   const activeChapterIndex = useMemo(() => {
     if (!chapters.length) return -1
 
@@ -136,31 +118,23 @@ export default function VideoPlayer({
     })
   }, [chapters, currentTime, duration])
 
-  const activeCaption = useMemo(() => {
-    if (!subtitlesEnabled || !captions?.length) return null;
-
-    return (
-      captions.find(
-        (segment) =>
-          currentTime >= segment.startTime && currentTime <= segment.endTime
-      ) ?? null
-    );
-  }, [captions, currentTime, subtitlesEnabled]);
-
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0
 
   async function handlePlayPause() {
     const video = videoRef.current
     if (!video) return
 
-    if (video.paused) {
-      await video.play()
-      setIsPlaying(true)
-      return
+    try {
+      if (video.paused) {
+        await video.play()
+        setIsPlaying(true)
+      } else {
+        video.pause()
+        setIsPlaying(false)
+      }
+    } catch (error) {
+      console.error('Video playback toggle failed', error)
     }
-
-    video.pause()
-    setIsPlaying(false)
   }
 
   function handleSeek(nextTime: number) {
@@ -181,28 +155,81 @@ export default function VideoPlayer({
     handleSeek(ratio * duration)
   }
 
-function handleTimelineClick(event: MouseEvent<HTMLDivElement>) {
-  if (isScrubbing) return
-  handleSeekFromPointer(event.clientX)
-}
-
-function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
-  setIsScrubbing(true)
-  event.currentTarget.setPointerCapture(event.pointerId)
-  handleSeekFromPointer(event.clientX)
-}
-
-function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
-  if (!isScrubbing) return
-  handleSeekFromPointer(event.clientX)
-}
-
-function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
-  setIsScrubbing(false)
-  if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-    event.currentTarget.releasePointerCapture(event.pointerId)
+  function handleTimelineClick(event: MouseEvent<HTMLDivElement>) {
+    if (activePointerIdRef.current !== null) return
+    handleSeekFromPointer(event.clientX)
   }
-}
+
+  function handlePointerDown(event: PointerEvent<HTMLDivElement>) {
+    activePointerIdRef.current = event.pointerId
+    setIsScrubbing(true)
+    event.currentTarget.setPointerCapture(event.pointerId)
+    handleSeekFromPointer(event.clientX)
+  }
+
+  function handlePointerMove(event: PointerEvent<HTMLDivElement>) {
+    if (!isScrubbing) return
+    if (activePointerIdRef.current !== event.pointerId) return
+    handleSeekFromPointer(event.clientX)
+  }
+
+  function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
+    if (activePointerIdRef.current !== event.pointerId) return
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+
+    activePointerIdRef.current = null
+    setIsScrubbing(false)
+  }
+
+  function handlePointerCancel(event: PointerEvent<HTMLDivElement>) {
+    if (activePointerIdRef.current !== event.pointerId) return
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+
+    activePointerIdRef.current = null
+    setIsScrubbing(false)
+  }
+
+  function handleTimelineKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (duration <= 0) return
+
+    const smallStep = 5
+    const largeStep = 15
+
+    switch (event.key) {
+      case 'ArrowRight':
+        event.preventDefault()
+        handleSeek(currentTime + smallStep)
+        break
+      case 'ArrowLeft':
+        event.preventDefault()
+        handleSeek(currentTime - smallStep)
+        break
+      case 'PageUp':
+        event.preventDefault()
+        handleSeek(currentTime + largeStep)
+        break
+      case 'PageDown':
+        event.preventDefault()
+        handleSeek(currentTime - largeStep)
+        break
+      case 'Home':
+        event.preventDefault()
+        handleSeek(0)
+        break
+      case 'End':
+        event.preventDefault()
+        handleSeek(duration)
+        break
+      default:
+        break
+    }
+  }
 
   async function handleToggleFullscreen() {
     const player = playerRef.current
@@ -219,6 +246,7 @@ function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
   async function handleScreenshot() {
     const video = videoRef.current
     if (!video) return
+    if (!video.videoWidth || !video.videoHeight) return
 
     const canvas = document.createElement('canvas')
     canvas.width = video.videoWidth
@@ -240,228 +268,233 @@ function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
     onChapterSelect?.(chapter, index)
   }
 
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const delta = Math.abs(video.currentTime - currentTime)
+    if (delta > 0.25) {
+      video.currentTime = currentTime
+    }
+  }, [currentTime])
+
   return (
-  <div
-    ref={playerRef}
-    className={`video-player-shell ${isFullscreen ? 'is-fullscreen' : ''} ${panelOpen ? 'panel-open' : ''}`}
-  >
-    <div className="video-stage">
-      <div className="video-media-area">
-        <video
-          key={videoId}
-          ref={videoRef}
-          src={src}
-          preload="metadata"
-          className="video-element"
-          onClick={handlePlayPause}
-          onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)}
-          onPlay={() => setIsPlaying(true)}
-          onPause={() => setIsPlaying(false)}
-          onTimeUpdate={(event) => onTimeUpdate(event.currentTarget.currentTime)}
-        >
-          Your browser does not support the video tag for {title}.
-        </video>
-
-        {activeCaption ? (
-            <div className="video-subtitle-overlay" aria-live="polite">
-              {activeCaption.text}
-            </div>
-          ) : null}
-
-        <div className="video-controls">
-          <div
-            ref={seekRef}
-            className={`video-progress ${isScrubbing ? 'is-scrubbing' : ''}`}
-            role="slider"
-            aria-label="Video timeline"
-            aria-valuemin={0}
-            aria-valuemax={Math.floor(duration || 0)}
-            aria-valuenow={Math.floor(currentTime || 0)}
-            onClick={handleTimelineClick}
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            onPointerCancel={handlePointerUp}
+    <div
+      ref={playerRef}
+      className={`video-player-shell ${isFullscreen ? 'is-fullscreen' : ''} ${panelOpen ? 'panel-open' : ''}`}
+    >
+      <div className="video-stage">
+        <div className="video-media-area">
+          <video
+            key={videoId}
+            ref={videoRef}
+            src={src}
+            preload="metadata"
+            className="video-element"
+            onClick={handlePlayPause}
+            onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)}
+            onPlay={() => setIsPlaying(true)}
+            onPause={() => setIsPlaying(false)}
+            onTimeUpdate={(event) => onTimeUpdate(event.currentTarget.currentTime)}
           >
-            <div className="video-progress-track" />
-            <div className="video-progress-fill" style={{ width: `${progressPercent}%` }} />
+            Your browser does not support the video tag for {title}.
+          </video>
 
-            {chapters.map((chapter) => {
-              const left = duration > 0 ? (chapter.startTime / duration) * 100 : 0
-              return (
-                <button
-                  key={chapter.id}
-                  type="button"
-                  className="video-chapter-marker"
-                  style={{ left: `${left}%` }}
-                  onClick={(event) => {
-                  event.stopPropagation()
-                  handleChapterJump(chapter, chapters.findIndex((item) => item.id === chapter.id))
-                  }}
-                  title={`${chapter.title} • ${formatTime(chapter.startTime)}`}
-                  aria-label={`Jump to chapter ${chapter.title}`}
-                />
-              )
-            })}
+          <div className="video-controls">
+            <div
+              ref={seekRef}
+              className={`video-progress ${isScrubbing ? 'is-scrubbing' : ''}`}
+              role="slider"
+              aria-label="Video timeline"
+              aria-valuemin={0}
+              aria-valuemax={Math.floor(duration || 0)}
+              aria-valuenow={Math.floor(currentTime || 0)}
+              tabIndex={0}
+              onClick={handleTimelineClick}
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              onPointerCancel={handlePointerCancel}
+              onPointerLeave={handlePointerUp}
+              onKeyDown={handleTimelineKeyDown}
+            >
+              <div className="video-progress-track" />
+              <div
+                className="video-progress-fill"
+                style={{ width: `${progressPercent}%` }}
+              />
 
-            <div className="video-progress-thumb" style={{ left: `${progressPercent}%` }} />
-          </div>
+              {chapters.map((chapter, index) => {
+                const left = duration > 0 ? (chapter.startTime / duration) * 100 : 0
+                const isActive = index === activeChapterIndex
 
-          <div className="video-controls-row">
-            <div className="video-controls-left">
-              <button
-                type="button"
-                className="video-control-btn icon-only"
-                onClick={handlePlayPause}
-                aria-label={isPlaying ? 'Pause video' : 'Play video'}
-                title={isPlaying ? 'Pause' : 'Play'}
-              >
-                {isPlaying ? <Pause size={18} /> : <Play size={18} />}
-              </button>
+                return (
+                  <button
+                    key={chapter.id}
+                    type="button"
+                    className={`video-progress-marker ${isActive ? 'active' : ''}`}
+                    style={{ left: `${left}%` }}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      handleChapterJump(chapter, index)
+                    }}
+                    aria-label={`Jump to chapter: ${chapter.title}`}
+                    title={`${chapter.title} · ${formatTime(chapter.startTime)}`}
+                  />
+                )
+              })}
 
-              <button
-                type="button"
-                className={`video-control-btn video-control-btn-panel ${panelOpen ? 'active' : ''}`}
-                onClick={() => setPanelOpen((current) => !current)}
-                aria-label={panelOpen ? 'Close chapters panel' : 'Open chapters panel'}
-                title="Chapters panel"
-              >
-                <ListVideo size={18} />
-                <span className="video-control-label">More Section</span>
-                <ChevronRight size={16} className={panelOpen ? 'rotate-open' : ''} />
-              </button>
-
-              <div className="video-time-readout">
-                <span>{formatTime(currentTime)}</span>
-                <span>/</span>
-                <span>{formatTime(duration)}</span>
-              </div>
+              <div
+                className="video-progress-thumb"
+                style={{ left: `${progressPercent}%` }}
+              />
             </div>
 
-            <div className="video-controls-right">
-              <button
-                type="button"
-                className={`video-control-btn icon-only ${subtitlesEnabled ? 'active' : ''}`}
-                onClick={() => onSubtitlesToggle?.(!subtitlesEnabled)}
-                aria-label={subtitlesEnabled ? 'Disable subtitles' : 'Enable subtitles'}
-                title="Subtitles"
-              >
-                <Captions size={18} />
-              </button>
-
-              <div className="video-speed-menu-wrap">
+            <div className="video-controls-row">
+              <div className="video-controls-left">
                 <button
                   type="button"
-                  className="video-control-btn"
-                  onClick={() => setSpeedMenuOpen((current) => !current)}
-                  aria-label="Playback speed"
-                  title="Playback speed"
+                  className="video-control-btn icon-only"
+                  onClick={handlePlayPause}
+                  aria-label={isPlaying ? 'Pause video' : 'Play video'}
+                  title={isPlaying ? 'Pause' : 'Play'}
                 >
-                  <span className="video-speed-trigger">{playbackRate}x</span>
+                  {isPlaying ? <Pause size={18} /> : <Play size={18} />}
                 </button>
 
-                {speedMenuOpen ? (
-                  <div className="video-speed-menu">
-                    {SPEED_OPTIONS.map((speed) => (
-                      <button
-                        key={speed}
-                        type="button"
-                        className={speed === playbackRate ? 'active' : ''}
-                        onClick={() => {
-                          onPlaybackRateChange?.(speed)
-                          setSpeedMenuOpen(false)
-                        }}
-                      >
-                        {speed}x
-                      </button>
-                    ))}
-                  </div>
-                ) : null}
+                <button
+                  type="button"
+                  className={`video-control-btn video-control-btn-panel ${panelOpen ? 'active' : ''}`}
+                  onClick={() => setPanelOpen((current) => !current)}
+                  aria-label={panelOpen ? 'Close chapters panel' : 'Open chapters panel'}
+                  title="Chapters panel"
+                >
+                  <ListVideo size={18} />
+                  <span className="video-control-label">More Section</span>
+                  <ChevronRight size={16} className={panelOpen ? 'rotate-open' : ''} />
+                </button>
+
+                <div className="video-time-readout">
+                  <span>{formatTime(currentTime)}</span>
+                  <span>/</span>
+                  <span>{formatTime(duration)}</span>
+                </div>
               </div>
 
-              <button
-                type="button"
-                className="video-control-btn icon-only"
-                onClick={handleScreenshot}
-                aria-label="Capture screenshot"
-                title="Screenshot"
-              >
-                <Camera size={18} />
-              </button>
+              <div className="video-controls-right">
+                <div className="video-speed-menu-wrap">
+                  <button
+                    type="button"
+                    className="video-control-btn"
+                    onClick={() => setSpeedMenuOpen((current) => !current)}
+                    aria-label="Playback speed"
+                    title="Playback speed"
+                  >
+                    <span className="video-speed-trigger">{playbackRate}x</span>
+                  </button>
 
-              <button
-                type="button"
-                className="video-control-btn icon-only"
-                onClick={handleToggleFullscreen}
-                aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-                title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-              >
-                {isFullscreen ? <Shrink size={18} /> : <Expand size={18} />}
-              </button>
+                  {speedMenuOpen ? (
+                    <div className="video-speed-menu">
+                      {SPEED_OPTIONS.map((speed) => (
+                        <button
+                          key={speed}
+                          type="button"
+                          className={speed === playbackRate ? 'active' : ''}
+                          onClick={() => {
+                            onPlaybackRateChange?.(speed)
+                            setSpeedMenuOpen(false)
+                          }}
+                        >
+                          {speed}x
+                        </button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+
+                <button
+                  type="button"
+                  className="video-control-btn icon-only"
+                  onClick={handleScreenshot}
+                  aria-label="Capture screenshot"
+                  title="Screenshot"
+                >
+                  <Camera size={18} />
+                </button>
+
+                <button
+                  type="button"
+                  className="video-control-btn icon-only"
+                  onClick={handleToggleFullscreen}
+                  aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+                  title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                >
+                  {isFullscreen ? <Shrink size={18} /> : <Expand size={18} />}
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {panelOpen ? (
-        <aside className="video-side-panel" aria-label="Video side panel">
-          <div className="video-side-panel-tabs">
-            <button
-              type="button"
-              className={panelTab === 'chapters' ? 'active' : ''}
-              onClick={() => setPanelTab('chapters')}
-            >
-              Chapters
-            </button>
-            <button
-              type="button"
-              className={panelTab === 'transcript' ? 'active' : ''}
-              onClick={() => setPanelTab('transcript')}
-            >
-              Transcript
-            </button>
-          </div>
+        {panelOpen ? (
+          <aside className="video-side-panel" aria-label="Video side panel">
+            <div className="video-side-panel-tabs">
+              <button
+                type="button"
+                className={panelTab === 'chapters' ? 'active' : ''}
+                onClick={() => setPanelTab('chapters')}
+              >
+                Chapters
+              </button>
+              <button
+                type="button"
+                className={panelTab === 'transcript' ? 'active' : ''}
+                onClick={() => setPanelTab('transcript')}
+              >
+                Transcript
+              </button>
+            </div>
 
-          <div className="video-side-panel-body">
-            {panelTab === 'chapters' ? (
-              chapters.length > 0 ? (
+            <div className="video-side-panel-body">
+              {panelTab === 'chapters' ? (
+                chapters.length > 0 ? (
+                  <div className="video-panel-list">
+                    {chapters.map((chapter, index) => (
+                      <button
+                        key={chapter.id}
+                        type="button"
+                        className={`video-panel-item ${index === activeChapterIndex ? 'active' : ''}`}
+                        onClick={() => handleChapterJump(chapter, index)}
+                      >
+                        <span>{chapter.title}</span>
+                        <strong>{formatTime(chapter.startTime)}</strong>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="video-panel-empty">No chapters available.</p>
+                )
+              ) : transcript.length > 0 ? (
                 <div className="video-panel-list">
-                  {chapters.map((chapter, index) => (
+                  {transcript.map((item) => (
                     <button
-                      key={chapter.id}
+                      key={item.id}
                       type="button"
-                      className={`video-panel-item ${index === activeChapterIndex ? 'active' : ''}`}
-                      onClick={() => handleChapterJump(chapter, index)}
+                      className={`video-panel-item ${Math.abs(currentTime - item.startTime) < 3 ? 'active' : ''}`}
+                      onClick={() => handleSeek(item.startTime)}
                     >
-                      <span>{chapter.title}</span>
-                      <strong>{formatTime(chapter.startTime)}</strong>
+                      <span>{item.text}</span>
+                      <strong>{formatTime(item.startTime)}</strong>
                     </button>
                   ))}
                 </div>
               ) : (
-                <p className="video-panel-empty">No chapters available.</p>
-              )
-            ) : transcript.length > 0 ? (
-              <div className="video-panel-list">
-                {transcript.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className={`video-panel-item ${Math.abs(currentTime - item.startTime) < 3 ? 'active' : ''}`}
-                    onClick={() => handleSeek(item.startTime)}
-                  >
-                    <span>{item.text}</span>
-                    <strong>{formatTime(item.startTime)}</strong>
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <p className="video-panel-empty">No transcript available.</p>
-            )}
-          </div>
-        </aside>
-      ) : null}
+                <p className="video-panel-empty">No transcript available.</p>
+              )}
+            </div>
+          </aside>
+        ) : null}
+      </div>
     </div>
-  </div>
-)
+  )
 }

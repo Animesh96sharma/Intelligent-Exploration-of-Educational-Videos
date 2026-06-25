@@ -1,5 +1,3 @@
-// src/lib/dataLoader.ts
-
 import type {
   AppDataset,
   ChapterRecord,
@@ -12,7 +10,6 @@ import type {
 
 const DATA_BASE = "/data/processed/subtask2_summarization";
 const TRANSCRIPT_BASE = "/data/processed/subtask1_segmentation/transcripts";
-const CAPTIONS_BASE = "/data/processed/subtask1_segmentation/captions";
 
 const VIDEO_FILE_MAP: Record<string, string> = {
   tib_av_00000_720p: "/data/raw/videos/tib_av_00000_720p.mp4",
@@ -46,31 +43,6 @@ type RawTranscriptFile = {
     num_segments?: number;
   };
   segments?: RawTranscriptSegment[];
-};
-
-type RawCaptionSlide = {
-  slide_id: number;
-  slide_start: number;
-  slide_end: number;
-  slide_start_str?: string;
-  slide_end_str?: string;
-  duration_sec?: number;
-  representative_timestamp?: number;
-  representative_timestamp_str?: string;
-  split_from_slide?: number;
-  caption?: string;
-  transcript?: string;
-  frame_path?: string;
-};
-
-type RawCaptionsFile = {
-  video_metadata?: {
-    title?: string;
-    author?: string;
-    organization?: string;
-    domain?: string;
-  };
-  slides?: RawCaptionSlide[];
 };
 
 function ensureStringArray(value: unknown): string[] {
@@ -129,36 +101,6 @@ function normalizeTranscript(raw?: RawTranscriptFile) {
   };
 }
 
-function normalizeCaptions(raw?: RawCaptionsFile) {
-  if (!raw) return undefined;
-
-  const segments = Array.isArray(raw.slides)
-    ? raw.slides
-        .map((slide, index) => ({
-          id: `${slide.slide_id ?? index}`,
-          startTime: Number(slide.slide_start ?? 0),
-          endTime: Number(slide.slide_end ?? 0),
-          startTimestamp: slide.slide_start_str ?? "",
-          endTimestamp: slide.slide_end_str ?? "",
-          text:
-            typeof slide.caption === "string"
-              ? slide.caption.replace(/\n{3,}/g, "\n\n").trim()
-              : "",
-          transcript:
-            typeof slide.transcript === "string" ? slide.transcript.trim() : "",
-        }))
-        .filter((segment) => segment.text.length > 0)
-    : [];
-
-  return {
-    title: raw.video_metadata?.title,
-    author: raw.video_metadata?.author,
-    organization: raw.video_metadata?.organization,
-    domain: raw.video_metadata?.domain,
-    segments,
-  };
-}
-
 async function fetchJson<T>(path: string): Promise<T> {
   const response = await fetch(path);
   if (!response.ok) {
@@ -170,8 +112,7 @@ async function fetchJson<T>(path: string): Promise<T> {
 function mergeVideoData(
   videoSummary: RawVideoSummary,
   chapterFile?: RawChapterSummariesFile,
-  transcriptFile?: RawTranscriptFile,
-  captionsFile?: RawCaptionsFile
+  transcriptFile?: RawTranscriptFile
 ): VideoRecord {
   const chapterSummaryMap = new Map(
     (chapterFile?.chapter_summaries ?? []).map((chapter) => [
@@ -230,7 +171,6 @@ function mergeVideoData(
     videoSrc: VIDEO_FILE_MAP[videoSummary.video_id] ?? "",
     posterSrc: undefined,
     transcript: normalizeTranscript(transcriptFile),
-    captions: normalizeCaptions(captionsFile),
     summaryShort: videoSummary.summary_short,
     summaryMedium: videoSummary.summary_medium,
     summaryLong: videoSummary.summary_long,
@@ -264,11 +204,6 @@ export async function loadVideoRecord(videoId: string): Promise<VideoRecord> {
     `${TRANSCRIPT_BASE}/${videoId}_transcript.json`,
     `${TRANSCRIPT_BASE}/${videoId}.json`,
   ];
-  const captionCandidates = [
-  `${CAPTIONS_BASE}/${videoId}_captions.json`,
-  `${CAPTIONS_BASE}/${videoId}_caption.json`,
-  `${CAPTIONS_BASE}/${videoId}.json`,
-  ];
 
   const loadTranscript = async (): Promise<RawTranscriptFile | undefined> => {
     for (const path of transcriptCandidates) {
@@ -285,22 +220,7 @@ export async function loadVideoRecord(videoId: string): Promise<VideoRecord> {
     return undefined;
   };
 
-  const loadCaptions = async (): Promise<RawCaptionsFile | undefined> => {
-  for (const path of captionCandidates) {
-    try {
-      const captions = await fetchJson<RawCaptionsFile>(path);
-      console.log("[dataLoader] captions loaded:", videoId, path, captions);
-      return captions;
-    } catch (error) {
-      console.warn("[dataLoader] captions not found:", videoId, path, error);
-    }
-  }
-
-  console.warn("[dataLoader] no captions found for video:", videoId);
-  return undefined;
-};
-
-  const [videoSummary, chapterSummaries, transcriptFile, captionsFile] = await Promise.all([
+  const [videoSummary, chapterSummaries, transcriptFile] = await Promise.all([
     fetchJson<RawVideoSummary>(
       `${DATA_BASE}/video_summaries/${videoId}_video_summary.json`
     ),
@@ -308,10 +228,9 @@ export async function loadVideoRecord(videoId: string): Promise<VideoRecord> {
       `${DATA_BASE}/chapter_summaries/${videoId}_chapter_summaries.json`
     ).catch(() => undefined),
     loadTranscript(),
-    loadCaptions(),
   ]);
 
-  return mergeVideoData(videoSummary, chapterSummaries, transcriptFile, captionsFile);
+  return mergeVideoData(videoSummary, chapterSummaries, transcriptFile);
 }
 
 export async function loadAllVideos(): Promise<VideoRecord[]> {

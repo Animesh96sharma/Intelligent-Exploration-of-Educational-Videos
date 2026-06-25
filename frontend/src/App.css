@@ -2576,54 +2576,62 @@ input[type="range"]:focus {
 
 .video-progress {
   position: relative;
-  height: 24px;
-  margin-bottom: 10px;
+  width: 100%;
+  height: 20px;
   cursor: pointer;
+  touch-action: none;
 }
 
 .video-progress-track,
-.video-progress-fill {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  height: 4px;
-  transform: translateY(-50%);
-  border-radius: 999px;
+.video-progress-fill,
+.video-progress-thumb {
   pointer-events: none;
 }
 
 .video-progress-track {
-  width: 100%;
-  background: rgba(255,255,255,0.32);
-  z-index: 1;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 4px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.24);
+  pointer-events: none;
 }
 
 .video-progress-fill {
-  background: #ff3b30;
-  z-index: 2;
-}
-
-.video-chapter-marker {
   position: absolute;
   top: 50%;
-  width: 4px;
-  height: 12px;
-  transform: translate(-50%, -50%);
-  border: none;
+  left: 0;
+  height: 4px;
+  transform: translateY(-50%);
   border-radius: 999px;
-  background: rgba(255,255,255,0.95);
-  z-index: 3;
+  background: #ff0202;
+  pointer-events: none;
+}
+
+.video-progress-marker {
+  position: absolute;
+  top: 50%;
+  width: 1px;
+  height: 4px;
+  transform: translate(-50%, -50%);
+  pointer-events: auto;
+  z-index: 2;
+  background: rgba(247, 247, 247, 0.55);
 }
 
 .video-progress-thumb {
   position: absolute;
   top: 50%;
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   border-radius: 999px;
-  background: #ff3b30;
+  background: #ffffff;
   transform: translate(-50%, -50%);
-  z-index: 4;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+  pointer-events: none;
 }
 
 .video-chapter-marker {
@@ -2634,7 +2642,7 @@ input[type="range"]:focus {
   transform: translate(-50%, -50%);
   border: none;
   border-radius: 999px;
-  background: rgba(255,255,255,0.9);
+  background: rgba(255, 255, 255, 0.9);
 }
 
 .video-controls-row {
@@ -2695,7 +2703,7 @@ input[type="range"]:focus {
 }
 
 .video-side-panel {
-  width: min(360px, 32vw);
+  width: min(440px, 38vw);
   height: 100%;
   background: rgba(7, 10, 18, 0.96);
   color: #fff;
@@ -2783,7 +2791,7 @@ input[type="range"]:focus {
   width: 100vw;
   height: 100vh;
   border-radius: 0;
-  background: #000;
+  background: #000000;
 }
 
 .video-player-shell:fullscreen .video-stage,
@@ -2798,7 +2806,7 @@ input[type="range"]:focus {
   flex: 1 1 auto;
   height: 100%;
   min-width: 0;
-  background: #000;
+  background: #0000009a;
 }
 
 .video-player-shell:fullscreen .video-element,
@@ -2810,30 +2818,12 @@ input[type="range"]:focus {
 
 .video-player-shell:fullscreen .video-side-panel,
 .video-player-shell.is-fullscreen .video-side-panel {
-  width: min(420px, 30vw);
+  width: min(700px, 40vw);
   height: 100%;
 }
 
 .video-progress.is-scrubbing {
   cursor: grabbing;
-}
-
-.video-subtitle-overlay {
-  position: absolute;
-  left: 50%;
-  bottom: 84px;
-  transform: translateX(-50%);
-  max-width: min(80%, 900px);
-  padding: 10px 14px;
-  border-radius: 10px;
-  background: rgba(0, 0, 0, 0.72);
-  color: #fff;
-  text-align: center;
-  line-height: 1.45;
-  font-size: 0.95rem;
-  z-index: 6;
-  white-space: pre-line;
-  pointer-events: none;
 }
 
 --------------------------------------------------------------------

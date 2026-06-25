@@ -156,7 +156,6 @@ export default function VideoExplorer({
   const [detailsExpanded, setDetailsExpanded] = useState(true)
   const [noteText, setNoteText] = useState('')
   const [playbackRate, setPlaybackRate] = useState(1)
-  const [subtitlesEnabled, setSubtitlesEnabled] = useState(false)
   const hiddenVideoRef = useRef<HTMLVideoElement | null>(null)
 
   const chapters = useMemo(() => ensureChapterArray(video?.chapters), [video?.chapters])
@@ -169,7 +168,6 @@ export default function VideoExplorer({
     setDetailsExpanded(true)
     setNoteText('')
     setPlaybackRate(1)
-    setSubtitlesEnabled(false)
   }, [video?.id])
 
   useEffect(() => {
@@ -250,7 +248,13 @@ export default function VideoExplorer({
     if (index < 0 || index >= chapters.length) return
     setSelectedChapterIndex(index)
     const nextChapter = chapters[index]
-    if (nextChapter) setCurrentTime(nextChapter.startTime ?? 0)
+    if (nextChapter) seekTo(nextChapter.startTime ?? 0)
+  }
+
+  function seekTo(time: number) {
+    const safeTime = Math.max(0, time)
+    setCurrentTime(safeTime)
+    onUpdateVideoProgress(video.id, safeTime, video.duration ?? 0)
   }
 
   function createId() {
@@ -372,17 +376,14 @@ export default function VideoExplorer({
                 startTime: segment.startTime,
               }))}
               playbackRate={playbackRate}
-              subtitlesEnabled={subtitlesEnabled}
-              captions={video.captions?.segments ?? []}
               onTimeUpdate={(time) => {
                 setCurrentTime(time)
                 onUpdateVideoProgress(video.id, time, video.duration ?? 0)
               }}
               onPlaybackRateChange={setPlaybackRate}
-              onSubtitlesToggle={setSubtitlesEnabled}
               onChapterSelect={(chapter, index) => {
                 setSelectedChapterIndex(index)
-                setCurrentTime(chapter.startTime)
+                seekTo(chapter.startTime)
               }}
             />
           </section>
@@ -426,14 +427,14 @@ export default function VideoExplorer({
 
           <section className="video-details-collapsible">
             <button
-    type="button"
-    className="video-details-collapsible__toggle"
-    onClick={() => setDetailsExpanded((current) => !current)}
-    aria-expanded={detailsExpanded}
-  >
-    <span>Click here for more details</span>
-    <span>{detailsExpanded ? "Show" : "Hide"}</span>
-  </button>
+              type="button"
+              className="video-details-collapsible__toggle"
+              onClick={() => setDetailsExpanded((current) => !current)}
+              aria-expanded={detailsExpanded}
+            >
+              <span>Click here for more details</span>
+              <span>{detailsExpanded ? 'Show' : 'Hide'}</span>
+            </button>
 
             {detailsExpanded ? (
               <div className="video-details-collapsiblecontent">
@@ -556,18 +557,6 @@ export default function VideoExplorer({
               <p className="meta">Currently selected: {playbackRate}x</p>
             </div>
 
-            <div className="info-block">
-              <label className="playback-toggle-row">
-                <input
-                  type="checkbox"
-                  checked={subtitlesEnabled}
-                  onChange={(event) => setSubtitlesEnabled(event.target.checked)}
-                />
-                <span>Subtitles {subtitlesEnabled ? 'enabled' : 'disabled'}</span>
-              </label>
-              <p className="meta">Use this as a frontend toggle until subtitle track files are connected.</p>
-            </div>
-
             <video
               ref={hiddenVideoRef}
               src={getVideoSource(video)}
@@ -607,7 +596,7 @@ export default function VideoExplorer({
                     <button
                       type="button"
                       className="inline-link"
-                      onClick={() => setCurrentTime(bookmark.timestampSeconds)}
+                      onClick={() => seekTo(bookmark.timestampSeconds)}
                     >
                       {bookmark.label ?? formatClock(bookmark.timestampSeconds)}
                     </button>
@@ -662,7 +651,7 @@ export default function VideoExplorer({
                       <button
                         type="button"
                         className="inline-link"
-                        onClick={() => setCurrentTime(note.timestampSeconds)}
+                        onClick={() => seekTo(note.timestampSeconds)}
                       >
                         Jump to {formatClock(note.timestampSeconds)}
                       </button>
@@ -723,54 +712,54 @@ export default function VideoExplorer({
           </section>
 
           <section className="sidebar-card">
-  <div className="results-head">
-    <h3>More videos</h3>
-    <span>{moreVideos.length} shown</span>
-  </div>
+            <div className="results-head">
+              <h3>More videos</h3>
+              <span>{moreVideos.length} shown</span>
+            </div>
 
-  {moreVideos.length === 0 ? (
-    <p>No additional videos are available.</p>
-  ) : (
-    <div className="more-videos-list">
-      {moreVideos.map((item) => (
-        <article key={item.id} className="more-video-card">
-          <button
-            type="button"
-            className="more-video-card-preview"
-            onClick={() => onSelectVideo(item.id)}
-          >
-            {getVideoSource(item) ? (
-              <video
-                className="more-video-card__player"
-                src={getVideoSource(item)}
-                preload="metadata"
-                muted
-                playsInline
-              />
+            {moreVideos.length === 0 ? (
+              <p>No additional videos are available.</p>
             ) : (
-              <div className="more-video-card-fallback">No preview available</div>
+              <div className="more-videos-list">
+                {moreVideos.map((item) => (
+                  <article key={item.id} className="more-video-card">
+                    <button
+                      type="button"
+                      className="more-video-card-preview"
+                      onClick={() => onSelectVideo(item.id)}
+                    >
+                      {getVideoSource(item) ? (
+                        <video
+                          className="more-video-card__player"
+                          src={getVideoSource(item)}
+                          preload="metadata"
+                          muted
+                          playsInline
+                        />
+                      ) : (
+                        <div className="more-video-card-fallback">No preview available</div>
+                      )}
+                    </button>
+
+                    <div className="more-video-card__body">
+                      <strong>{item.title ?? 'Untitled video'}</strong>
+                      <span>
+                        {item.domain ?? 'General'} · {formatDurationMinutes(item.duration)}
+                      </span>
+                    </div>
+                  </article>
+                ))}
+              </div>
             )}
-          </button>
 
-          <div className="more-video-card__body">
-            <strong>{item.title ?? 'Untitled video'}</strong>
-            <span>
-              {item.domain ?? 'General'} · {formatDurationMinutes(item.duration)}
-            </span>
-          </div>
-        </article>
-      ))}
-    </div>
-  )}
-
-  <button
-    type="button"
-    className="secondary-btn more-videos-browse-btn"
-    onClick={onBrowseMoreVideos}
-  >
-    Browse more videos
-  </button>
-</section>
+            <button
+              type="button"
+              className="secondary-btn more-videos-browse-btn"
+              onClick={onBrowseMoreVideos}
+            >
+              Browse more videos
+            </button>
+          </section>
         </aside>
       </div>
     </section>
