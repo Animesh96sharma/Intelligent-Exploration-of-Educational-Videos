@@ -56,6 +56,15 @@ function NavIcon({ path }: { path: string }) {
   )
 }
 
+const NAV_ITEMS: { key: ViewMode; label: string; icon: keyof typeof NAV_ICONS }[] = [
+  { key: 'browse', label: 'Home', icon: 'home' },
+  { key: 'collection', label: 'Collection Analysis', icon: 'collection' },
+  { key: 'network', label: 'Network View', icon: 'network' },
+  { key: 'compare', label: 'Compare', icon: 'compare' },
+  { key: 'metadata', label: 'Metadata', icon: 'metadata' },
+  { key: 'about', label: 'About', icon: 'about' },
+]
+
 export default function App() {
   const [dataset, setDataset] = useState<AppDataset | null>(null)
   const [loading, setLoading] = useState(true)
@@ -70,6 +79,10 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedDomain, setSelectedDomain] = useState('all')
   const [selectedDifficulty, setSelectedDifficulty] = useState('all')
+
+  // Sidebar: on desktop this toggles full <-> mini (icon rail), like YouTube.
+  // On mobile it toggles a slide-in overlay.
+  const [sidebarOpen, setSidebarOpen] = useState(true)
 
   useEffect(() => {
     saveUserState(userState)
@@ -328,6 +341,19 @@ export default function App() {
     })
   }
 
+  function handleNavSelect(key: ViewMode) {
+    if (key === 'browse') handleOpenBrowse()
+    else if (key === 'collection') handleOpenCollection()
+    else if (key === 'network') handleOpenNetwork()
+    else if (key === 'compare') setView('compare')
+    else setView(key)
+
+    // On mobile, selecting a nav item should close the overlay.
+    if (window.matchMedia('(max-width: 900px)').matches) {
+      setSidebarOpen(false)
+    }
+  }
+
   if (loading) {
     return <div className="app-shell">Loading EduVid Explorer...</div>
   }
@@ -336,10 +362,28 @@ export default function App() {
     return <div className="app-shell">Error: {error ?? 'Unknown error'}</div>
   }
 
+  const isLanding = view === 'home'
+  const showSearchAndFilters = !isLanding && view !== 'about' && view !== 'metadata'
+
   return (
-    <div className="app-shell">
-      <header className="topbar">
+    <div className={`app-shell ${isLanding ? 'is-landing' : ''}`}>
+      <header className="topbar youtube-topbar">
         <div className="topbar-left">
+          {!isLanding && (
+            <button
+              type="button"
+              className={`hamburger-btn youtube-hamburger ${sidebarOpen ? 'active' : ''}`}
+              onClick={() => setSidebarOpen((prev) => !prev)}
+              aria-label={sidebarOpen ? 'Collapse menu' : 'Expand menu'}
+              aria-expanded={sidebarOpen}
+              aria-controls="side-drawer"
+            >
+              <span />
+              <span />
+              <span />
+            </button>
+          )}
+
           <button
             type="button"
             className="brand-block"
@@ -347,7 +391,6 @@ export default function App() {
             aria-label="Go to homepage"
           >
             <Logo />
-
             <div className="brand-copy">
               <h1 className="brand-gradient">EduVid Explorer</h1>
               <p className="brand-tagline">Intelligent Video Analysis Platform</p>
@@ -355,196 +398,180 @@ export default function App() {
           </button>
         </div>
 
-        <nav className="topbar-nav" aria-label="Primary">
-          {view === 'home' ? (
-            <button
-              type="button"
-              className={view === 'about' ? 'active' : ''}
-              onClick={() => setView('about')}
+        {showSearchAndFilters && (
+          <div className="topbar-center">
+            <form className="topbar-search" role="search" onSubmit={(e) => e.preventDefault()}>
+              <input
+                type="search"
+                placeholder="Search by title, speaker, summary, or concept"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                aria-label="Search videos"
+              />
+            </form>
+
+            <select
+              className="topbar-filter"
+              value={selectedDomain}
+              onChange={(event) => setSelectedDomain(event.target.value)}
+              aria-label="Filter by domain"
             >
-              <NavIcon path={NAV_ICONS.about} />
-              About
-            </button>
-          ) : (
-            <>
-              <button
-                type="button"
-                className={view === 'browse' || view === 'video' ? 'active' : ''}
-                onClick={handleOpenBrowse}
-              >
-                <NavIcon path={NAV_ICONS.home} />
-                Home
-              </button>
+              <option value="all">All domains</option>
+              {availableDomains.map((domain) => (
+                <option key={domain} value={domain}>
+                  {domain}
+                </option>
+              ))}
+            </select>
 
-              <button
-                type="button"
-                className={view === 'collection' ? 'active' : ''}
-                onClick={handleOpenCollection}
-              >
-                <NavIcon path={NAV_ICONS.collection} />
-                Collection Analysis
-              </button>
+            <select
+              className="topbar-filter"
+              value={selectedDifficulty}
+              onChange={(event) => setSelectedDifficulty(event.target.value)}
+              aria-label="Filter by difficulty"
+            >
+              <option value="all">All difficulty levels</option>
+              {availableDifficulties.map((difficulty) => (
+                <option key={difficulty} value={difficulty}>
+                  {difficulty}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
-              <button
-                type="button"
-                className={view === 'network' ? 'active' : ''}
-                onClick={handleOpenNetwork}
-              >
-                <NavIcon path={NAV_ICONS.network} />
-                Network View
-              </button>
-
-              <button
-                type="button"
-                className={view === 'compare' ? 'active' : ''}
-                onClick={() => setView('compare')}
-                disabled={comparisonVideos.length < 2}
-              >
-                <NavIcon path={NAV_ICONS.compare} />
-                Compare {comparisonVideos.length > 0 ? `(${comparisonVideos.length}/2)` : ''}
-              </button>
-
-              <button
-                type="button"
-                className={view === 'metadata' ? 'active' : ''}
-                onClick={() => setView('metadata')}
-              >
-                <NavIcon path={NAV_ICONS.metadata} />
-                Metadata
-              </button>
-
-              <button
-                type="button"
-                className={view === 'about' ? 'active' : ''}
-                onClick={() => setView('about')}
-              >
-                <NavIcon path={NAV_ICONS.about} />
-                About
-              </button>
-            </>
-          )}
-        </nav>
+        <div className="topbar-right" />
       </header>
 
-      {view !== 'home' && view !== 'about' && view !== 'metadata' && (
-  <section className="filters-bar">
-    <input
-      type="search"
-      placeholder="Search by title, speaker, summary, or concept"
-      value={searchQuery}
-      onChange={(event) => setSearchQuery(event.target.value)}
-    />
+      {!isLanding && (
+        <div className="app-body">
+          {sidebarOpen && (
+            <button
+              type="button"
+              className="drawer-overlay"
+              aria-label="Close menu"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
 
-    <select
-      value={selectedDomain}
-      onChange={(event) => setSelectedDomain(event.target.value)}
-    >
-      <option value="all">All domains</option>
-      {availableDomains.map((domain) => (
-        <option key={domain} value={domain}>
-          {domain}
-        </option>
-      ))}
-    </select>
+          <aside
+            id="side-drawer"
+            className={`side-drawer ${sidebarOpen ? 'open' : 'collapsed'}`}
+            aria-label="Primary navigation"
+          >
+            {NAV_ITEMS.map((item) => {
+              const isActive =
+                view === item.key || (item.key === 'browse' && view === 'video')
 
-    <select
-      value={selectedDifficulty}
-      onChange={(event) => setSelectedDifficulty(event.target.value)}
-    >
-      <option value="all">All difficulty levels</option>
-      {availableDifficulties.map((difficulty) => (
-        <option key={difficulty} value={difficulty}>
-          {difficulty}
-        </option>
-      ))}
-    </select>
-  </section>
-)}
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  className={isActive ? 'active' : ''}
+                  onClick={() => handleNavSelect(item.key)}
+                  disabled={item.key === 'compare' && comparisonVideos.length < 2}
+                  title={item.label}
+                >
+                  <NavIcon path={NAV_ICONS[item.icon]} />
+                  <span className="side-drawer-label">
+                    {item.label}
+                    {item.key === 'compare' && comparisonVideos.length > 0
+                      ? ` (${comparisonVideos.length}/2)`
+                      : ''}
+                  </span>
+                </button>
+              )
+            })}
+          </aside>
 
-      <main className="main-content">
-        {view === 'home' && (
+          <main className={`main-content ${sidebarOpen ? 'shifted' : ''}`}>
+            {view === 'about' && <AboutPage onStartExploring={handleOpenBrowse} />}
+
+            {view === 'metadata' && (
+              <MetadataPage videos={dataset?.videos ?? []} />
+            )}
+
+            {view === 'browse' && (
+              <HomePage
+                videos={filteredVideos}
+                selectedVideoId={selectedVideoId}
+                comparisonVideoIds={comparisonVideoIds}
+                onOpenVideo={handleOpenVideo}
+                onOpenCollection={handleOpenCollection}
+                onOpenNetwork={handleOpenNetwork}
+                onToggleCompareVideo={handleToggleCompareVideo}
+                onSelectConcept={handleSelectConcept}
+              />
+            )}
+
+            {view === 'video' && selectedVideo && (
+              <VideoExplorer
+                video={selectedVideo}
+                allVideos={dataset.videos ?? []}
+                selectedConcept={selectedConcept}
+                onSelectConcept={handleSelectConcept}
+                onSelectVideo={handleOpenVideo}
+                onToggleCompareVideo={handleToggleCompareVideo}
+                onOpenComparison={handleOpenComparison}
+                onBrowseMoreVideos={handleOpenBrowse}
+                userState={userState}
+                onAddBookmark={addBookmark}
+                onRemoveBookmark={removeBookmark}
+                onAddNote={addNote}
+                onUpdateNote={updateNote}
+                onRemoveNote={removeNote}
+                onCreatePlaylist={createNewPlaylist}
+                onAddVideoToPlaylist={addVideoToPlaylist}
+                onRemoveVideoFromPlaylist={removeVideoFromPlaylist}
+                onUpdateVideoProgress={updateVideoProgress}
+              />
+            )}
+
+            {view === 'collection' && dataset.collectionAnalysis && (
+              <CollectionAnalysis
+                analysis={dataset.collectionAnalysis}
+                videos={filteredVideos}
+                onOpenVideo={handleOpenVideo}
+                onToggleCompareVideo={handleToggleCompareVideo}
+                onSelectConcept={handleSelectConcept}
+                selectedConcept={selectedConcept}
+                onOpenComparison={handleOpenComparison}
+              />
+            )}
+
+            {view === 'network' && (
+              <NetworkView
+                videos={filteredVideos}
+                selectedVideoId={selectedVideoId}
+                onOpenVideo={handleOpenVideo}
+                onSelectConcept={handleSelectConcept}
+                selectedConcept={selectedConcept}
+              />
+            )}
+
+            {view === 'compare' && (
+              <ComparisonView
+                videos={comparisonVideos}
+                allVideos={filteredVideos}
+                selectedConcept={selectedConcept}
+                onOpenVideo={handleOpenVideo}
+                onSelectConcept={handleSelectConcept}
+                onToggleCompareVideo={handleToggleCompareVideo}
+              />
+            )}
+          </main>
+        </div>
+      )}
+
+      {isLanding && (
+        <main className="main-content main-content--landing">
           <LandingPage
             onEnterHomepage={handleOpenBrowse}
             onOpenAbout={() => setView('about')}
             onOpenNetwork={handleOpenNetwork}
           />
-        )}
-
-        {view === 'about' && <AboutPage onStartExploring={handleOpenBrowse} />}
-
-        {view === 'metadata' && (
-          <MetadataPage videos={dataset?.videos ?? []} />
-        )}
-
-        {view === 'browse' && (
-          <HomePage
-            videos={filteredVideos}
-            selectedVideoId={selectedVideoId}
-            comparisonVideoIds={comparisonVideoIds}
-            onOpenVideo={handleOpenVideo}
-            onOpenCollection={handleOpenCollection}
-            onOpenNetwork={handleOpenNetwork}
-            onToggleCompareVideo={handleToggleCompareVideo}
-            onSelectConcept={handleSelectConcept}
-          />
-        )}
-
-        {view === 'video' && selectedVideo && (
-          <VideoExplorer
-            video={selectedVideo}
-            allVideos={dataset.videos ?? []}
-            selectedConcept={selectedConcept}
-            onSelectConcept={handleSelectConcept}
-            onSelectVideo={handleOpenVideo}
-            onToggleCompareVideo={handleToggleCompareVideo}
-            onOpenComparison={handleOpenComparison}
-            onBrowseMoreVideos={handleOpenBrowse}
-            userState={userState}
-            onAddBookmark={addBookmark}
-            onRemoveBookmark={removeBookmark}
-            onAddNote={addNote}
-            onUpdateNote={updateNote}
-            onRemoveNote={removeNote}
-            onCreatePlaylist={createNewPlaylist}
-            onAddVideoToPlaylist={addVideoToPlaylist}
-            onRemoveVideoFromPlaylist={removeVideoFromPlaylist}
-            onUpdateVideoProgress={updateVideoProgress}
-          />
-        )}
-
-        {view === 'collection' && dataset.collectionAnalysis && (
-          <CollectionAnalysis
-            analysis={dataset.collectionAnalysis}
-            videos={filteredVideos}
-            onOpenVideo={handleOpenVideo}
-            onToggleCompareVideo={handleToggleCompareVideo}
-            onSelectConcept={handleSelectConcept}
-            selectedConcept={selectedConcept}
-            onOpenComparison={handleOpenComparison}
-          />
-        )}
-
-        {view === 'network' && (
-          <NetworkView
-            videos={filteredVideos}
-            selectedVideoId={selectedVideoId}
-            onOpenVideo={handleOpenVideo}
-            onSelectConcept={handleSelectConcept}
-            selectedConcept={selectedConcept}
-          />
-        )}
-
-        {view === 'compare' && (
-          <ComparisonView
-            videos={comparisonVideos}
-            allVideos={filteredVideos}
-            selectedConcept={selectedConcept}
-            onOpenVideo={handleOpenVideo}
-            onSelectConcept={handleSelectConcept}
-            onToggleCompareVideo={handleToggleCompareVideo}
-          />
-        )}
-      </main>
+        </main>
+      )}
 
       <footer className="app-footer">
         <div className="app-footer__inner">
