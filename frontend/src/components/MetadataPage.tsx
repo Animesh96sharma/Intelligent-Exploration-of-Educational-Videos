@@ -1,26 +1,51 @@
-export default function MetadataPage() {
+import type { VideoRecord } from "../types/video";
+
+type MetadataPageProps = {
+  videos: VideoRecord[];
+};
+
+function downloadMetadataJson(videos: VideoRecord[]) {
+  const exportData = videos.map((video) => ({
+    id: video.id,
+    title: video.title,
+    author: video.author,
+    organization: video.organization,
+    domain: video.domain,
+    description: video.description,
+    mainTopics: video.mainTopics,
+    keywords: video.keywords,
+    entities: video.entities,
+    processingStats: video.processingStats,
+  }));
+
+  const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "video-metadata.json";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+export default function MetadataPage({ videos }: MetadataPageProps) {
   return (
     <section className="metadata-page">
-      <div className="page-intro">
-        <div className="page-intro-copy">
-          <p className="eyebrow">Metadata</p>
-          <h2>
-            Dataset and Research
-            <span>Foundation</span>
-          </h2>
-          <p>
-            Review the data source, methodological grounding, and prototype scope
-            behind the educational video exploration system.
-          </p>
-        </div>
-      </div>
-
       <section className="panel">
         <div className="stats-grid">
-          <article className="stat-card">
-            <span className="stat-label">Primary Repository</span>
+          <a
+            href="https://av.tib.eu/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="stat-card"
+            style={{ textDecoration: "none", cursor: "pointer" }}
+          >
+            <span className="stat-label">Data Source</span>
             <strong>TIB AV-Portal</strong>
-          </article>
+          </a>
           <article className="stat-card">
             <span className="stat-label">Segmentation Basis</span>
             <strong>Chapter-Llama</strong>
@@ -33,30 +58,61 @@ export default function MetadataPage() {
       </section>
 
       <section className="panel">
-        <h3>Data source</h3>
-        <p>
-          TIB AV-Portal (av.tib.eu) is used as the scientific video repository for the
-          demonstration dataset and exploration workflow.
-        </p>
-      </section>
+        <div className="results-head">
+          <h3>Video-level processed metadata</h3>
+          <span>Available {videos.length} videos</span>
+        </div>
 
-      <section className="panel">
-        <h3>Methodological foundation</h3>
-        <p>
-          The interface concept is grounded in automatic chaptering, multi-granularity
-          summarization, and visual analytics principles for interactive exploration
-          and comparison.
-        </p>
-      </section>
+        {videos.length > 0 && (
+          <div className="hero-actions" style={{ marginBottom: "16px" }}>
+            <button
+              type="button"
+              className="secondary-btn"
+              onClick={() => downloadMetadataJson(videos)}
+            >
+              Download Metadata
+            </button>
+          </div>
+        )}
 
-      <section className="panel">
-        <h3>Prototype scope</h3>
-        <p>
-          This demonstration focuses on educational video exploration, concept
-          discovery, chapter-aware summaries, and collection-level comparison rather
-          than a production deployment.
-        </p>
+        {videos.length === 0 ? (
+          <p>No processed metadata is available yet.</p>
+        ) : (
+          <div className="node-grid">
+            {videos.map((video) => (
+              <article key={video.id} className="node-card">
+                <div className="node-card__head">
+                  <h4>{video.title}</h4>
+                </div>
+
+                {(video.author || video.organization) && (
+                  <ul className="meta-list">
+                    {video.author && (
+                      <li><strong>Author:</strong> {video.author}</li>
+                    )}
+                    {video.organization && (
+                      <li><strong>Organization:</strong> {video.organization}</li>
+                    )}
+                  </ul>
+                )}
+
+                {video.description && <p>{video.description}</p>}
+
+                {video.mainTopics.length > 0 && (
+                  <div className="info-block">
+                    <h5>Main topics</h5>
+                    <div className="chip-group">
+                      {video.mainTopics.map((topic) => (
+                        <span key={topic} className="chip static">{topic}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
       </section>
     </section>
-  )
+  );
 }

@@ -5,11 +5,13 @@ import type {
   RawChapterSummariesFile,
   RawCollectionAnalysis,
   RawVideoSummary,
+  RawVideoMetadataFile,
   VideoRecord,
 } from "../types/video";
 
 const DATA_BASE = "/data/processed/subtask2_summarization";
 const TRANSCRIPT_BASE = "/data/processed/subtask1_segmentation/transcripts";
+const METADATA_BASE = "/data/processed/metadata/subtask1_segmentation";
 
 const VIDEO_FILE_MAP: Record<string, string> = {
   tib_av_00000_720p: "/data/raw/videos/tib_av_00000_720p.mp4",
@@ -18,6 +20,9 @@ const VIDEO_FILE_MAP: Record<string, string> = {
   tib_av_16259_720p: "/data/raw/videos/tib_av_16259_720p.mp4",
   tib_av_16260_720p: "/data/raw/videos/tib_av_16260_720p.mp4",
   tib_av_16261_1080p: "/data/raw/videos/tib_av_16261_1080p.mp4",
+  tib_av_21899_720p: "/data/raw/videos/tib_av_21899_720p.mp4",
+  tib_av_34032_480p: "/data/raw/videos/tib_av_34032_480p.mp4",
+  tib_av_34035_480p: "/data/raw/videos/tib_av_34035_480p.mp4",
 };
 
 const VIDEO_IDS = Object.keys(VIDEO_FILE_MAP);
@@ -101,6 +106,15 @@ function normalizeTranscript(raw?: RawTranscriptFile) {
   };
 }
 
+function normalizeEntities(
+  entities?: { text: string; label: string; mentions: number }[]
+) {
+  return (entities ?? []).filter(
+    (entity) =>
+      entity.text?.trim().length > 0 && entity.label?.trim().length > 0
+  );
+}
+
 async function fetchJson<T>(path: string): Promise<T> {
   const response = await fetch(path);
   if (!response.ok) {
@@ -109,10 +123,24 @@ async function fetchJson<T>(path: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+async function loadVideoMetadata(videoId: string): Promise<RawVideoMetadataFile | undefined> {
+  try {
+    const metadata = await fetchJson<RawVideoMetadataFile>(
+      `${METADATA_BASE}/${videoId}_metadata.json`
+    );
+    console.log("[dataLoader] metadata loaded:", videoId, metadata);
+    return metadata;
+  } catch (error) {
+    console.warn("[dataLoader] metadata not found:", videoId, error);
+    return undefined;
+  }
+}
+
 function mergeVideoData(
   videoSummary: RawVideoSummary,
   chapterFile?: RawChapterSummariesFile,
-  transcriptFile?: RawTranscriptFile
+  transcriptFile?: RawTranscriptFile,
+  metadataFile?: RawVideoMetadataFile
 ): VideoRecord {
   const chapterSummaryMap = new Map(
     (chapterFile?.chapter_summaries ?? []).map((chapter) => [
@@ -161,11 +189,14 @@ function mergeVideoData(
     ])
   );
 
+  const videoMetadata = metadataFile?.video_metadata;
+  const sourceMetadata = metadataFile?.source_metadata;
+
   return {
     id: videoSummary.video_id,
-    title: videoSummary.video_title,
+    title: videoMetadata?.title || videoSummary.video_title,
     speaker: videoSummary.speaker ?? chapterFile?.speaker,
-    domain: videoSummary.domain ?? chapterFile?.domain,
+    domain: videoMetadata?.domain || videoSummary.domain || chapterFile?.domain,
     duration: videoSummary.duration,
     totalChapters: videoSummary.total_chapters,
     videoSrc: VIDEO_FILE_MAP[videoSummary.video_id] ?? "",
@@ -184,6 +215,24 @@ function mergeVideoData(
     hasMathematicalContent: Boolean(videoSummary.has_mathematical_content),
     hasDiagrams: Boolean(videoSummary.has_diagrams),
     chapters,
+    // New fields from metadata file
+    author: videoMetadata?.author || undefined,
+    organization: videoMetadata?.organization || undefined,
+    description: videoMetadata?.description || undefined,
+    mainTopics: ensureStringArray(videoMetadata?.main_topics),
+    keywords: ensureStringArray(videoMetadata?.keywords),
+    entities: normalizeEntities(metadataFile?.entities),
+    processingStats: sourceMetadata
+      ? {
+          language: sourceMetadata.language,
+          model: sourceMetadata.model,
+          device: sourceMetadata.device,
+          fp16: sourceMetadata.fp16,
+          processingTimeSeconds: sourceMetadata.processing_time_seconds,
+          realtimeFactor: sourceMetadata.realtime_factor,
+          numSegments: sourceMetadata.num_segments,
+        }
+      : undefined,
   };
 }
 
@@ -220,7 +269,7 @@ export async function loadVideoRecord(videoId: string): Promise<VideoRecord> {
     return undefined;
   };
 
-  const [videoSummary, chapterSummaries, transcriptFile] = await Promise.all([
+  const [videoSummary, chapterSummaries, transcriptFile, metadataFile] = await Promise.all([
     fetchJson<RawVideoSummary>(
       `${DATA_BASE}/video_summaries/${videoId}_video_summary.json`
     ),
@@ -228,9 +277,10 @@ export async function loadVideoRecord(videoId: string): Promise<VideoRecord> {
       `${DATA_BASE}/chapter_summaries/${videoId}_chapter_summaries.json`
     ).catch(() => undefined),
     loadTranscript(),
+    loadVideoMetadata(videoId),
   ]);
 
-  return mergeVideoData(videoSummary, chapterSummaries, transcriptFile);
+  return mergeVideoData(videoSummary, chapterSummaries, transcriptFile, metadataFile);
 }
 
 export async function loadAllVideos(): Promise<VideoRecord[]> {

@@ -1,5 +1,36 @@
 export type SummaryDetailLevel = "short" | "medium" | "long";
 
+export interface RawMetadataEntity {
+  text: string;
+  label: string;
+  mentions: number;
+}
+
+export interface RawVideoMetadataFile {
+  source_metadata: {
+    language: string;
+    duration_seconds: number;
+    model: string;
+    device: string;
+    fp16: boolean;
+    processing_time_seconds: number;
+    realtime_factor: number;
+    num_segments: number;
+  };
+  video_metadata: {
+    title: string;
+    author: string;
+    organization: string;
+    domain: string;
+    description: string;
+    main_topics: string[];
+    keywords: string[];
+    entities: RawMetadataEntity[];
+    language: string;
+  };
+  entities: RawMetadataEntity[];
+}
+
 export interface TranscriptSegment {
   id: string;
   startTime: number;
@@ -142,6 +173,20 @@ export interface VideoRecord {
   hasMathematicalContent: boolean;
   hasDiagrams: boolean;
   chapters: ChapterRecord[];
+  author?: string;
+  organization?: string;
+  description?: string;
+  mainTopics: string[];
+  keywords: string[];
+  entities: RawMetadataEntity[];
+  processingStats?: {
+    language: string;
+    model: string;
+    device: string;
+    fp16: boolean;
+    processingTimeSeconds: number;
+    realtimeFactor: number;
+    numSegments: number;
 }
 
 export interface CollectionAnalysisRecord {

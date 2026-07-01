@@ -276,7 +276,7 @@ export default function App() {
   }
 
   function handleSelectConcept(concept: string | null) {
-    setSelectedConcept(concept)
+    setSelectedConcept(concept || null);
   }
 
   function handleToggleCompareVideo(videoId: string) {
@@ -340,64 +340,40 @@ export default function App() {
     <div className="app-shell">
       <header className="topbar">
         <div className="topbar-left">
-          <div className="brand-block">
+          <button
+            type="button"
+            className="brand-block"
+            onClick={() => setView('home')}
+            aria-label="Go to homepage"
+          >
             <Logo />
 
             <div className="brand-copy">
               <h1 className="brand-gradient">EduVid Explorer</h1>
               <p className="brand-tagline">Intelligent Video Analysis Platform</p>
             </div>
-          </div>
+          </button>
         </div>
 
         <nav className="topbar-nav" aria-label="Primary">
-          {view === 'home' || view === 'about' || view === 'metadata' ? (
-            <>
-              <button
-                type="button"
-                className={view === 'home' ? 'active' : ''}
-                onClick={() => setView('home')}
-              >
-                <NavIcon path={NAV_ICONS.home} />
-                Home
-              </button>
-
-              <button
-                type="button"
-                className={view === 'about' ? 'active' : ''}
-                onClick={() => setView('about')}
-              >
-                <NavIcon path={NAV_ICONS.about} />
-                About
-              </button>
-
-              <button
-                type="button"
-                className={view === 'metadata' ? 'active' : ''}
-                onClick={() => setView('metadata')}
-              >
-                <NavIcon path={NAV_ICONS.metadata} />
-                Metadata
-              </button>
-            </>
+          {view === 'home' ? (
+            <button
+              type="button"
+              className={view === 'about' ? 'active' : ''}
+              onClick={() => setView('about')}
+            >
+              <NavIcon path={NAV_ICONS.about} />
+              About
+            </button>
           ) : (
             <>
               <button
                 type="button"
-                className={view === 'home' ? 'active' : ''}
-                onClick={() => setView('home')}
+                className={view === 'browse' || view === 'video' ? 'active' : ''}
+                onClick={handleOpenBrowse}
               >
                 <NavIcon path={NAV_ICONS.home} />
                 Home
-              </button>
-
-              <button
-                type="button"
-                className={view === 'browse' ? 'active' : ''}
-                onClick={handleOpenBrowse}
-              >
-                <NavIcon path={NAV_ICONS.video} />
-                Video Explorer
               </button>
 
               <button
@@ -427,45 +403,63 @@ export default function App() {
                 <NavIcon path={NAV_ICONS.compare} />
                 Compare {comparisonVideos.length > 0 ? `(${comparisonVideos.length}/2)` : ''}
               </button>
+
+              <button
+                type="button"
+                className={view === 'metadata' ? 'active' : ''}
+                onClick={() => setView('metadata')}
+              >
+                <NavIcon path={NAV_ICONS.metadata} />
+                Metadata
+              </button>
+
+              <button
+                type="button"
+                className={view === 'about' ? 'active' : ''}
+                onClick={() => setView('about')}
+              >
+                <NavIcon path={NAV_ICONS.about} />
+                About
+              </button>
             </>
           )}
         </nav>
       </header>
 
-      {view !== 'home' && view !== 'about' && view !== 'metadata' && view !== 'video' && (
-        <section className="filters-bar">
-          <input
-            type="search"
-            placeholder="Search by title, speaker, summary, or concept"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-          />
+      {view !== 'home' && view !== 'about' && view !== 'metadata' && (
+  <section className="filters-bar">
+    <input
+      type="search"
+      placeholder="Search by title, speaker, summary, or concept"
+      value={searchQuery}
+      onChange={(event) => setSearchQuery(event.target.value)}
+    />
 
-          <select
-            value={selectedDomain}
-            onChange={(event) => setSelectedDomain(event.target.value)}
-          >
-            <option value="all">All domains</option>
-            {availableDomains.map((domain) => (
-              <option key={domain} value={domain}>
-                {domain}
-              </option>
-            ))}
-          </select>
+    <select
+      value={selectedDomain}
+      onChange={(event) => setSelectedDomain(event.target.value)}
+    >
+      <option value="all">All domains</option>
+      {availableDomains.map((domain) => (
+        <option key={domain} value={domain}>
+          {domain}
+        </option>
+      ))}
+    </select>
 
-          <select
-            value={selectedDifficulty}
-            onChange={(event) => setSelectedDifficulty(event.target.value)}
-          >
-            <option value="all">All difficulty levels</option>
-            {availableDifficulties.map((difficulty) => (
-              <option key={difficulty} value={difficulty}>
-                {difficulty}
-              </option>
-            ))}
-          </select>
-        </section>
-      )}
+    <select
+      value={selectedDifficulty}
+      onChange={(event) => setSelectedDifficulty(event.target.value)}
+    >
+      <option value="all">All difficulty levels</option>
+      {availableDifficulties.map((difficulty) => (
+        <option key={difficulty} value={difficulty}>
+          {difficulty}
+        </option>
+      ))}
+    </select>
+  </section>
+)}
 
       <main className="main-content">
         {view === 'home' && (
@@ -478,7 +472,9 @@ export default function App() {
 
         {view === 'about' && <AboutPage onStartExploring={handleOpenBrowse} />}
 
-        {view === 'metadata' && <MetadataPage />}
+        {view === 'metadata' && (
+          <MetadataPage videos={dataset?.videos ?? []} />
+        )}
 
         {view === 'browse' && (
           <HomePage

@@ -101,6 +101,25 @@ a {
   align-items: center;
   gap: 14px;
   min-width: 0;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius-md, 14px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.brand-block:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.brand-block:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 4px;
 }
 
 .brand-logo {
@@ -282,6 +301,7 @@ a {
 .hamburger-btn.active span:nth-child(3) {
   transform: translateY(-7px) rotate(-45deg);
 }
+
 
 /* Shared interactive */
 
@@ -751,79 +771,101 @@ a {
   color: var(--text-faint);
 }
 
+/* Concept filter bar */
 
+.concept-filter-bar {
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 10px;
+  padding: 4px 2px 12px;
+  margin-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.concept-filter-bar::-webkit-scrollbar {
+  height: 6px;
+}
+
+.concept-filter-bar::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.35);
+  border-radius: 999px;
+}
+
+.concept-filter-chip {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/*Concepts filter*/ 
 /* =========================================
    Home page only: soften video card shell
    Keep global card styles untouched elsewhere
 ========================================= */
 
-.home-page .video-grid {
-  grid-template-columns: 1fr;
-  gap: 18px;
+.home-page .video-grid--youtube {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px 16px;
+  width: 100%;
 }
 
-.home-page .video-card--horizontal {
-  padding: 0;
+.home-page .video-card-tile-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 2px 0;
+}
+
+.home-page .video-card-tile-content h3 {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.3;
+  color: var(--text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.home-page .video-card-thumbnail--horizontal .video-card-thumbnail-media,
-.home-page .video-card-thumbnail--horizontal video {
-  width: 100%;
-  height: 100%;
-  min-height: 100%;
-  object-fit: cover;
+.home-page .video-card-tile-meta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-faint);
 }
 
-.home-page .video-card-concepts-block {
+.home-page .video-card.video-card--tile {
+  padding: 0;
+  overflow: visible;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.home-page .video-card.video-card--tile:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: transparent;
+}
+
+.home-page .video-card--tile .video-cardsurface {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  cursor: pointer;
 }
 
-.home-page .video-card-concepts-title {
-  margin: 0;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: var(--text);
+.home-page .video-card--tile .video-card-thumbnail {
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  overflow: hidden;
+  border: none;
 }
 
-.home-page .video-card-concepts-empty {
-  margin: 0;
-  font-size: 0.88rem;
-  color: var(--text-soft);
+.home-page .video-card--tile:hover .video-card-thumbnail-media {
+  transform: scale(1.02);
+  transition: transform 0.2s ease;
 }
 
-.home-page .video-cardactions {
-  padding: 0 18px 18px 18px;
-}
-
-.home-page .video-cardactions .primary-btn,
-.home-page .video-cardactions .secondary-btn {
-  width: auto;
-}
-
-@media (max-width: 900px) {
-  .home-page .video-cardsurface--horizontal {
-    grid-template-columns: 1fr;
-  }
-
-  .home-page .video-card-thumbnail--horizontal {
-    aspect-ratio: 16 / 9;
-    border-right: none;
-    border-bottom: 1px solid var(--divider);
-  }
-
- .home-page .video-cardactions {
-  padding: 0 18px 18px 18px;
-}
-
-  .home-page .video-cardactions .primary-btn,
-  .home-page .video-cardactions .secondary-btn {
-    width: 100%;
-    justify-content: center;
-  }
-}
 
 .home-page .video-card {
   padding: 0;
@@ -885,106 +927,226 @@ a {
   line-height: 1;
 }
 
-.home-page .video-card-content .eyebrow {
-  margin: 0;
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  color: var(--text-faint);
+.home-page .video-card-thumbnail {
+  position: relative;
 }
 
-.home-page .video-card-content h3 {
-  margin: 0;
-  color: var(--text);
-  font-size: 1.02rem;
-  line-height: 1.38;
-  letter-spacing: -0.02em;
-}
+/* Mute button: top-right corner, independent element */
 
-
-.home-page .meta-pill {
+.video-tile-mute-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 4;
   display: inline-flex;
   align-items: center;
-  padding: 6px 10px;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
   border-radius: 999px;
-  background: var(--surface-soft);
-  border: 1px solid var(--divider);
-  color: var(--text-soft);
-  font-size: 0.78rem;
-  font-weight: 600;
-  line-height: 1;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  cursor: pointer;
 }
 
-.home-page .video-card-summary {
-  margin: 0;
-  color: var(--text-soft);
-  font-size: 0.92rem;
-  line-height: 1.6;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.video-tile-mute-btn:hover {
+  background: rgba(0, 0, 0, 0.75);
 }
 
-.home-page .chip-group.compact {
-  gap: 8px;
+.mute-icon {
+  width: 16px;
+  height: 16px;
+  color: #fff;
 }
 
-.home-page .video-card-content .chip {
-  padding: 6px 10px;
-  font-size: 0.74rem;
-}
+/* Progress bar: bottom, full width, independent element */
 
-.home-page .video-card-toprow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 16px;
-  align-items: start;
-}
-
-.home-page .video-card-headline {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.home-page .chip.static {
-  cursor: default;
-}
-.home-page .video-card-sideactions {
+.video-tile-progress-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 10px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  align-self: center;
-}
-
-.home-page .video-card-sideactions .primary-btn,
-.home-page .video-card-sideactions .secondary-btn {
-  min-width: 140px;
-  justify-content: center;
-}
-
-.home-page .video-card-preview-button {
+  padding: 0 4px;
   cursor: pointer;
-  border: none;
-  padding: 0;
-  text-align: left;
-  background: var(--surface-soft);
+  z-index: 4;
 }
 
-.home-page .video-card-preview-button:hover {
-  filter: brightness(0.98);
+.video-tile-progress-track::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4px;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.35);
 }
 
-.home-page .video-card-preview-button:focus-visible {
-  outline: 2px solid var(--border-strong);
-  outline-offset: -2px;
+.video-tile-progress-fill {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  height: 3px;
+  border-radius: 999px;
+  background: #ff0000;
+  pointer-events: none;
 }
 
-@media (max-width: 720px) {
-  .home-page .video-grid {
+.video-tile-progress-handle {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ff0000;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.18);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.video-tile-progress-track:hover .video-tile-progress-handle {
+  opacity: 1;
+}
+
+.video-tile-progress-track:hover .video-tile-progress-fill,
+.video-tile-progress-track:active .video-tile-progress-fill {
+  height: 5px;
+  bottom: 3px;
+}
+
+.video-tile-compare-badge {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  z-index: 4;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(37, 100, 235, 0.514);
+  color: #ffffffc5;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+@media (max-width: 1024px) {
+  .home-page .video-grid--youtube {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .home-page .video-grid--youtube {
     grid-template-columns: 1fr;
     gap: 16px;
   }
+}
+
+@media (max-width: 640px) {
+  .home-page .video-card-tile-content {
+    padding: 8px 2px 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-page .video-card-tile-actions .primary-btn,
+  .home-page .video-card-tile-actions .secondary-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+
+.home-page .video-card-tile-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 2px 0;
+}
+
+.home-page .video-card-tile-row .video-card-tile-content {
+  padding: 0;
+  flex: 1;
+  min-width: 0;
+}
+
+.video-tile-menu-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.video-tile-menu-trigger {
+  border: none;
+  background: transparent;
+  font-size: 1.7rem;
+  line-height: 1;
+  color: var(--text-soft);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 999px;
+}
+
+.video-tile-menu-trigger:hover {
+  background: var(--surface-soft);
+  color: var(--text);
+}
+
+.video-tile-menu-popover {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 20;
+  width: 200px;
+  margin-top: 4px;
+  padding: 6px;
+  border-radius: 12px;
+  border: 1px solid var(--divider);
+  background: var(--surface);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.video-tile-menu-popover button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.video-tile-menu-popover button:hover {
+  background: var(--surface-soft);
+}
+
+.menu-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: var(--text-soft);
+}
+
+.video-tile-menu-popover button:hover .menu-icon {
+  color: var(--text);
+}
+
+.video-tile-menu-divider {
+  height: 1px;
+  background: var(--divider);
+  margin: 4px 2px;
 }
 
 
@@ -4115,399 +4277,6 @@ input[type="range"]:focus {
   box-shadow:
     0 14px 30px rgba(0, 0, 0, 0.24),
     inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-
-
-/* =========================================
-   HOME PAGE ONLY — final horizontal video cards
-   Replace the existing home-page video-card
-   and concept popup blocks with this
-========================================= */
-
-.home-page .video-grid {
-  grid-template-columns: 1fr;
-  gap: 18px;
-}
-
-.home-page .video-card {
-  padding: 0;
-  overflow: visible;
-  background: linear-gradient(180deg, var(--surface) 0, var(--surface-soft) 100%);
-  border: 1px solid var(--divider);
-  border-radius: 22px;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.045);
-}
-
-.home-page .video-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--border-strong);
-  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
-}
-
-.home-page .video-card.selected {
-  border-color: rgba(0, 0, 0, 0.22);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
-}
-
-.home-page .video-cardsurface {
-  display: grid;
-  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
-  align-items: center;
-  width: 100%;
-  padding: 0;
-  gap: 0;
-  border: none;
-  background: transparent;
-  text-align: left;
-  border-radius: inherit;
-  overflow: hidden;
-}
-
-.home-page .video-card-thumbnail {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 100%;
-  padding: 18px;
-  border-right: 1px solid var(--divider);
-  border-bottom: none;
-  background: var(--surface-soft);
-   border-top-left-radius: 22px;
-  border-bottom-left-radius: 22px;
-  overflow: hidden;
-
-}
-
-.home-page .video-card-thumbnail-media,
-.home-page .video-card-thumbnail video {
-  width: 100%;
-  max-width: 320px;
-  aspect-ratio: 16 / 9;
-  height: auto;
-  border-radius: 16px;
-  object-fit: cover;
-  display: block;
-}
-
-.home-page .video-card-thumbnail-fallback {
-  width: 100%;
-  min-height: 240px;
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-  color: rgba(255, 255, 255, 0.88);
-  background: linear-gradient(135deg, #1e293b, #334155);
-  text-align: center;
-}
-
-.home-page .video-card-thumbnail-overlay {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.82);
-  color: #fff;
-  font-size: 0.78rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.home-page .video-card-content {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 12px;
-  min-width: 0;
-  padding: 18px 20px;
-  overflow: visible;
-}
-
-.home-page .video-card-toprow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 16px;
-  align-items: center;
-}
-
-.home-page .video-card-headline {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.home-page .video-card-content .eyebrow {
-  margin: 0;
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  color: var(--text-faint);
-}
-
-.home-page .video-card-content h3 {
-  margin: 0;
-  color: var(--text);
-  font-size: 1.04rem;
-  line-height: 1.38;
-  letter-spacing: -0.02em;
-}
-
-.home-page .video-card-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  min-width: 0;
-}
-
-.home-page .meta-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: var(--surface-soft);
-  border: 1px solid var(--divider);
-  color: var(--text-soft);
-  font-size: 0.78rem;
-  font-weight: 600;
-  line-height: 1;
-}
-
-.home-page .video-card-summary {
-  margin: 0;
-  color: var(--text-soft);
-  font-size: 0.93rem;
-  line-height: 1.62;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.home-page .chip-group.compact {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  overflow: visible;
-}
-
-.home-page .video-card-content .chip {
-  padding: 6px 10px;
-  font-size: 0.74rem;
-}
-
-.home-page .video-card-sideactions,
-.home-page .video-cardactions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.home-page .video-cardactions {
-  margin-top: 2px;
-}
-
-.home-page .video-cardactions .primary-btn,
-.home-page .video-cardactions .secondary-btn {
-  min-width: 148px;
-  justify-content: center;
-}
-
-.home-page .video-card-preview-button {
-  cursor: pointer;
-  border: none;
-  padding: 0;
-  text-align: left;
-  background: var(--surface-soft);
-}
-
-.home-page .video-card-preview-button:hover {
-  filter: brightness(0.98);
-}
-
-.home-page .video-card-preview-button:focus-visible {
-  outline: 2px solid var(--border-strong);
-  outline-offset: -2px;
-}
-
-/* More concepts popup */
-
-.home-page .concept-popover-wrap {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
-
-.home-page .concept-more-trigger {
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.home-page .concept-popover {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 0;
-  z-index: 40;
-  width: min(360px, 72vw);
-  max-height: 220px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 12px;
-  border-radius: 16px;
-  border: 1px solid var(--divider);
-  background: var(--surface);
-  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.14);
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.home-page .concept-popover-title {
-  margin: 0;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: 0.02em;
-}
-
-.home-page .concept-popover::before {
-  content: "";
-  position: absolute;
-  top: -7px;
-  left: 20px;
-  width: 12px;
-  height: 12px;
-  background: rgba(255, 255, 255, 0.99);
-  border-top: 1px solid var(--border);
-  border-left: 1px solid var(--border);
-  transform: rotate(45deg);
-}
-
-.home-page .concept-popover .chip-group.compact {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-content: flex-start;
-}
-
-.home-page .concept-popover::-webkit-scrollbar {
-  width: 8px;
-}
-
-.home-page .concept-popover::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.45);
-  border-radius: 999px;
-}
-
-.home-page .concept-popover::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-@media (max-width: 640px) {
-  .home-page .concept-popover {
-    left: 0;
-    right: auto;
-    width: min(300px, 82vw);
-    max-height: 180px;
-  }
-}
-
-.home-page .concept-popover-wrap:hover .concept-popover,
-.home-page .concept-popover-wrap:focus-within .concept-popover {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-.home-page .concept-popover .chip-group.compact {
-  gap: 8px;
-}
-
-.home-page .concept-popover .chip {
-  max-width: 100%;
-  white-space: normal;
-  text-align: left;
-}
-
-/* Tablet / mobile */
-
-@media (max-width: 900px) {
-  .home-page .video-cardsurface {
-    grid-template-columns: 1fr;
-  }
-
-  .home-page .video-card-thumbnail {
-    aspect-ratio: 16 / 9;
-    min-height: auto;
-    border-right: none;
-    border-bottom: 1px solid var(--divider);
-  }
-
-  .home-page .video-card-thumbnail-media,
-  .home-page .video-card-thumbnail video,
-  .home-page .video-card-thumbnail img {
-     width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-  border-top-left-radius: inherit;
-  border-bottom-left-radius: inherit;
-  }
-
-  .home-page .video-card-content {
-    padding: 16px 16px 14px;
-  }
-
-  .home-page .video-card-toprow {
-    grid-template-columns: 1fr;
-    align-items: start;
-  }
-
-  .home-page .video-cardactions {
-    justify-content: flex-start;
-  }
-
-  .home-page .video-cardactions .primary-btn,
-  .home-page .video-cardactions .secondary-btn {
-    min-width: 140px;
-    width: auto;
-  }
-
-  .home-page .concept-popover {
-    min-width: 300px;
-    max-width: min(420px, calc(100vw - 48px));
-  }
-}
-
-@media (max-width: 640px) {
-  .home-page .video-grid {
-    gap: 16px;
-  }
-
-  .home-page .video-card-content {
-    padding: 15px 15px 12px;
-  }
-
-  .home-page .video-cardactions {
-    justify-content: stretch;
-  }
-
-  .home-page .video-cardactions .primary-btn,
-  .home-page .video-cardactions .secondary-btn {
-    width: 100%;
-  }
-
-  .home-page .concept-popover {
-    left: 0;
-    min-width: 240px;
-    max-width: min(340px, calc(100vw - 36px));
-    padding: 12px 12px 10px;
-  }
 }
 
 /* Dark helpers kept */
