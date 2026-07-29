@@ -189,6 +189,11 @@ export default function App() {
       .filter(Boolean) as VideoRecord[]
   }, [dataset, comparisonVideoIds])
 
+  const isSelectedVideoInComparison = useMemo(() => {
+  if (!selectedVideoId) return false
+  return comparisonVideoIds.includes(selectedVideoId)
+}, [comparisonVideoIds, selectedVideoId])
+
   const availableDomains = useMemo(() => {
     if (!dataset) return []
     return Array.from(
@@ -565,6 +570,7 @@ export default function App() {
               onToggleCompareVideo={handleToggleCompareVideo}
               onOpenComparison={handleOpenComparison}
               onBrowseMoreVideos={handleOpenBrowse}
+              isVideoCompared={isSelectedVideoInComparison}
               userState={userState}
               onAddBookmark={addBookmark}
               onRemoveBookmark={removeBookmark}

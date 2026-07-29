@@ -1372,61 +1372,86 @@ Keep this block at the very end of App.css
   min-width: 0;
 }
 
+.video-tile-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 18;
+  border: none;
+  background: rgba(15, 23, 42, 0.18);
+  cursor: default;
+}
+
 .video-tile-menu-wrap {
   position: relative;
   flex-shrink: 0;
+  z-index: 19;
 }
 
 .video-tile-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
   border: none;
+  border-radius: 999px;
   background: transparent;
-  font-size: 1.7rem;
-  line-height: 1;
   color: var(--text-soft);
   cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 999px;
+  transition: background-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
 
 .video-tile-menu-trigger:hover {
   background: var(--surface-soft);
   color: var(--text);
+  transform: translateY(-1px);
+}
+
+.menu-dots-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
 .video-tile-menu-popover {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 6px);
   right: 0;
   z-index: 20;
-  width: 200px;
-  margin-top: 4px;
-  padding: 6px;
-  border-radius: 12px;
-  border: 1px solid var(--divider);
-  background: var(--surface);
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14);
+  width: 220px;
+  margin-top: 0;
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.16);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
 }
 
 .video-tile-menu-popover button {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   width: 100%;
   text-align: left;
-  padding: 8px 10px;
+  padding: 10px 12px;
   border: none;
   background: transparent;
-  border-radius: 8px;
-  font-size: 0.85rem;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  font-weight: 500;
   color: var(--text);
   cursor: pointer;
+  transition: background-color 0.16s ease, color 0.16s ease, transform 0.16s ease;
 }
 
 .video-tile-menu-popover button:hover {
   background: var(--surface-soft);
+  transform: translateX(1px);
 }
 
 .menu-icon {
@@ -1445,6 +1470,8 @@ Keep this block at the very end of App.css
   background: var(--divider);
   margin: 4px 2px;
 }
+
+
 
 
 /* Filters */
@@ -1879,6 +1906,195 @@ input[type="range"]:focus {
 /* Video explorer */
 
 /* Video explorer */
+
+.video-watch-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.video-watch-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.video-watch-meta__main {
+  min-width: 0;
+  flex: 1 1 420px;
+}
+
+.video-watch-meta__main h2 {
+  margin: 0;
+  font-size: clamp(1.35rem, 2vw, 2rem);
+  line-height: 1.18;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+.video-watch-meta__eyebrow {
+  margin: 8px 0 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-soft);
+}
+
+.video-watch-meta__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.video-watch-quick-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.video-utility-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 14px;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 999px;
+  background: rgba(248, 250, 252, 0.92);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+  transition:
+    transform 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease;
+}
+
+.video-utility-btn svg {
+  width: 18px;
+  height: 18px;
+  color: var(--text-soft);
+  flex-shrink: 0;
+}
+
+.video-utility-btn:hover {
+  transform: translateY(-1px);
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.14);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+}
+
+.video-utility-btn:hover svg {
+  color: var(--text);
+}
+
+.video-utility-btn:focus-visible {
+  outline: 2px solid rgba(37, 99, 235, 0.22);
+  outline-offset: 3px;
+}
+
+.video-tile-menu-trigger--icon {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(248, 250, 252, 0.92);
+  color: var(--text-soft);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.05);
+}
+
+.video-tile-menu-trigger--icon:hover {
+  background: #ffffff;
+  color: var(--text);
+  border-color: rgba(15, 23, 42, 0.14);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+}
+
+.video-kebab-icon {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.video-kebab-icon span {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.video-tile-menu-wrap--end .video-tile-menu-popover {
+  right: 0;
+  left: auto;
+}
+
+@media (max-width: 720px) {
+  .video-watch-meta,
+  .video-watch-meta__actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .video-watch-quick-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .video-utility-btn {
+    justify-content: center;
+  }
+
+  .video-tile-menu-wrap {
+    align-self: flex-end;
+  }
+}
+
+
+.video-tile-menu-wrap--end .video-tile-menu-trigger {
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-soft);
+  box-shadow: var(--shadow-sm);
+  padding: 0;
+  font-size: 1.35rem;
+}
+
+.video-tile-menu-wrap--end .video-tile-menu-trigger:hover {
+  background: var(--surface-soft);
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.compare-toggle-btn.is-selected {
+  background: #111111;
+  color: #ffffff;
+  border-color: #111111;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.14);
+}
+
+.compare-toggle-btn.is-selected:hover {
+  background: #1f1f1f;
+  border-color: #1f1f1f;
+}
 
 .video-explorerlayout {
   display: grid;

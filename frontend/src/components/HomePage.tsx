@@ -6,8 +6,6 @@ type HomePageProps = {
   selectedVideoId: string | null;
   comparisonVideoIds: string[];
   onOpenVideo: (videoId: string) => void;
-  onOpenCollection: () => void;
-  onOpenNetwork: () => void;
   onToggleCompareVideo: (videoId: string) => void;
   onSelectConcept: (concept: string) => void;
 };
@@ -18,13 +16,115 @@ function formatDuration(seconds: number) {
   return `${Math.round(seconds / 60)} min`;
 }
 
+function MoreMenuIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="menu-dots-icon" aria-hidden="true">
+      <circle cx="12" cy="5.5" r="1.8" fill="currentColor" />
+      <circle cx="12" cy="12" r="1.8" fill="currentColor" />
+      <circle cx="12" cy="18.5" r="1.8" fill="currentColor" />
+    </svg>
+  );
+}
+
+function CompareMenuIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
+      <rect x="3.5" y="6" width="6.5" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <rect x="14" y="6" width="6.5" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M10.75 12h2.5" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function WatchLaterIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <path
+        d="M12 8.2v4.3l3 1.9"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function PlaylistMenuIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
+      <path d="M4 7h10M4 12h10M4 17h6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <circle cx="18" cy="16.5" r="3.2" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M18 14.9v3.2M16.4 16.5h3.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function DownloadIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
+      <path d="M12 4.5v10.2" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path
+        d="M8.5 11.8 12 15.3l3.5-3.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M5 18.5h14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function ShareMenuIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
+      <circle cx="6" cy="12" r="2.1" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <circle cx="17.5" cy="6.2" r="2.1" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <circle cx="17.5" cy="17.8" r="2.1" fill="none" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M8 11.1 15.4 7M8 12.9l7.4 4.1" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function InterestedIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
+      <path d="M7 11v8H4v-8h3Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path
+        d="M9 19h7.8a1.7 1.7 0 0 0 1.65-2.08l-1.04-4.38A1.7 1.7 0 0 0 15.76 11H13l.78-3.08A1.63 1.63 0 0 0 12.2 6L9 11v8Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function NotInterestedIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
+      <path d="M7 13V5H4v8h3Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path
+        d="M9 5h7.8a1.7 1.7 0 0 1 1.65 2.08l-1.04 4.38A1.7 1.7 0 0 1 15.76 13H13l.78 3.08A1.63 1.63 0 0 1 12.2 18L9 13V5Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export default function HomePage({
   videos,
   selectedVideoId,
   comparisonVideoIds,
   onOpenVideo,
-  onOpenCollection,
-  onOpenNetwork,
   onToggleCompareVideo,
   onSelectConcept,
 }: HomePageProps) {
@@ -33,27 +133,34 @@ export default function HomePage({
   const [unmutedIds, setUnmutedIds] = useState<Set<string>>(new Set());
   const [progressMap, setProgressMap] = useState<Record<string, number>>({});
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const seekingIdRef = useRef<string | null>(null);
+  const justSeekedRef = useRef(false);
 
   useEffect(() => {
     if (!openMenuId) return;
+
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setOpenMenuId(null);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [openMenuId]);
 
   const topConcepts = useMemo(() => {
     const counts = new Map<string, number>();
+
     videos.forEach((video) => {
       video.keyConcepts.forEach((concept) => {
         counts.set(concept, (counts.get(concept) ?? 0) + 1);
       });
     });
+
     return Array.from(counts.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, TOP_CONCEPT_LIMIT)
@@ -69,12 +176,10 @@ export default function HomePage({
     setActiveConcept(concept);
     onSelectConcept(concept ?? "");
   };
-  
-  const isMuted = (id: string) => !mutedIds.has(id) ? true : mutedIds.has(id);
-  // Default: muted. Track "unmuted" ids instead for clarity:
 
   const toggleMute = (id: string, event: React.MouseEvent) => {
     event.stopPropagation();
+
     setUnmutedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
@@ -86,52 +191,80 @@ export default function HomePage({
     });
   };
 
-  const seekingIdRef = useRef<string | null>(null);
+  const seekToPosition = (id: string, clientX: number, trackEl: HTMLDivElement) => {
+    const el = videoRefs.current[id];
+    if (!el || !el.duration) return;
 
-const seekToPosition = (id: string, clientX: number, trackEl: HTMLDivElement) => {
-  const el = videoRefs.current[id];
-  if (!el || !el.duration) return;
-  const rect = trackEl.getBoundingClientRect();
-  const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
-  el.currentTime = ratio * el.duration;
-  setProgressMap((prev) => ({ ...prev, [id]: ratio * 100 }));
-};
+    const rect = trackEl.getBoundingClientRect();
+    const ratio = Math.min(Math.max((clientX - rect.left) / rect.width, 0), 1);
 
-const justSeekedRef = useRef(false);
-
-const handleSeekStart = (id: string, event: React.MouseEvent<HTMLDivElement>) => {
-  event.stopPropagation();
-  const trackEl = event.currentTarget;
-  seekingIdRef.current = id;
-  justSeekedRef.current = true;
-  seekToPosition(id, event.clientX, trackEl);
-
-  const handleMouseMove = (moveEvent: MouseEvent) => {
-    if (seekingIdRef.current !== id) return;
-    seekToPosition(id, moveEvent.clientX, trackEl);
+    el.currentTime = ratio * el.duration;
+    setProgressMap((prev) => ({ ...prev, [id]: ratio * 100 }));
   };
 
-  const handleMouseUp = () => {
-    seekingIdRef.current = null;
-    window.removeEventListener("mousemove", handleMouseMove);
-    window.removeEventListener("mouseup", handleMouseUp);
-    setTimeout(() => {
-      justSeekedRef.current = false;
-    }, 0);
-  };
+  const handleSeekStart = (id: string, event: React.MouseEvent<HTMLDivElement>) => {
+    event.stopPropagation();
 
-  window.addEventListener("mousemove", handleMouseMove);
-  window.addEventListener("mouseup", handleMouseUp);
-};
+    const trackEl = event.currentTarget;
+    seekingIdRef.current = id;
+    justSeekedRef.current = true;
+    seekToPosition(id, event.clientX, trackEl);
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      if (seekingIdRef.current !== id) return;
+      seekToPosition(id, moveEvent.clientX, trackEl);
+    };
+
+    const handleMouseUp = () => {
+      seekingIdRef.current = null;
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+
+      setTimeout(() => {
+        justSeekedRef.current = false;
+      }, 0);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+  };
 
   const handleTimeUpdate = (id: string) => {
     const el = videoRefs.current[id];
     if (!el || !el.duration) return;
-    setProgressMap((prev) => ({ ...prev, [id]: (el.currentTime / el.duration) * 100 }));
+
+    setProgressMap((prev) => ({
+      ...prev,
+      [id]: (el.currentTime / el.duration) * 100,
+    }));
   };
 
-  const handleMenuAction = (action: string, video: VideoRecord) => {
+  const handleShare = async (videoId: string) => {
+    const shareUrl = `${window.location.origin}/video/${videoId}`;
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        return;
+      }
+    } catch {
+      // fallback below
+    }
+
+    const textArea = document.createElement("textarea");
+    textArea.value = shareUrl;
+    textArea.setAttribute("readonly", "");
+    textArea.style.position = "absolute";
+    textArea.style.left = "-9999px";
+    document.body.appendChild(textArea);
+    textArea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textArea);
+  };
+
+  const handleMenuAction = async (action: string, video: VideoRecord) => {
     setOpenMenuId(null);
+
     switch (action) {
       case "watch-later":
         console.log("Save to Watch Later:", video.id);
@@ -143,7 +276,7 @@ const handleSeekStart = (id: string, event: React.MouseEvent<HTMLDivElement>) =>
         console.log("Download:", video.id);
         break;
       case "share":
-        navigator.clipboard?.writeText(`${window.location.origin}/video/${video.id}`);
+        await handleShare(video.id);
         break;
       case "interested":
         console.log("Interested:", video.id);
@@ -162,7 +295,8 @@ const handleSeekStart = (id: string, event: React.MouseEvent<HTMLDivElement>) =>
         <div>
           <h1>Browse videos, chapter summaries, and important concept-level relationships</h1>
           <p>
-            This interface supports timeline & chapter-based exploration, including the hierarchical-based summaries across the processed educational video dataset.
+            This interface supports timeline & chapter-based exploration, including the hierarchical-based
+            summaries across the processed educational video dataset.
           </p>
         </div>
       </div>
@@ -194,7 +328,14 @@ const handleSeekStart = (id: string, event: React.MouseEvent<HTMLDivElement>) =>
         </h3>
       </div>
 
-      
+      {openMenuId ? (
+        <button
+          type="button"
+          className="video-tile-menu-backdrop"
+          aria-label="Close video actions"
+          onClick={() => setOpenMenuId(null)}
+        />
+      ) : null}
 
       <div className="video-grid video-grid--youtube">
         {displayedVideos.length === 0 ? (
@@ -225,7 +366,10 @@ const handleSeekStart = (id: string, event: React.MouseEvent<HTMLDivElement>) =>
                   role="button"
                   tabIndex={0}
                   className="video-cardsurface"
-                  onClick={() => onOpenVideo(video.id)}
+                  onClick={() => {
+                    if (justSeekedRef.current) return;
+                    onOpenVideo(video.id);
+                  }}
                   onMouseEnter={() => setHoveredId(video.id)}
                   onMouseLeave={() => setHoveredId(null)}
                   onKeyDown={(event) => {
@@ -249,6 +393,7 @@ const handleSeekStart = (id: string, event: React.MouseEvent<HTMLDivElement>) =>
                         ref={(el) => {
                           videoRefs.current[video.id] = el;
                           if (!el) return;
+
                           if (isHovered) {
                             el.play().catch(() => {});
                           } else {
@@ -267,20 +412,17 @@ const handleSeekStart = (id: string, event: React.MouseEvent<HTMLDivElement>) =>
                       <span className="video-tile-compare-badge">Selected to compare</span>
                     ) : null}
 
-
                     {isHovered ? (
                       <>
-                        <button type="button"
+                        <button
+                          type="button"
                           className="video-tile-mute-btn"
                           onClick={(event) => toggleMute(video.id, event)}
                           aria-label={isUnmuted ? "Mute" : "Unmute"}
                         >
                           {isUnmuted ? (
                             <svg viewBox="0 0 24 24" className="mute-icon" aria-hidden="true">
-                              <path
-                                d="M4 9v6h4l5 4V5L8 9H4z"
-                                fill="currentColor"
-                              />
+                              <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />
                               <path
                                 d="M16.5 9a4.5 4.5 0 0 1 0 6M19 6.5a8 8 0 0 1 0 11"
                                 fill="none"
@@ -291,10 +433,7 @@ const handleSeekStart = (id: string, event: React.MouseEvent<HTMLDivElement>) =>
                             </svg>
                           ) : (
                             <svg viewBox="0 0 24 24" className="mute-icon" aria-hidden="true">
-                              <path
-                                d="M4 9v6h4l5 4V5L8 9H4z"
-                                fill="currentColor"
-                              />
+                              <path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor" />
                               <path
                                 d="M16 9l5 6M21 9l-5 6"
                                 fill="none"
@@ -346,8 +485,9 @@ const handleSeekStart = (id: string, event: React.MouseEvent<HTMLDivElement>) =>
                           setOpenMenuId(isMenuOpen ? null : video.id);
                         }}
                         aria-label="More options"
+                        aria-expanded={isMenuOpen}
                       >
-                        ⋮
+                        <MoreMenuIcon />
                       </button>
 
                       {isMenuOpen ? (
@@ -362,76 +502,71 @@ const handleSeekStart = (id: string, event: React.MouseEvent<HTMLDivElement>) =>
                               onToggleCompareVideo(video.id);
                             }}
                           >
-                            <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
-                              <rect x="3" y="6" width="7" height="12" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.6" />
-                              <rect x="14" y="6" width="7" height="12" rx="1.5" fill="none" stroke="currentColor" strokeWidth="1.6" />
-                              <path d="M10.5 12h3" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                            </svg>
+                            <CompareMenuIcon />
                             <span>{isInComparison ? "Remove from Compare" : "Compare"}</span>
                           </button>
 
                           <div className="video-tile-menu-divider" />
 
-                          <button type="button" onClick={() => handleMenuAction("watch-later", video)}>
-                            <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
-                              <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.6" />
-                              <path d="M12 7v5l3.5 2" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                            </svg>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              void handleMenuAction("watch-later", video);
+                            }}
+                          >
+                            <WatchLaterIcon />
                             <span>Save to Watch Later</span>
                           </button>
 
-                          <button type="button" onClick={() => handleMenuAction("playlist", video)}>
-                            <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
-                              <path d="M4 6h11M4 12h11M4 18h6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                              <circle cx="18.5" cy="16.5" r="3" fill="none" stroke="currentColor" strokeWidth="1.6" />
-                              <path d="M18.5 15v3M17 16.5h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                            </svg>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              void handleMenuAction("playlist", video);
+                            }}
+                          >
+                            <PlaylistMenuIcon />
                             <span>Add to Playlist</span>
                           </button>
 
-                          <button type="button" onClick={() => handleMenuAction("download", video)}>
-                            <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
-                              <path d="M12 4v11m0 0l-4-4m4 4l4-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-                              <path d="M5 18.5h14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                            </svg>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              void handleMenuAction("download", video);
+                            }}
+                          >
+                            <DownloadIcon />
                             <span>Download</span>
                           </button>
 
-                          <button type="button" onClick={() => handleMenuAction("share", video)}>
-                            <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
-                              <circle cx="6" cy="12" r="2.2" fill="none" stroke="currentColor" strokeWidth="1.6" />
-                              <circle cx="17" cy="6" r="2.2" fill="none" stroke="currentColor" strokeWidth="1.6" />
-                              <circle cx="17" cy="18" r="2.2" fill="none" stroke="currentColor" strokeWidth="1.6" />
-                              <path d="M8 11l7-4M8 13l7 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                            </svg>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              void handleMenuAction("share", video);
+                            }}
+                          >
+                            <ShareMenuIcon />
                             <span>Share</span>
                           </button>
 
                           <div className="video-tile-menu-divider" />
 
-                          <button type="button" onClick={() => handleMenuAction("interested", video)}>
-                            <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
-                              <path
-                                d="M7 11v8H4v-8h3zm2 8h8.5a1.5 1.5 0 0 0 1.46-1.85l-1.2-5A1.5 1.5 0 0 0 16.3 11H13l.7-3.5A1.5 1.5 0 0 0 12.24 5.6L9 11v8z"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1.4"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              void handleMenuAction("interested", video);
+                            }}
+                          >
+                            <InterestedIcon />
                             <span>Interested</span>
                           </button>
 
-                          <button type="button" onClick={() => handleMenuAction("not-interested", video)}>
-                            <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
-                              <path
-                                d="M7 13V5H4v8h3zm2-8h8.5a1.5 1.5 0 0 1 1.46 1.85l-1.2 5A1.5 1.5 0 0 1 16.3 13H13l.7 3.5A1.5 1.5 0 0 1 12.24 18.4L9 13V5z"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="1.4"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              void handleMenuAction("not-interested", video);
+                            }}
+                          >
+                            <NotInterestedIcon />
                             <span>Not Interested</span>
                           </button>
                         </div>

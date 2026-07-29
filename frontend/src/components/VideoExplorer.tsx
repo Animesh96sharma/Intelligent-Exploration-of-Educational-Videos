@@ -4,6 +4,7 @@ import type { Playlist, UserVideoState, VideoBookmark, VideoNote } from '../type
 import VideoPlayer from './VideoPlayer'
 import VideoTimeline from './VideoTimeline'
 import PlaylistPanel from './PlaylistPanel'
+import { ListPlus, Share2, ThumbsDown, ThumbsUp } from 'lucide-react'
 
 type VideoExplorerProps = {
   video: VideoRecord
@@ -14,6 +15,7 @@ type VideoExplorerProps = {
   onToggleCompareVideo: (videoId: string) => void
   onOpenComparison: (videoId?: string) => void
   onBrowseMoreVideos: () => void
+  isVideoCompared: boolean
   userState: UserVideoState
   onAddBookmark: (bookmark: VideoBookmark) => void
   onRemoveBookmark: (bookmarkId: string) => void
@@ -129,6 +131,7 @@ export default function VideoExplorer({
   selectedConcept,
   onOpenComparison,
   onBrowseMoreVideos,
+  isVideoCompared,
   userState,
   onAddBookmark,
   onRemoveBookmark,
@@ -147,6 +150,9 @@ export default function VideoExplorer({
   const [noteText, setNoteText] = useState('')
   const [playbackRate, setPlaybackRate] = useState(1)
   const hiddenVideoRef = useRef<HTMLVideoElement | null>(null)
+  const [videoMenuOpen, setVideoMenuOpen] = useState(false)
+  const videoMenuRef = useRef<HTMLDivElement | null>(null)
+
 
   const chapters = useMemo(() => ensureChapterArray(video?.chapters), [video?.chapters])
   const videoConcepts = useMemo(() => ensureStringArray(video?.keyConcepts), [video?.keyConcepts])
@@ -170,6 +176,22 @@ export default function VideoExplorer({
       setSelectedChapterIndex(0)
     }
   }, [chapters, selectedChapterIndex])
+
+  useEffect(() => {
+    if (!videoMenuOpen) return
+
+    function handlePointerDown(event: MouseEvent) {
+      if (!videoMenuRef.current) return
+      if (!videoMenuRef.current.contains(event.target as Node)) {
+        setVideoMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown)
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown)
+    }
+  }, [videoMenuOpen])
 
   const selectedChapter = useMemo(() => {
     if (chapters.length === 0) return null
@@ -327,33 +349,7 @@ export default function VideoExplorer({
     <section className="video-explorer">
       <div className="video-explorerlayout">
         <div className="video-explorermain">
-          <section className="video-title-card video-title-card--top">
-            <div className="video-title-cardtop">
-              <div className="video-title-cardheading">
-                <h2>{video.title ?? 'Untitled video'}</h2>
-                <p className="eyebrow">
-                  {video.speaker ?? 'Unknown speaker'} · {video.domain ?? 'General'} · {formatDurationMinutes(video.duration)}
-                </p>
-              </div>
-
-              <div className="video-title-cardactions hero-actions">
-                <button
-                  type="button"
-                  className="secondary-btn"
-                  onClick={() => onToggleCompareVideo(video.id)}
-                >
-                  Add to compare
-                </button>
-                <button
-                  type="button"
-                  className="primary-btn"
-                  onClick={() => onOpenComparison(video.id)}
-                >
-                  Open comparison
-                </button>
-              </div>
-            </div>
-
+          <section className="video-watch-card">
             <VideoPlayer
               videoId={video.id}
               src={getVideoSource(video)}
@@ -383,6 +379,119 @@ export default function VideoExplorer({
                 seekTo(chapter.startTime)
               }}
             />
+
+            <div className="video-watch-meta">
+              <div className="video-watch-meta__main">
+                <h2>{video.title ?? 'Untitled video'} : {video.speaker ?? 'Unknown speaker'} | {video.domain ?? 'General'}</h2>
+              </div>
+
+              <div className="video-watch-meta__actions">
+                <button
+                  type="button"
+                  className={isVideoCompared ? 'secondary-btn compare-toggle-btn is-selected' : 'secondary-btn compare-toggle-btn'}
+                  onClick={() => onToggleCompareVideo(video.id)}
+                >
+                  {isVideoCompared ? 'Remove' : 'Add to compare'}
+                </button>
+
+                {isVideoCompared ? (
+                  <button
+                    type="button"
+                    className="primary-btn"
+                    onClick={() => onOpenComparison(video.id)}
+                  >
+                    Open comparison
+                  </button>
+                ) : null}
+
+                <div className="video-watch-quick-actions" aria-label="Video quick actions">
+                  <button type="button" className="video-utility-btn" aria-label="Like video">
+                    <ThumbsUp size={18} />
+                    <span>Like</span>
+                  </button>
+
+                  <button type="button" className="video-utility-btn" aria-label="Dislike video">
+                    <ThumbsDown size={18} />
+                    <span>Dislike</span>
+                  </button>
+
+                  <button type="button" className="video-utility-btn" aria-label="Share video">
+                    <Share2 size={18} />
+                    <span>Share</span>
+                  </button>
+
+                  <button type="button" className="video-utility-btn" aria-label="Save to playlist">
+                    <ListPlus size={18} />
+                    <span>Playlist</span>
+                  </button>
+                </div>
+
+                <div
+                  ref={videoMenuRef}
+                  className="video-tile-menu-wrap video-tile-menu-wrap--end"
+                >
+                  <button
+                    type="button"
+                    className="video-tile-menu-trigger video-tile-menu-trigger--icon"
+                    aria-label="More actions"
+                    aria-expanded={videoMenuOpen}
+                    onClick={() => setVideoMenuOpen((prev) => !prev)}
+                  >
+                    <span className="video-kebab-icon" aria-hidden="true">
+                      <span />
+                      <span />
+                      <span />
+                    </span>
+                  </button>
+
+                  {videoMenuOpen ? (
+                    <div className="video-tile-menu-popover">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleAddBookmark()
+                          setVideoMenuOpen(false)
+                        }}
+                      >
+                        Add bookmark
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleCaptureScreenshot()
+                          setVideoMenuOpen(false)
+                        }}
+                      >
+                        Capture screenshot
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onToggleCompareVideo(video.id)
+                          setVideoMenuOpen(false)
+                        }}
+                      >
+                        {isVideoCompared ? 'Remove from compare' : 'Add to compare'}
+                      </button>
+
+                      {isVideoCompared ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onOpenComparison(video.id)
+                            setVideoMenuOpen(false)
+                          }}
+                        >
+                          Open comparison
+                        </button>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </div>
           </section>
 
           {chapters.length > 0 && selectedChapter ? (
