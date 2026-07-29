@@ -70,7 +70,7 @@ function SearchIcon() {
   )
 }
 
-const NAV_ITEMS: { key: ViewMode; label: string; icon: keyof typeof NAV_ICONS }[] = [
+const NAV_ITEMS: { key: ViewMode; label: string }[] = [
   { key: 'browse', label: 'Home'},
   { key: 'collection', label: 'Collection View'},
   { key: 'network', label: 'Network View' },
