@@ -3374,13 +3374,14 @@ input[type="range"]:focus {
 }
 
 .video-side-panel {
-  width: min(440px, 38vw);
+  width: min(480px, 38vw);
   height: 100%;
   background: rgba(7, 10, 18, 0.96);
   color: #fff;
   border-left: 1px solid rgba(255,255,255,0.12);
   display: flex;
   flex-direction: column;
+  align-items: center;
 }
 
 .video-player-shell:fullscreen,
@@ -3508,10 +3509,10 @@ input[type="range"]:focus {
 }
 
 .summary-toggle button {
-  border: none;
-  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(26, 25, 25, 0.639);
   color: rgb(255, 255, 255);
-  padding: 8px 14px;
+  padding: 3px 15px;
   border-radius: 999px;
   font-weight: 600;
   box-shadow: none;
@@ -3519,7 +3520,7 @@ input[type="range"]:focus {
 
 .summary-toggle button:hover {
   background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
+  color: rgba(255, 255, 255, 0.9);
   transform: none;
 }
 
@@ -3533,9 +3534,8 @@ input[type="range"]:focus {
 .summary-toggle button:focus-visible {
   outline: 2px solid rgba(0, 0, 0, 0.18);
   outline-offset: 2px;
+  
 }
-
-
 
 --------------------------------------------------------------------
 

@@ -101,6 +101,20 @@ export default function App() {
   }, [userState])
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' })
+  }, [view])
+
+  useEffect(() => {
+    setSearchPanelOpen(false)
+  }, [view])
+
+  useEffect(() => {
+    if (searchPanelOpen) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [searchPanelOpen])
+
+  useEffect(() => {
     let mounted = true
 
     async function init() {
@@ -423,6 +437,10 @@ export default function App() {
               setView('home')
               setMenuOpen(false)
               setSearchPanelOpen(false)
+              setSearchQuery('')
+              setSelectedDomain('all')
+              setSelectedDifficulty('all')
+              setSelectedConcept(null)
             }}
             aria-label="Go to homepage"
           >
