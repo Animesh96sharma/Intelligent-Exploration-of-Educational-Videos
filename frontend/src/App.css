@@ -205,7 +205,7 @@ Keep this block at the very end of App.css
   justify-content: space-between;
   gap: 12px;
   border-radius: 0;
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(198, 194, 194, 0);
   border: none;
   border-bottom: 1px solid rgba(15, 23, 42, 0.08);
   box-shadow: none;
@@ -300,8 +300,8 @@ Keep this block at the very end of App.css
 }
 
 .topbar-nav button.active {
-  background: rgba(15, 23, 42, 0.08);
-  color: var(--text);
+  background: rgb(15, 23, 42);
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .topbar-nav button:disabled {
@@ -518,13 +518,8 @@ Keep this block at the very end of App.css
     margin-left: auto;
   }
 
-  .topbar-search-toggle {
-    display: none;
-  }
-
-  .topbar-search-panel {
-    display: none;
-  }
+  /* REMOVED: .topbar-search-toggle { display: none; } */
+  /* REMOVED: .topbar-search-panel { display: none; } */
 
   .topbar {
     padding: 10px 14px;
@@ -558,6 +553,24 @@ Keep this block at the very end of App.css
     display: flex;
   }
 
+  .topbar-search-panel__inner {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar-search-panel {
+    padding: 0 14px;
+  }
+
+
+  .hamburger-btn {
+    display: inline-flex;
+    z-index: 1302;
+  }
+
+  .brand-copy p {
+    display: none;
+  }
+
   .topbar-nav button {
     width: 100%;
     min-height: 48px;
@@ -577,8 +590,8 @@ Keep this block at the very end of App.css
   }
 
   .topbar-nav button.active {
-    background: rgba(15, 23, 42, 0.08);
-    color: var(--text);
+    background: rgb(6, 6, 6);
+    color: rgba(255, 255, 255, 0.92);
   }
 
   .hamburger-btn {

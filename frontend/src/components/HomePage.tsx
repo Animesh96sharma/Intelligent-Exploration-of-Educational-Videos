@@ -293,10 +293,9 @@ export default function HomePage({
     <section className="home-page">
       <div className="home-hero">
         <div>
-          <h1>Browse videos, chapter summaries, and important concept-level relationships</h1>
+          <h1>Browse & easy filtering based on shared-concepts relationships</h1>
           <p>
-            This interface supports timeline & chapter-based exploration, including the hierarchical-based
-            summaries across the processed educational video dataset.
+            This page supports the collection of educational videos & filtering/searching capabilities based on shared-concepts, domain, difficulty-level.         
           </p>
         </div>
       </div>

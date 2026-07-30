@@ -398,7 +398,7 @@ export default function App() {
   }
 
   const isLanding = view === 'home'
-  const canUseSearchTray = !isLanding
+  const canUseSearchTray = !['home', 'about', 'metadata'].includes(view)
 
   return (
     <div className={`app-shell ${isLanding ? 'is-landing' : ''}`}>
