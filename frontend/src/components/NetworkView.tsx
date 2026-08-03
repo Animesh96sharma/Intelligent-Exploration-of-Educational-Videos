@@ -259,32 +259,30 @@ export default function NetworkView({
 return (
   <section className="network-page">
     <div className="page-intro">
-      <div className="page-intro-copy">
-        <p className="eyebrow">Network Exploration</p>
+      <div className="page-intro-network">
         <h2>
-          Relationship Mapping
-          <span>Across Educational Videos</span>
+          Relationship mapping across Educational videos 
         </h2>
         <p>
-          Discover concept-based relationships between videos through shared key
-          concepts, visible overlap patterns, and interactive network navigation.
+          Discover concept-based relationships between videos through shared key-concepts using different interactive network navigation.
         </p>
         {selectedConcept ? (
           <p className="section-note">Focused concept: {selectedConcept}</p>
         ) : null}
-      </div>
+      
 
-        <div className="hero-actions">
-          {selectedConcept ? (
-            <button className="secondary-btn" onClick={() => onSelectConcept(null)}>
-              Clear concept
-            </button>
-          ) : null}
-          {focusedVideo ? (
-            <button className="secondary-btn" onClick={() => setFocusedVideoId(null)}>
-              Clear focus
-            </button>
-          ) : null}
+          <div className="hero-actions">
+            {selectedConcept ? (
+              <div className="active-concept-banner">
+            <span>
+              Filtering by concept: <strong>{selectedConcept}</strong>
+            </span>
+              <button className="secondary-btn" onClick={() => onSelectConcept(null)}>
+                Clear concept
+              </button>
+             </div> 
+            ) : null}
+          </div>
         </div>
       </div>
 

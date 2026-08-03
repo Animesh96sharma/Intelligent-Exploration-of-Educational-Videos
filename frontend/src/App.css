@@ -1001,8 +1001,10 @@ Keep this block at the very end of App.css
 }
 
 .home-hero,
+.page-intro-copy,
+.page-intro-metadata,
 .collection-hero,
-.network-hero,
+.page-intro-network,
 .comparison-hero,
 .video-explorer__header,
 .about-hero {
@@ -1014,8 +1016,10 @@ Keep this block at the very end of App.css
 }
 
 .home-hero,
+.page-intro-copy,
+.page-intro-metadata,
 .collection-hero,
-.network-hero,
+.page-intro-network,
 .comparison-hero {
   display: flex;
   justify-content: space-between;
@@ -1024,15 +1028,19 @@ Keep this block at the very end of App.css
 }
 
 .home-hero,
+.page-intro-copy,
+.page-intro-metadata,
 .collection-hero,
-.network-hero,
+.page-intro-network,
 .video-explorer__header {
   color: var(--text);
 }
 
 .home-hero h2,
+.page-intro-copy h2,
+.page-intro-metadata h2,
 .collection-hero h2,
-.network-hero h2,
+.page-intro-network h2,
 .comparison-hero h2,
 .video-explorer__header h2,
 .about-hero h2 {
@@ -1044,8 +1052,10 @@ Keep this block at the very end of App.css
 }
 
 .home-hero p,
+.page-intro-copy p,
+.page-intro-metadata p,
 .collection-hero p,
-.network-hero p,
+.page-intro-network p,
 .comparison-hero p,
 .video-explorer__header p,
 .about-hero p,
@@ -4486,8 +4496,10 @@ input[type="range"]:focus {
 
 /* 2) Hero identity per page */
 .home-hero,
+.page-intro-copy,
+.page-intro-metadata,
 .collection-hero,
-.network-hero,
+.page-intro-network,
 .comparison-hero,
 .metadata-page > .panel:first-child {
   position: relative;
@@ -4501,8 +4513,10 @@ input[type="range"]:focus {
 }
 
 .home-hero::before,
+.page-intro-copy::before,
+.page-intro-metadata::before,
 .collection-hero::before,
-.network-hero::before,
+.page-intro-network::before,
 .comparison-hero::before,
 .metadata-page > .panel:first-child::before {
   content: "";
@@ -4513,8 +4527,10 @@ input[type="range"]:focus {
 }
 
 .home-hero > *,
+.page-intro-copy > *,
+.page-intro-metadata > *,
 .collection-hero > *,
-.network-hero > *,
+.page-intro-network > *,
 .comparison-hero > *,
 .metadata-page > .panel:first-child > * {
   position: relative;
@@ -4528,14 +4544,14 @@ input[type="range"]:focus {
     linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96));
 }
 
-.collection-hero::before {
+.page-intro-copy::before {
   background:
     radial-gradient(circle at 100% 0%, rgba(124, 58, 237, 0.16), transparent 30%),
     radial-gradient(circle at 0% 100%, rgba(236, 72, 153, 0.09), transparent 28%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96));
 }
 
-.network-hero::before {
+.page-intro-network::before {
   background:
     radial-gradient(circle at 100% 0%, rgba(37, 99, 235, 0.14), transparent 30%),
     radial-gradient(circle at 0% 100%, rgba(168, 85, 247, 0.11), transparent 28%),
@@ -4549,7 +4565,7 @@ input[type="range"]:focus {
     linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96));
 }
 
-.metadata-page > .panel:first-child::before {
+.page-intro-metadata::before {
   background:
     radial-gradient(circle at 100% 0%, rgba(245, 158, 11, 0.12), transparent 28%),
     radial-gradient(circle at 0% 100%, rgba(59, 130, 246, 0.08), transparent 24%),
@@ -4866,8 +4882,10 @@ input[type="range"]:focus {
 
 
   .home-hero,
+  .page-intro-copy,
+  .page-intro-metadata,
   .collection-hero,
-  .network-hero,
+  .page-intro-network,
   .comparison-hero,
   .video-explorer__header {
     flex-direction: column;
@@ -4942,8 +4960,10 @@ input[type="range"]:focus {
   .about-note,
   .landing-detail-card,
   .home-hero,
+  .page-intro-copy,
+  .page-intro-metadata,
   .collection-hero,
-  .network-hero,
+  .page-intro-network,
   .comparison-hero,
   .video-explorer__header,
   .panel,
@@ -5553,4 +5573,407 @@ input[type="range"]:focus {
 
 .active-concept-banner strong {
   color: #1d4ed8;
+}
+
+.word-cloud-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.word-cloud-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: #475569;
+}
+
+.word-cloud-limit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.word-cloud-limit button {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.78rem;
+}
+
+.word-cloud-zoom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.word-cloud-zoom button {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: #fff;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1;
+}
+
+.word-cloud-zoom button:hover {
+  background: rgba(37, 99, 235, 0.08);
+  border-color: rgba(37, 99, 235, 0.4);
+}
+
+.word-cloud-zoom span {
+  min-width: 42px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.word-cloud-svg {
+  width: 100%;
+  height: 560px;
+  display: block;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: radial-gradient(circle at 50% 40%, #f8fafc 0%, #eef2f7 100%);
+  cursor: grab;
+  touch-action: none;
+}
+
+.word-cloud-svg.dragging {
+  cursor: grabbing;
+}
+
+.word-cloud-word {
+  transition: fill-opacity 0.15s ease;
+  user-select: none;
+}
+
+.word-cloud-word:hover {
+  filter: drop-shadow(0 2px 6px rgba(15, 23, 42, 0.25));
+}
+
+.word-cloud-hint {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+@media (max-width: 640px) {
+  .home-hero p,
+  .page-intro-copy p,
+  .page-intro-metadata p,
+  .collection-hero p,
+  .page-intro-network p,
+  .comparison-hero p,
+  .video-explorer-header p,
+  .about-hero p {
+    display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-hero,
+  .page-intro-copy,
+  .page-intro-metadata,
+  .collection-hero,
+  .page-intro-network,
+  .comparison-hero,
+  .video-explorer-header,
+  .about-hero {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 20px;
+  }
+}
+
+
+/* =========================================================
+   MOBILE RESPONSIVENESS PATCH
+   Append this entire block to the END of App.css
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   1. Page intro cards — hide description paragraphs on mobile,
+      and stop them squeezing into a row layout.
+   --------------------------------------------------------- */
+@media (max-width: 640px) {
+  .home-hero,
+  .page-intro-copy,
+  .page-intro-metadata,
+  .collection-hero,
+  .page-intro-network,
+  .comparison-hero,
+  .video-explorer-header,
+  .about-hero {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 20px;
+    border-radius: 22px;
+  }
+
+  .home-hero > p,
+  .page-intro-copy > p,
+  .page-intro-metadata > p,
+  .collection-hero > p,
+  .page-intro-network > p,
+  .comparison-hero > p,
+  .video-explorer-header > p,
+  .about-hero > p {
+    display: none;
+  }
+
+  .home-hero h2,
+  .page-intro-copy h2,
+  .page-intro-metadata h2,
+  .collection-hero h2,
+  .page-intro-network h2,
+  .comparison-hero h2,
+  .video-explorer-header h2,
+  .about-hero h2 {
+    font-size: clamp(1.4rem, 5vw, 1.8rem);
+    margin: 4px 0 0;
+  }
+
+  .hero-actions {
+    width: 100%;
+  }
+
+  .hero-actions .primary-btn,
+  .hero-actions .secondary-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+
+/* ---------------------------------------------------------
+   2. Filters bar — stack inputs vertically on mobile
+   --------------------------------------------------------- */
+@media (max-width: 720px) {
+  .filters-bar {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .filters-bar input,
+  .filters-bar select {
+    padding: 12px 14px;
+  }
+}
+
+/* ---------------------------------------------------------
+   3. Generic two-column layouts (collection / network / video
+      explorer) — extra safety net in case a page-specific
+      override is ever missing.
+   --------------------------------------------------------- */
+@media (max-width: 900px) {
+  .collection-layout,
+  .network-layout,
+  .video-explorer-layout,
+  .video-explorer-layout--with-sidebar {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------------------------------------------------------
+   4. Comparison page — stack the two comparison columns and
+      the unique-concept grid on mobile/tablet.
+   --------------------------------------------------------- */
+@media (max-width: 900px) {
+  .comparison-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .comparison-unique-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .comparison-actions,
+  .table-video-actions {
+    width: 100%;
+  }
+
+  .comparison-actions .primary-btn,
+  .comparison-actions .secondary-btn,
+  .table-video-actions .primary-btn,
+  .table-video-actions .secondary-btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
+
+/* ---------------------------------------------------------
+   5. About page — stack stat banners, two-col lists, and
+      student-track cards on mobile.
+   --------------------------------------------------------- */
+@media (max-width: 900px) {
+  .about-hero-banner__stats,
+  .about-two-col-list,
+  .student-track-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+@media (max-width: 640px) {
+  .about-hero-banner__stats > * {
+    text-align: center;
+  }
+}
+
+/* ---------------------------------------------------------
+   6. Landing capabilities / nav card grids — extra safety
+      net (in case content grows beyond 2 items per row later)
+   --------------------------------------------------------- */
+@media (max-width: 900px) {
+  .landing-card-grid,
+  .landing-capabilities-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .landing-card-grid,
+  .landing-capabilities-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------------------------------------------------------
+   7. Generic card grids (video / node / stats) — tighten gaps
+      and ensure single-column fallback stays clean on very
+      small screens.
+   --------------------------------------------------------- */
+@media (max-width: 480px) {
+  .video-grid,
+  .node-grid,
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .stat-card {
+    padding: 14px 16px;
+  }
+
+  .stat-card strong {
+    font-size: 1.4rem;
+  }
+}
+
+/* ---------------------------------------------------------
+   8. Action button rows — force full-width stacking sooner
+      across shared components on very small screens.
+   --------------------------------------------------------- */
+@media (max-width: 480px) {
+  .video-card-actions,
+  .related-card-actions,
+  .node-card-actions,
+  .relationship-actions,
+  .video-explorer-header-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .video-card-actions > *,
+  .related-card-actions > *,
+  .node-card-actions > *,
+  .relationship-actions > *,
+  .video-explorer-header-actions > * {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ---------------------------------------------------------
+   9. Concept analysis components (similarity matrix, topic
+      heatmap, live word cloud) — shrink frozen header sizes
+      and control rows on mobile so they don't overflow.
+   --------------------------------------------------------- */
+@media (max-width: 720px) {
+  .similarity-toolbar,
+  .topic-heatmap-controls,
+  .word-cloud-controls,
+  .concept-cloud-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .similarity-search,
+  .concept-cloud-controls .similarity-search {
+    width: 100%;
+  }
+
+  .similarity-zoom-controls,
+  .topic-heatmap-zoom,
+  .word-cloud-zoom,
+  .concept-cloud-zoom {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .similarity-frozen-grid {
+    grid-template-columns: 140px 1fr;
+    grid-template-rows: 90px 1fr;
+    max-height: 460px;
+  }
+
+  .similarity-corner-cell,
+  .similarity-row-header-scroll {
+    width: 140px !important;
+  }
+
+  .similarity-col-header-scroll,
+  .similarity-corner-cell {
+    height: 90px !important;
+  }
+
+  .topic-heatmap-frozen-grid {
+    grid-template-columns: 160px 1fr;
+    grid-template-rows: 100px 1fr;
+    max-height: 420px;
+  }
+
+  .topic-heatmap-corner,
+  .topic-heatmap-row-header-scroll {
+    width: 160px !important;
+  }
+
+  .topic-heatmap-col-header-scroll,
+  .topic-heatmap-corner {
+    height: 100px !important;
+  }
+
+  .word-cloud-svg {
+    height: 400px;
+  }
+
+  .concept-cloud-wrap {
+    max-height: 420px;
+    padding: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .word-cloud-hint,
+  .similarity-hint {
+    font-size: 0.72rem;
+  }
 }

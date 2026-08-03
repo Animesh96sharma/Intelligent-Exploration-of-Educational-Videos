@@ -34,7 +34,17 @@ function downloadMetadataJson(videos: VideoRecord[]) {
 export default function MetadataPage({ videos }: MetadataPageProps) {
   return (
     <section className="metadata-page">
-      <section className="panel">
+      <div className="page-intro">
+        <div className="page-intro-metadata">
+          <h2>
+            Video-level processed metadata
+          </h2>
+          <p>
+            This page supports the basic details of the processed Educational videos. You can download the metadata into json format.
+          </p>
+        </div>
+      </div>
+      <section>
         <div className="stats-grid">
           <a
             href="https://av.tib.eu/"
@@ -59,10 +69,8 @@ export default function MetadataPage({ videos }: MetadataPageProps) {
 
       <section className="panel">
         <div className="results-head">
-          <h3>Video-level processed metadata</h3>
-          <span>Available {videos.length} videos</span>
+          <h3>Available {videos.length} videos</h3>
         </div>
-
         {videos.length > 0 && (
           <div className="hero-actions" style={{ marginBottom: "16px" }}>
             <button

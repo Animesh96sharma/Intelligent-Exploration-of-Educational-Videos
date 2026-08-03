@@ -291,14 +291,13 @@ export default function HomePage({
 
   return (
     <section className="home-page">
-      <div className="home-hero">
-        <div>
-          <h1>Browse & easy filtering based on shared-concepts relationships</h1>
-          <p>
-            This page supports the collection of educational videos & filtering/searching capabilities based on shared-concepts, domain, difficulty-level.         
-          </p>
+        <div className="home-hero">
+            <h2>Browse & easy filtering based on shared-concepts relationships</h2>
+            <p>
+              This page supports the collection of educational videos & filtering/searching capabilities based on shared-concepts, domain, difficulty-level.         
+            </p>
         </div>
-      </div>
+
 
       <div className="concept-filter-bar">
         <button

@@ -140,15 +140,13 @@ export default function CollectionAnalysis({
     <section className="collection-page">
       <div className="page-intro">
         <div className="page-intro-copy">
-          <p className="eyebrow">Collection Intelligence</p>
           <h2>
-            Collection Analysis
-            <span>Across Educational Videos</span>
+            Collection analysis across Educational videos
           </h2>
           <p>
-            Explore collection-level structure through shared concepts, similarity
-            patterns, topic coverage, and guided learning flow across the visible
-            video set.
+            This page supports the collection-level analysis through shared concepts, similarity
+            patterns, topic coverage, and guided learning flow across the available educational
+            videos.
           </p>
           <p className="section-note">
             No videos match the current filter. Clear or adjust the active search,
@@ -162,20 +160,15 @@ export default function CollectionAnalysis({
 
 return (
   <section className="collection-page">
-    <div className="page-intro">
+
       <div className="page-intro-copy">
-        <p className="eyebrow">Collection Intelligence</p>
         <h2>
-          Collection Analysis
-          <span>Across Educational Videos</span>
+          Collection analysis across Educational videos
         </h2>
         <p>
-          Explore collection-level structure through shared concepts, similarity
-          patterns, topic coverage, and guided learning flow across the processed
-          educational video set.
-        </p>
-        <p className="section-note">
-          Showing analysis for {visibleCount} out of{' '}{totalCollectionCount} videos in the collection.
+            This page supports the collection-level analysis through shared concepts, similarity
+            patterns, topic coverage, and guided learning flow across the available educational
+            videos.
         </p>
         {selectedConcept ? (
           <div className="active-concept-banner">
@@ -188,18 +181,13 @@ return (
           </div>
         ) : null}
       </div>
-    </div>
 
     {/* keep the rest of the component unchanged */}
 
       <div className="stats-grid">
         <article className="stat-card">
-          <span className="stat-label">Visible Videos</span>
+          <span className="stat-label">Filtered Videos</span>
           <strong>{visibleCount}</strong>
-        </article>
-        <article className="stat-card">
-          <span className="stat-label">Total Duration</span>
-          <strong>{formatMinutes(totalDuration)}</strong>
         </article>
         <article className="stat-card">
           <span className="stat-label">Shared Concepts</span>
@@ -213,8 +201,7 @@ return (
 
       <section className="panel">
         <div className="results-head">
-          <h3>Collection signals</h3>
-          <span>Fast demo-ready insights</span>
+          <h3>✦ Some Highlighted signals from selected videos</h3>
         </div>
 
         <div className="insight-band">
@@ -308,7 +295,7 @@ return (
 
           <section className="panel">
             <div className="results-head">
-              <h3>Topics/Key-concepts Clustering</h3>
+              <h3>💬 Topics/Key-concepts Clustering</h3>
             </div>
             <ConceptWeightCluster
               videos={safeVideos}
@@ -319,7 +306,7 @@ return (
 
           <section className="panel">
             <div className="results-head">
-              <h3>Pairwise similarity amongst videos</h3>
+              <h3>⿻ Pairwise similarity amongst videos</h3>
             </div>
 
             <SimilarityMatrixCanvas
@@ -333,7 +320,7 @@ return (
 
           <section className="panel">
             <div className="results-head">
-              <h3>Topic coverage heatmap</h3>
+              <h3>📈 Topic coverage heatmap</h3>
             </div>
 
             <TopicHeatmap
@@ -409,72 +396,27 @@ return (
             )}
           </section>
 
+          
+        </div>
+        <aside className="collection-sidebar">
           <section className="panel">
-            <div className="results-head">
-              <h3>Unique concepts by video</h3>
-              <span>Differentiating signals</span>
-            </div>
-
-            {uniqueConceptEntries.length === 0 ? (
-              <p>No unique concept breakdown is available for the current selection.</p>
+            <h3>🗂️ Domains</h3>
+            {domains.length === 0 ? (
+              <p>No domains are visible with the current filters.</p>
             ) : (
-              <div className="collection-unique-grid">
-                {uniqueConceptEntries.map(([videoId, group]) => {
-                  const video = safeVideos.find((item) => item.id === videoId)
-                  if (!video) return null
-
-                  return (
-                    <article key={videoId} className="unique-video-card">
-                      <div className="node-cardhead">
-                        <div>
-                          <p className="eyebrow">{video.domain ?? 'General'}</p>
-                          <h4>{group?.videotitle || video.title}</h4>
-                        </div>
-                        <span>{group?.uniqueconcepts?.length ?? 0} unique concepts</span>
-                      </div>
-
-                      <div className="chip-group compact">
-                        {(group?.uniqueconcepts ?? []).slice(0, 8).map((concept) => (
-                          <button
-                            key={concept}
-                            type="button"
-                            className={`chip ${selectedConcept === concept ? 'active' : ''}`}
-                            onClick={() => onSelectConcept(selectedConcept === concept ? null : concept)}
-                          >
-                            {concept}
-                          </button>
-                        ))}
-                        {(group?.uniqueconcepts?.length ?? 0) > 8 ? (
-                          <span className="chip muted">
-                            +{(group?.uniqueconcepts?.length ?? 0) - 8} more
-                          </span>
-                        ) : null}
-                      </div>
-
-                      <div className="node-cardactions">
-                        <span>
-                          {formatMinutes(video.duration)} · {video.chapters.length} chapters
-                        </span>
-                        <button className="secondary-btn" onClick={() => onToggleCompareVideo(videoId)}>
-                          Compare
-                        </button>
-                        <button className="inline-link" onClick={() => onOpenVideo(videoId)}>
-                          Open video
-                        </button>
-                      </div>
-                    </article>
-                  )
-                })}
+              <div className="chip-group">
+                {domains.map((domain) => (
+                  <span key={domain} className="chip static">
+                    {domain}
+                  </span>
+                ))}
               </div>
             )}
           </section>
-        </div>
 
-        <aside className="collection-sidebar">
           <section className="panel">
             <div className="results-head">
-              <h3>Suggested learning path</h3>
-              <span>Pedagogical sequence</span>
+              <h3>🎯 Suggested learning path</h3>
             </div>
 
             {suggestedOrder.length === 0 ? (
@@ -509,29 +451,9 @@ return (
             )}
           </section>
 
-          <section className="panel">
-            <h3>Domains</h3>
-            {domains.length === 0 ? (
-              <p>No domains are visible with the current filters.</p>
-            ) : (
-              <div className="chip-group">
-                {domains.map((domain) => (
-                  <span key={domain} className="chip static">
-                    {domain}
-                  </span>
-                ))}
-              </div>
-            )}
-          </section>
 
-          <section className="panel">
-            <h3>Collection cues</h3>
-            <ul className="clean-list">
-              <li>Use the matrix to identify the strongest pairwise overlaps.</li>
-              <li>Use the heatmap to scan which concepts are distributed across the set.</li>
-              <li>Use the learning path to present a recommended progression story.</li>
-            </ul>
-          </section>
+
+          
         </aside>
       </div>
     </section>

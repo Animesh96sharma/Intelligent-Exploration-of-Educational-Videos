@@ -20,15 +20,18 @@ type PlacedWord = {
   color: string
   width: number
   height: number
-  angle: number
   driftSeed: number
 }
 
 const MAX_WORDS_IN_CONCEPT = 8
 const MIN_FONT = 13
 const MAX_FONT = 52
-const CLOUD_WIDTH = 960
-const CLOUD_HEIGHT = 560
+const CLOUD_WIDTH = 4000
+const CLOUD_HEIGHT = 4000
+const MIN_ZOOM = 0.4
+const MAX_ZOOM = 3
+const ZOOM_STEP = 0.2
+const BOUNDS_PADDING = 40
 
 const PALETTE = [
   '#2563eb', '#dc2626', '#16a34a', '#d97706', '#7c3aed',
@@ -124,13 +127,59 @@ function layoutWordCloud(entries: WordEntry[]): PlacedWord[] {
         color: colorForLabel(entry.label),
         width,
         height,
-        angle: 0,
         driftSeed: index * 0.618,
       })
     }
   })
 
   return placed
+}
+
+function computeFitViewBox(words: PlacedWord[]): { x: number; y: number; w: number; h: number } {
+  if (words.length === 0) {
+    return { x: 0, y: 0, w: CLOUD_WIDTH, h: CLOUD_HEIGHT }
+  }
+
+  let minX = Infinity
+  let maxX = -Infinity
+  let minY = Infinity
+  let maxY = -Infinity
+
+  words.forEach((word) => {
+    minX = Math.min(minX, word.x - word.width / 2)
+    maxX = Math.max(maxX, word.x + word.width / 2)
+    minY = Math.min(minY, word.y - word.height / 2)
+    maxY = Math.max(maxY, word.y + word.height / 2)
+  })
+
+  minX -= BOUNDS_PADDING
+  maxX += BOUNDS_PADDING
+  minY -= BOUNDS_PADDING
+  maxY += BOUNDS_PADDING
+
+  const contentWidth = Math.max(maxX - minX, 120)
+  const contentHeight = Math.max(maxY - minY, 80)
+  const contentCenterX = (minX + maxX) / 2
+  const contentCenterY = (minY + maxY) / 2
+
+  const targetAspect = CLOUD_WIDTH / CLOUD_HEIGHT
+  const contentAspect = contentWidth / contentHeight
+
+  let w = contentWidth
+  let h = contentHeight
+
+  if (contentAspect > targetAspect) {
+    h = w / targetAspect
+  } else {
+    w = h * targetAspect
+  }
+
+  return {
+    x: contentCenterX - w / 2,
+    y: contentCenterY - h / 2,
+    w,
+    h,
+  }
 }
 
 export default function LiveWordCloud({
@@ -144,7 +193,16 @@ export default function LiveWordCloud({
   const [limit, setLimit] = useState(60)
   const [hovered, setHovered] = useState<string | null>(null)
   const [tick, setTick] = useState(0)
+  const [zoom, setZoom] = useState(1)
+  const [pan, setPan] = useState({ x: 0, y: 0 })
   const rafRef = useRef<number | null>(null)
+  const svgRef = useRef<SVGSVGElement>(null)
+  const draggingRef = useRef<{
+    startClientX: number
+    startClientY: number
+    startPan: { x: number; y: number }
+  } | null>(null)
+  const [isDragging, setIsDragging] = useState(false)
 
   useEffect(() => {
     let start: number | null = null
@@ -179,6 +237,111 @@ export default function LiveWordCloud({
 
   const placedWords = useMemo(() => layoutWordCloud(searched), [searched])
 
+  useEffect(() => {
+    setZoom(1)
+    setPan({ x: 0, y: 0 })
+  }, [searched.length])
+
+  const fitBox = useMemo(() => computeFitViewBox(placedWords), [placedWords])
+
+  const viewBox = useMemo(() => {
+    const w = fitBox.w / zoom
+    const h = fitBox.h / zoom
+    const cx = fitBox.x + fitBox.w / 2 + pan.x
+    const cy = fitBox.y + fitBox.h / 2 + pan.y
+
+    return {
+      x: cx - w / 2,
+      y: cy - h / 2,
+      w,
+      h,
+    }
+  }, [fitBox, zoom, pan])
+
+  function clampPan(nextPan: { x: number; y: number }, currentZoom: number) {
+    const w = fitBox.w / currentZoom
+    const h = fitBox.h / currentZoom
+    const maxOffsetX = Math.max(0, (fitBox.w - w) / 2 + fitBox.w * 0.15)
+    const maxOffsetY = Math.max(0, (fitBox.h - h) / 2 + fitBox.h * 0.15)
+
+    return {
+      x: Math.max(-maxOffsetX, Math.min(maxOffsetX, nextPan.x)),
+      y: Math.max(-maxOffsetY, Math.min(maxOffsetY, nextPan.y)),
+    }
+  }
+
+  function handleZoomIn() {
+    setZoom((z) => {
+      const nextZoom = Math.min(MAX_ZOOM, Math.round((z + ZOOM_STEP) * 100) / 100)
+      setPan((p) => clampPan(p, nextZoom))
+      return nextZoom
+    })
+  }
+
+  function handleZoomOut() {
+    setZoom((z) => {
+      const nextZoom = Math.max(MIN_ZOOM, Math.round((z - ZOOM_STEP) * 100) / 100)
+      setPan((p) => clampPan(p, nextZoom))
+      return nextZoom
+    })
+  }
+
+  function handleResetZoom() {
+    setZoom(1)
+    setPan({ x: 0, y: 0 })
+  }
+
+  function handleWheel(e: React.WheelEvent) {
+    e.preventDefault()
+    const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP
+    setZoom((z) => {
+      const nextZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.round((z + delta) * 100) / 100))
+      setPan((p) => clampPan(p, nextZoom))
+      return nextZoom
+    })
+  }
+
+  function handleMouseDown(e: React.MouseEvent) {
+    draggingRef.current = {
+      startClientX: e.clientX,
+      startClientY: e.clientY,
+      startPan: { ...pan },
+    }
+    setIsDragging(false)
+  }
+
+  function handleMouseMove(e: React.MouseEvent) {
+    if (!draggingRef.current || !svgRef.current) return
+
+    const dxClient = e.clientX - draggingRef.current.startClientX
+    const dyClient = e.clientY - draggingRef.current.startClientY
+
+    if (!isDragging && Math.hypot(dxClient, dyClient) > 3) {
+      setIsDragging(true)
+    }
+
+    const rect = svgRef.current.getBoundingClientRect()
+    const scaleX = viewBox.w / rect.width
+    const scaleY = viewBox.h / rect.height
+
+    const nextPan = {
+      x: draggingRef.current.startPan.x - dxClient * scaleX,
+      y: draggingRef.current.startPan.y - dyClient * scaleY,
+    }
+
+    setPan(clampPan(nextPan, zoom))
+  }
+
+  function handleMouseUp() {
+    draggingRef.current = null
+    setTimeout(() => setIsDragging(false), 0)
+  }
+
+  function handleWordClick(label: string) {
+    if (isDragging) return
+    onSelectConcept(selectedConcept === label ? null : label)
+  }
+
   if (filteredEntries.length === 0) {
     return <p>{emptyMessage}</p>
   }
@@ -202,13 +365,36 @@ export default function LiveWordCloud({
             More
           </button>
         </div>
+        <div className="word-cloud-zoom">
+          <button type="button" onClick={handleZoomOut} aria-label="Zoom out" title="Zoom out">
+            −
+          </button>
+          <span>{Math.round(zoom * 100)}%</span>
+          <button type="button" onClick={handleZoomIn} aria-label="Zoom in" title="Zoom in">
+            +
+          </button>
+          <span onClick={handleResetZoom} title="Reset zoom and position">
+            Reset
+          </span>
+        </div>
+        {selectedConcept ? (
+          <button type="button" className="secondary-btn" onClick={() => onSelectConcept(null)}>
+            Reset selection
+          </button>
+        ) : null}
       </div>
 
       <svg
-        viewBox={`0 0 ${CLOUD_WIDTH} ${CLOUD_HEIGHT}`}
-        className="word-cloud-svg"
+        ref={svgRef}
+        viewBox={`${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`}
+        className={`word-cloud-svg ${isDragging ? 'dragging' : ''}`}
         role="img"
         aria-label="Live word cloud of concepts"
+        onWheel={handleWheel}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
       >
         {placedWords.map((word) => {
           const isActive = selectedConcept === word.label
@@ -232,9 +418,9 @@ export default function LiveWordCloud({
               style={{
                 transform: `scale(${scale})`,
                 transformOrigin: `${word.x}px ${word.y}px`,
-                cursor: 'pointer',
+                cursor: isDragging ? 'grabbing' : 'pointer',
               }}
-              onClick={() => onSelectConcept(isActive ? null : word.label)}
+              onClick={() => handleWordClick(word.label)}
               onMouseEnter={() => setHovered(word.label)}
               onMouseLeave={() => setHovered(null)}
             >

@@ -81,18 +81,26 @@ export default function ComparisonView({
   <section className="comparison-page">
     <div className="page-intro">
       <div className="page-intro-copy">
-        <p className="eyebrow">Comparison View</p>
         <h2>
-          Side-by-Side Comparison
-          <span>of Educational Videos</span>
+          Side-by-Side comparison of Educational videos
         </h2>
         <p>
           Inspect overlap, unique concepts, chapter structure, and summary
           differences across two selected educational videos.
         </p>
-        {selectedConcept ? (
-          <p className="section-note">Focused concept: {selectedConcept}</p>
-        ) : null}
+        
+        <div className="hero-actions">
+            {selectedConcept ? (
+              <div className="active-concept-banner">
+            <span>
+              Filtering by concept: <strong>{selectedConcept}</strong>
+            </span>
+              <button className="secondary-btn" onClick={() => onSelectConcept(null)}>
+                Clear concept
+              </button>
+              </div> 
+            ) : null}
+         </div>    
       </div>
     </div>
 

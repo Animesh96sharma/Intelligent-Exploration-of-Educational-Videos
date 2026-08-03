@@ -35,9 +35,6 @@ export default function ConceptWeightCluster({
         unitLabel="total mentions"
         emptyMessage="No concept frequency data is available for the current filtered set."
       />
-      <p className="section-note">
-        **Size and color reflects times each concept is mentioned across the entire dataset.
-      </p>
     </div>
   )
 }
