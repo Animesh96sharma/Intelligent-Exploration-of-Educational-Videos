@@ -4995,3 +4995,562 @@ input[type="range"]:focus {
   }
 }
 
+/* --- Replace previous similarity/heatmap/cluster CSS in App.css with this block --- */
+
+.similarity-canvas-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.similarity-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.similarity-search {
+  flex: 1;
+  min-width: 180px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  font-size: 0.85rem;
+}
+
+.similarity-sort-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.similarity-zoom-controls,
+.topic-heatmap-zoom,
+.concept-cluster-zoom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.similarity-zoom-controls input[type='range'],
+.topic-heatmap-zoom input[type='range'],
+.concept-cluster-zoom input[type='range'] {
+  width: 120px;
+}
+
+.similarity-count {
+  font-size: 0.8rem;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.similarity-frozen-grid {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  grid-template-rows: 130px 1fr;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  max-height: 620px;
+}
+
+.similarity-corner-cell {
+  grid-column: 1;
+  grid-row: 1;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.similarity-col-header-scroll {
+  grid-column: 2;
+  grid-row: 1;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  background: #f8fafc;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.similarity-col-header-row {
+  display: flex;
+  height: 100%;
+  align-items: flex-end;
+}
+
+.similarity-col-label {
+  flex-shrink: 0;
+  height: 100%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 8px;
+  border-left: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.similarity-col-label span {
+  display: inline-block;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.72rem;
+  color: #1e293b;
+  max-height: 118px;
+  white-space: nowrap;
+}
+
+.similarity-row-header-scroll {
+  grid-column: 1;
+  grid-row: 2;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  background: #f8fafc;
+  border-right: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.similarity-row-header-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.similarity-row-label {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: right;
+  padding: 0 12px;
+  font-size: 0.78rem;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.similarity-canvas-viewport {
+  grid-column: 2;
+  grid-row: 2;
+  overflow: auto;
+  position: relative;
+  background: #fff;
+}
+
+.similarity-tooltip {
+  position: fixed;
+  z-index: 40;
+  max-width: 320px;
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  pointer-events: none;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
+}
+
+.similarity-hint {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+/* Topic heatmap v2 */
+
+.topic-heatmap-v2 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.topic-heatmap-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  color: #475569;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.topic-heatmap-limit {
+  display: flex;
+  gap: 8px;
+}
+
+.topic-heatmap-limit button {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.78rem;
+}
+
+.topic-heatmap-frozen-grid {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 140px 1fr;
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 12px;
+  overflow: hidden;
+  max-height: 560px;
+}
+
+.topic-heatmap-corner {
+  grid-column: 1;
+  grid-row: 1;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.topic-heatmap-col-header-scroll {
+  grid-column: 2;
+  grid-row: 1;
+  overflow: hidden;
+  background: #f8fafc;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.topic-heatmap-col-header-row {
+  display: flex;
+  height: 100%;
+  align-items: flex-end;
+}
+
+.heatmap-concept-label {
+  flex-shrink: 0;
+  height: 100%;
+  padding: 8px 6px;
+  font-size: 0.74rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-left: 1px solid rgba(148, 163, 184, 0.15);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.heatmap-concept-label span {
+  display: inline-block;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  max-height: 128px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.heatmap-concept-label.active {
+  background: rgba(37, 99, 235, 0.15);
+  font-weight: 600;
+}
+
+.topic-heatmap-row-header-scroll {
+  grid-column: 1;
+  grid-row: 2;
+  overflow: hidden;
+  background: #f8fafc;
+  border-right: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.topic-heatmap-row-header-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.heatmap-row-label {
+  flex-shrink: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: right;
+  padding: 0 12px;
+  font-size: 0.78rem;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.topic-heatmap-body-scroll {
+  grid-column: 2;
+  grid-row: 2;
+  overflow: auto;
+  position: relative;
+}
+
+.topic-heatmap-row {
+  display: flex;
+}
+
+.heatmap-cell-v2 {
+  flex-shrink: 0;
+  border: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+}
+
+.heatmap-cell-v2.active {
+  outline: 2px solid #2563eb;
+  outline-offset: -2px;
+}
+
+.topic-heatmap-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.topic-heatmap-legend-scale {
+  display: flex;
+}
+
+.topic-heatmap-legend-scale span {
+  width: 24px;
+  height: 12px;
+}
+
+/* Concept cluster */
+
+.concept-cluster-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.concept-cluster-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: #475569;
+}
+
+.concept-cluster-limit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.concept-cluster-limit button {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.78rem;
+}
+
+.concept-cluster-svg-wrap {
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  overflow: hidden;
+  background: #f8fafc;
+  max-height: 620px;
+}
+
+.concept-cluster-svg {
+  width: 100%;
+  height: 600px;
+  display: block;
+}
+
+.concept-bubble circle {
+  transition: fill-opacity 0.15s ease, stroke-width 0.15s ease;
+}
+
+.concept-bubble text {
+  font-family: inherit;
+  pointer-events: none;
+}
+
+.concept-bubble.hovered circle {
+  stroke-width: 2.5;
+}
+
+/* --- Add this new block to App.css for the bubble-cloud concept components --- */
+
+.concept-cluster-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.concept-cloud-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.concept-cloud-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: #475569;
+}
+
+.concept-cloud-limit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.concept-cloud-limit button {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.78rem;
+}
+
+.concept-cloud-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 20px;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: #f8fafc;
+  max-height: 560px;
+  overflow-y: auto;
+}
+
+.concept-bubble-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1.5px solid;
+  background: transparent;
+  font-weight: 600;
+  line-height: 1.2;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: transform 0.12s ease, background 0.12s ease;
+}
+
+.concept-bubble-pill:hover {
+  transform: translateY(-2px) scale(1.03);
+}
+
+.concept-bubble-pill.active {
+  box-shadow: 0 0 0 2px currentColor inset;
+}
+
+.concept-bubble-pill-count {
+  font-size: 0.65em;
+  font-weight: 700;
+  opacity: 0.75;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+
+/* --- Add this block to App.css for the Live Word Cloud component --- */
+/* You can remove the old .concept-cloud-* / .concept-bubble-pill-* rules if no longer used */
+
+.word-cloud-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.word-cloud-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: #475569;
+}
+
+.word-cloud-limit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.word-cloud-limit button {
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: #fff;
+  cursor: pointer;
+  font-size: 0.78rem;
+}
+
+.word-cloud-svg {
+  width: 100%;
+  height: 560px;
+  display: block;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: radial-gradient(circle at 50% 40%, #f8fafc 0%, #eef2f7 100%);
+}
+
+.word-cloud-word {
+  transition: fill-opacity 0.15s ease;
+  user-select: none;
+}
+
+.word-cloud-word:hover {
+  filter: drop-shadow(0 2px 6px rgba(15, 23, 42, 0.25));
+}
+
+.active-concept-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: rgba(37, 99, 235, 0.08);
+  border: 1px solid rgba(37, 99, 235, 0.25);
+  font-size: 0.85rem;
+  color: #1e293b;
+  margin-top: 8px;
+}
+
+.active-concept-banner strong {
+  color: #1d4ed8;
+}

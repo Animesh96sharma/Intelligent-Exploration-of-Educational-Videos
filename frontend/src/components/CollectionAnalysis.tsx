@@ -1,6 +1,10 @@
 import { Fragment, useMemo } from 'react'
 import type { CollectionAnalysisRecord, VideoRecord } from '../types/video'
 import { buildSimilarityRecords } from '../lib/analytics'
+import SimilarityMatrixCanvas from './SimilarityMatrixCanvas'
+import TopicHeatmap from './TopicHeatmap'
+import ConceptCluster from './ConceptCluster'
+import ConceptWeightCluster from './ConceptWeightCluster'
 
 type CollectionAnalysisProps = {
   analysis: CollectionAnalysisRecord
@@ -18,11 +22,6 @@ function formatMinutes(seconds: number) {
 
 function formatPercent(value: number) {
   return `${Math.round(value * 100)}%`
-}
-
-function getHeatColor(intensity: number) {
-  const alpha = 0.08 + intensity * 0.6
-  return `rgba(37, 99, 235, ${alpha})`
 }
 
 function ensureStringArray(value: unknown): string[] {
@@ -129,29 +128,6 @@ export default function CollectionAnalysis({
 
   const highestOverlapPair = useMemo(() => similarityRecords[0] ?? null, [similarityRecords])
 
-  const topConceptColumns = useMemo(
-    () => commonConceptEntries.slice(0, 8).map(([concept]) => concept),
-    [commonConceptEntries],
-  )
-
-  const topicCoverageRows = useMemo(
-    () =>
-      safeVideos.map((video) => {
-        const normalized = new Set(
-          ensureStringArray(video.keyConcepts).map((concept) => concept.toLowerCase()),
-        )
-
-        const cells = topConceptColumns.map((concept) => ({
-          concept,
-          present: normalized.has(concept.toLowerCase()),
-          intensity: normalized.has(concept.toLowerCase()) ? 1 : 0,
-        }))
-
-        return { video, cells }
-      }),
-    [safeVideos, topConceptColumns],
-  )
-
   const mostSharedConcept = commonConceptEntries[0] ?? null
   const mostUniqueVideo = uniqueConceptEntries[0] ?? null
   const suggestedStart = suggestedOrder[0] ?? null
@@ -199,9 +175,18 @@ return (
           educational video set.
         </p>
         <p className="section-note">
-          Showing analysis for {visibleCount} visible video{visibleCount === 1 ? '' : 's'} out of{' '}
-          {totalCollectionCount}.
+          Showing analysis for {visibleCount} out of{' '}{totalCollectionCount} videos in the collection.
         </p>
+        {selectedConcept ? (
+          <div className="active-concept-banner">
+            <span>
+              Filtering by concept: <strong>{selectedConcept}</strong>
+            </span>
+            <button type="button" className="secondary-btn" onClick={() => onSelectConcept(null)}>
+              Clear filter
+            </button>
+          </div>
+        ) : null}
       </div>
     </div>
 
@@ -283,11 +268,7 @@ return (
       <div className="collection-layout collection-layout--visual">
         <div className="collection-main">
           {analysis.overview ? (
-            <section className="panel">
-              <div className="results-head">
-                <h3>Overview</h3>
-                <span>Collection summary</span>
-              </div>
+            <section>
 
               {analysis.overview.collectionsummary ? <p>{analysis.overview.collectionsummary}</p> : null}
 
@@ -327,110 +308,40 @@ return (
 
           <section className="panel">
             <div className="results-head">
-              <h3>Pairwise similarity matrix</h3>
-              <span>
-                {safeVideos.length} × {safeVideos.length} scan
-              </span>
+              <h3>Topics/Key-concepts Clustering</h3>
+            </div>
+            <ConceptWeightCluster
+              videos={safeVideos}
+              onSelectConcept={onSelectConcept}
+              selectedConcept={selectedConcept}
+            />
+          </section>
+
+          <section className="panel">
+            <div className="results-head">
+              <h3>Pairwise similarity amongst videos</h3>
             </div>
 
-            <div className="matrix-wrap">
-              <div
-                className="similarity-matrix"
-                style={{
-                  gridTemplateColumns: `180px repeat(${safeVideos.length}, minmax(72px, 1fr))`,
-                }}
-              >
-                <div className="matrix-corner">Videos</div>
-
-                {safeVideos.map((video) => (
-                  <div key={`col-${video.id}`} className="matrix-label matrix-label--top" title={video.title}>
-                    <button type="button" className="inline-link" onClick={() => onOpenVideo(video.id)}>
-                      {video.title}
-                    </button>
-                  </div>
-                ))}
-
-                {safeVideos.map((rowVideo) => (
-                  <FragmentRow
-                    key={rowVideo.id}
-                    rowVideo={rowVideo}
-                    videos={safeVideos}
-                    similarityMatrix={similarityMatrix}
-                    onOpenVideo={onOpenVideo}
-                    onToggleCompareVideo={onToggleCompareVideo}
-                    onOpenComparison={onOpenComparison}
-                  />
-                ))}
-              </div>
-            </div>
+            <SimilarityMatrixCanvas
+              videos={safeVideos}
+              similarityMatrix={similarityMatrix}
+              onOpenVideo={onOpenVideo}
+              onToggleCompareVideo={onToggleCompareVideo}
+              onOpenComparison={onOpenComparison}
+            />
           </section>
 
           <section className="panel">
             <div className="results-head">
               <h3>Topic coverage heatmap</h3>
-              <span>{topConceptColumns.length} major shared concepts</span>
             </div>
 
-            {topConceptColumns.length === 0 ? (
-              <p>No concept coverage map is available for the current filtered set.</p>
-            ) : (
-              <div className="heatmap-wrap">
-                <div
-                  className="topic-heatmap"
-                  style={{
-                    gridTemplateColumns: `220px repeat(${topConceptColumns.length}, minmax(74px, 1fr))`,
-                  }}
-                >
-                  <div className="matrix-corner">Videos</div>
-
-                  {topConceptColumns.map((concept) => (
-                    <button
-                      key={`heat-col-${concept}`}
-                      type="button"
-                      className={`matrix-label matrix-label--top heatmap-concept ${
-                        selectedConcept === concept ? 'active' : ''
-                      }`}
-                      onClick={() => onSelectConcept(selectedConcept === concept ? null : concept)}
-                    >
-                      {concept}
-                    </button>
-                  ))}
-
-                  {topicCoverageRows.map(({ video, cells }) => (
-                    <Fragment key={video.id}>
-                      <div className="matrix-label matrix-label--side">
-                        <button type="button" className="inline-link" onClick={() => onOpenVideo(video.id)}>
-                          {video.title}
-                        </button>
-                      </div>
-
-                      {cells.map((cell) => (
-                        <button
-                          key={`${video.id}-${cell.concept}`}
-                          type="button"
-                          className={`heatmap-cell ${cell.present ? 'present' : ''} ${
-                            selectedConcept === cell.concept ? 'active' : ''
-                          }`}
-                          style={{
-                            background: cell.present
-                              ? getHeatColor(cell.intensity)
-                              : 'rgba(148, 163, 184, 0.08)',
-                          }}
-                          onClick={() =>
-                            onSelectConcept(selectedConcept === cell.concept ? null : cell.concept)
-                          }
-                          title={`${video.title} · ${cell.concept} · ${
-                            cell.present ? 'Present' : 'Not highlighted'
-                          }`}
-                        >
-                          {cell.present ? '•' : ''}
-                        </button>
-                      ))}
-                    </Fragment>
-                  ))}
-                </div>
-              </div>
-            )}
+            <TopicHeatmap
+              videos={safeVideos}
+              onOpenVideo={onOpenVideo}
+              onSelectConcept={onSelectConcept}
+              selectedConcept={selectedConcept}
+            />
           </section>
 
           <section className="panel">
@@ -624,69 +535,5 @@ return (
         </aside>
       </div>
     </section>
-  )
-}
-
-type FragmentRowProps = {
-  rowVideo: VideoRecord
-  videos: VideoRecord[]
-  similarityMatrix: Map<string, { score: number; sharedConcepts: string[] }>
-  onOpenVideo: (videoId: string) => void
-  onToggleCompareVideo: (videoId: string) => void
-  onOpenComparison: (videoId?: string) => void
-}
-
-function FragmentRow({
-  rowVideo,
-  videos,
-  similarityMatrix,
-  onOpenVideo,
-  onToggleCompareVideo,
-  onOpenComparison,
-}: FragmentRowProps) {
-  return (
-    <>
-      <div className="matrix-label matrix-label--side">
-        <button type="button" className="inline-link" onClick={() => onOpenVideo(rowVideo.id)}>
-          {rowVideo.title}
-        </button>
-      </div>
-
-      {videos.map((columnVideo) => {
-        const isSame = rowVideo.id === columnVideo.id
-        const pair = similarityMatrix.get(`${rowVideo.id}::${columnVideo.id}`)
-        const score = pair?.score ?? 0
-        const sharedConcepts = pair?.sharedConcepts ?? []
-
-        return (
-          <button
-            key={`${rowVideo.id}-${columnVideo.id}`}
-            type="button"
-            className={`matrix-cell ${isSame ? 'matrix-cell--self' : ''}`}
-            style={{
-              background: isSame ? 'rgba(15, 23, 42, 0.06)' : getHeatColor(score),
-            }}
-            title={
-              isSame
-                ? `${rowVideo.title}`
-                : `${rowVideo.title} ↔ ${columnVideo.title} · ${Math.round(score * 100)}% similarity${
-                    sharedConcepts.length ? ` · ${sharedConcepts.join(', ')}` : ''
-                  }`
-            }
-            onClick={() => {
-              if (isSame) {
-                onOpenVideo(rowVideo.id)
-                return
-              }
-              onToggleCompareVideo(rowVideo.id)
-              onToggleCompareVideo(columnVideo.id)
-              onOpenComparison()
-            }}
-          >
-            {isSame ? '—' : `${Math.round(score * 100)}%`}
-          </button>
-        )
-      })}
-    </>
   )
 }
