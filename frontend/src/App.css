@@ -5977,3 +5977,138 @@ input[type="range"]:focus {
     font-size: 0.72rem;
   }
 }
+
+
+@media (max-width: 900px) {
+  .video-explorer-layout,
+  .video-explorer-layout--with-sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .video-explorer-main {
+    display: contents;
+  }
+
+  .video-title-card {
+    order: 1;
+  }
+
+  .video-explorer-sidebar {
+    order: 2;
+  }
+
+  .video-details-collapsible,
+  .timeline-vertical-section {
+    order: 3;
+  }
+}
+
+.video-mobile-more-link {
+  display: none;
+  border: none;
+  background: transparent;
+  color: #000000;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 4px 0 0;
+  cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .video-mobile-more-link {
+    display: inline-flex;
+  }
+
+  .video-details-collapsible__toggle {
+    display: none;
+  }
+
+  .video-title-card {
+    padding: 14px 16px;
+  }
+
+  .video-title-card__heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 640px) {
+  .video-player-controls {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+
+  .video-player-controls button {
+    width: 34px;
+    height: 34px;
+  }
+
+  .video-player-time {
+    font-size: 0.72rem;
+  }
+
+  .speed-menu-toggle {
+    padding: 0 8px;
+    font-size: 0.78rem;
+  }
+}
+
+.video-watch-meta__byline {
+  margin: 4px 0 10px;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+}
+
+.video-watch-meta__chips {
+  margin-bottom: 6px;
+}
+
+.video-mobile-more-link {
+  display: inline-flex;
+  border: none;
+  background: transparent;
+  color: #020202;
+  font-size: 1rem;
+  font-weight: 600;
+  padding: 2px 0 0;
+  cursor: pointer;
+}
+
+.video-mobile-more-link:hover {
+  text-decoration: underline;
+}
+
+
+.video-details-collapsible__summary-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.video-mobile-more-link {
+  display: inline-flex;
+  align-self: flex-start;
+  border: none;
+  background: transparent;
+  color: #000000;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+}
+
+.video-mobile-more-link:hover {
+  text-decoration: underline;
+}
+
+.chapter-panel {
+  position: relative;
+}
+
+.chapter-panel__more-link {
+  position: absolute;
+  bottom: 14px;
+  right: 16px;
+}

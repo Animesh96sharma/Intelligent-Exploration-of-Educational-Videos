@@ -146,7 +146,7 @@ export default function VideoExplorer({
   const [selectedChapterIndex, setSelectedChapterIndex] = useState(0)
   const [currentTime, setCurrentTime] = useState(0)
   const [summaryLevel, setSummaryLevel] = useState<SummaryDetailLevel>('medium')
-  const [detailsExpanded, setDetailsExpanded] = useState(true)
+  const [detailsExpanded, setDetailsExpanded] = useState(false)
   const [noteText, setNoteText] = useState('')
   const [playbackRate, setPlaybackRate] = useState(1)
   const hiddenVideoRef = useRef<HTMLVideoElement | null>(null)
@@ -161,7 +161,7 @@ export default function VideoExplorer({
   useEffect(() => {
     setSelectedChapterIndex(0)
     setCurrentTime(0)
-    setDetailsExpanded(true)
+    setDetailsExpanded(false)
     setNoteText('')
     setPlaybackRate(1)
   }, [video?.id])
@@ -198,19 +198,19 @@ export default function VideoExplorer({
     return chapters[selectedChapterIndex] ?? chapters[0] ?? null
   }, [chapters, selectedChapterIndex])
 
-  const selectedChapterConcepts = useMemo(
-    () => ensureStringArray(selectedChapter?.keyConcepts),
-    [selectedChapter]
-  )
-
-  const selectedChapterObjectives = useMemo(
-    () => ensureStringArray(selectedChapter?.learningObjectives),
-    [selectedChapter]
-  )
-
   const activePlaybackChapter = useMemo(
     () => getActiveChapter(chapters, currentTime),
     [chapters, currentTime]
+  )
+
+  const selectedChapterConcepts = useMemo(
+    () => ensureStringArray(activePlaybackChapter?.keyConcepts),
+    [activePlaybackChapter]
+  )
+
+  const selectedChapterObjectives = useMemo(
+    () => ensureStringArray(activePlaybackChapter?.learningObjectives),
+    [activePlaybackChapter]
   )
 
   const relatedVideos = useMemo(() => {
@@ -382,7 +382,7 @@ export default function VideoExplorer({
 
             <div className="video-watch-meta">
               <div className="video-watch-meta__main">
-                <h2>{video.title ?? 'Untitled video'} : {video.speaker ?? 'Unknown speaker'} | {video.domain ?? 'General'}</h2>
+                <h2>{video.title ?? 'Untitled video'}</h2>
               </div>
 
               <div className="video-watch-meta__actions">
@@ -494,121 +494,119 @@ export default function VideoExplorer({
             </div>
           </section>
 
-          {chapters.length > 0 && selectedChapter ? (
-            <>
-              <VideoTimeline
-                chapters={chapters}
-                activeChapterId={activePlaybackChapter?.id ?? null}
-                selectedChapterId={selectedChapter?.id ?? null}
-                currentTime={currentTime}
-                duration={video.duration ?? 0}
-                onSelectChapter={(chapter) => {
-                  const chapterIndex = chapters.findIndex((item) => item.id === chapter.id)
-                  if (chapterIndex >= 0) handleSelectChapter(chapterIndex)
-                }}
-              />
-
-              <article className="chapter-panel">
-                <div className="chapter-panelheader">
-                  <div>
-                    <h3>
-                      {selectedChapter.index ?? selectedChapterIndex + 1}. {selectedChapter.title ?? 'Untitled chapter'}
-                    </h3>
-                    <p>{getBestChapterSummary(selectedChapter, summaryLevel)}</p>
-                  </div>
-                </div>
-              </article>
-            </>
-          ) : (
-            <article className="chapter-panel">
-              <div className="chapter-panelheader">
-                <div>
-                  <p className="eyebrow">Selected chapter</p>
-                  <h3>No chapter data available</h3>
-                </div>
-              </div>
-              <p>This video does not currently have usable chapter information.</p>
-            </article>
-          )}
+          
 
           <section className="video-details-collapsible">
-            <button
-              type="button"
-              className="video-details-collapsible__toggle"
-              onClick={() => setDetailsExpanded((current) => !current)}
-              aria-expanded={detailsExpanded}
-            >
-              <span>Click here for more details</span>
-              <span>{detailsExpanded ? 'Show' : 'Hide'}</span>
-            </button>
-
-            {detailsExpanded ? (
-              <div className="video-details-collapsiblecontent">
-                <section className="sidebar-card">
-                  <div className="info-block">
-                    <div className="chip-group">
-                      <span className="chip static">{video.domain ?? 'Educational video'}</span>
-                      <span className="chip static">{video.speaker ?? 'Unknown speaker'}</span>
-                      <span className="chip static">{video.totalChapters ?? chapters.length} chapters</span>
-                      <span className="chip static">{formatDurationMinutes(video.duration)}</span>
-                      {video.difficultyLevel ? (
-                        <span className="chip static">{video.difficultyLevel}</span>
-                      ) : null}
+            <div className="video-details-collapsible__summary-row">
+              {chapters.length > 0 && activePlaybackChapter ? (
+                <article className="chapter-panel">
+                  <div className="chapter-panelheader">
+                    <div>
+                      <h3>
+                        {activePlaybackChapter.index ?? chapters.indexOf(activePlaybackChapter) + 1}. {activePlaybackChapter.title ?? 'Untitled chapter'}
+                      </h3>
+                      <p>{getBestChapterSummary(activePlaybackChapter, summaryLevel)}</p>
                     </div>
                   </div>
 
-                  {selectedChapterObjectives.length > 0 ? (
-                    <div className="info-block">
-                      <h4>Learning objectives</h4>
-                      <ul className="clean-list">
-                        {selectedChapterObjectives.map((objective) => (
-                          <li key={objective}>{objective}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-
-                  {selectedChapterConcepts.length > 0 ? (
-                    <div className="info-block">
-                      <h4>Important chapter concepts</h4>
-                      <div className="chip-group">
-                        {selectedChapterConcepts.map((concept) => (
-                          <button
-                            key={concept}
-                            type="button"
-                            className={`chip ${selectedConcept === concept ? 'active' : ''}`}
-                            onClick={() => onSelectConcept(concept)}
-                          >
-                            {concept}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <div className="info-block">
-                    <h4>Important concepts</h4>
-                    <div className="chip-group">
-                      {videoConcepts.length === 0 ? (
-                        <p>No concepts available.</p>
-                      ) : (
-                        videoConcepts.map((concept) => (
-                          <button
-                            key={concept}
-                            type="button"
-                            className={`chip ${selectedConcept === concept ? 'active' : ''}`}
-                            onClick={() => onSelectConcept(concept)}
-                          >
-                            {concept}
-                          </button>
-                        ))
-                      )}
+                  <button
+                    type="button"
+                    className="video-mobile-more-link chapter-panel__more-link"
+                    onClick={() => setDetailsExpanded((open) => !open)}
+                    aria-expanded={detailsExpanded}
+                  >
+                    {detailsExpanded ? 'Show less' : 'Show more...'}
+                  </button>
+                </article>
+              ) : (
+                <article className="chapter-panel">
+                  <div className="chapter-panelheader">
+                    <div>
+                      <p className="eyebrow">Selected chapter</p>
+                      <h3>No chapter data available</h3>
                     </div>
                   </div>
-                </section>
-              </div>
+                  <p>This video does not currently have usable chapter information.</p>
+
+                  <button
+                    type="button"
+                    className="video-mobile-more-link chapter-panel__more-link"
+                    onClick={() => setDetailsExpanded((open) => !open)}
+                    aria-expanded={detailsExpanded}
+                  >
+                    {detailsExpanded ? 'Show less' : 'Show more...'}
+                  </button>
+                </article>
+              )}
+            </div>
+
+  {detailsExpanded ? (
+    <div className="video-details-collapsiblecontent">
+      <section className="sidebar-card">
+        <div className="info-block">
+          <div className="chip-group">
+            <span className="chip static">{video.domain ?? 'Educational video'}</span>
+            <span className="chip static">{video.speaker ?? 'Unknown speaker'}</span>
+            <span className="chip static">{video.totalChapters ?? chapters.length} chapters</span>
+            <span className="chip static">{formatDurationMinutes(video.duration)}</span>
+            {video.difficultyLevel ? (
+              <span className="chip static">{video.difficultyLevel}</span>
             ) : null}
-          </section>
+          </div>
+        </div>
+
+        {selectedChapterObjectives.length > 0 ? (
+          <div className="info-block">
+            <h4>Learning objectives</h4>
+            <ul className="clean-list">
+              {selectedChapterObjectives.map((objective) => (
+                <li key={objective}>{objective}</li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        {selectedChapterConcepts.length > 0 ? (
+          <div className="info-block">
+            <h4>Important chapter concepts</h4>
+            <div className="chip-group">
+              {selectedChapterConcepts.map((concept) => (
+                <button
+                  key={concept}
+                  type="button"
+                  className={`chip ${selectedConcept === concept ? 'active' : ''}`}
+                  onClick={() => onSelectConcept(concept)}
+                >
+                  {concept}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <div className="info-block">
+          <h4>Important concepts</h4>
+          <div className="chip-group">
+            {videoConcepts.length === 0 ? (
+              <p>No concepts available.</p>
+            ) : (
+              videoConcepts.map((concept) => (
+                <button
+                  key={concept}
+                  type="button"
+                  className={`chip ${selectedConcept === concept ? 'active' : ''}`}
+                  onClick={() => onSelectConcept(concept)}
+                >
+                  {concept}
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+    </div>
+  ) : null}
+</section>
         </div>
 
         <aside className="video-explorersidebar">
