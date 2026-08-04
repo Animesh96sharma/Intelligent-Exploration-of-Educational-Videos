@@ -1,3 +1,90 @@
+# ============================================================
+# requirements.txt — Video Segmentation Pipeline
+# ASR · Frame Captioning · Chaptering · Metadata · API · Eval
+# ============================================================
+# Install: pip install -r requirements.txt
+# Note: FFmpeg and Ollama are system-level tools (see notes below)
+# ============================================================
+
+
+# ------------------------------------------------------------
+# ASR (asr.py)
+# ------------------------------------------------------------
+openai-whisper              # Whisper transcription
+torch                       # PyTorch — also required by whisper & LLaVA
+# Note: install the CUDA build of torch separately if you have a GPU:
+#   pip install torch --index-url https://download.pytorch.org/whl/cu121
+
+
+# ------------------------------------------------------------
+# Frame Captioning (frame_captioning.py / slide_captioner.py)
+# ------------------------------------------------------------
+opencv-python               # cv2 — video frame extraction
+Pillow                      # PIL Image handling
+imagehash                   # pHash perceptual deduplication
+transformers                # LlavaNextProcessor / LlavaNextForConditionalGeneration
+bitsandbytes                # 4-bit quantisation for LLaVA
+accelerate                  # device_map="auto" support for HuggingFace models
+sentence-transformers       # Caption embeddings (all-MiniLM-L6-v2)
+
+
+# ------------------------------------------------------------
+# Chaptering (chaptering.py)
+# ------------------------------------------------------------
+# No extra pip packages — uses only stdlib + sentence-transformers
+# (already listed above) + Ollama HTTP API (system tool, see note)
+
+
+# ------------------------------------------------------------
+# Metadata Extraction (metadata_extraction.py)
+# ------------------------------------------------------------
+anthropic                   # Claude API client
+
+
+# ------------------------------------------------------------
+# API (api.py)
+# ------------------------------------------------------------
+fastapi                     # REST API framework
+uvicorn[standard]           # ASGI server to run FastAPI
+python-multipart            # Required for FastAPI file uploads (UploadFile)
+pydantic                    # Response model validation (bundled with FastAPI but pin it)
+
+
+# ------------------------------------------------------------
+# Evaluation (evaluation.py)
+# ------------------------------------------------------------
+rouge-score                 # ROUGE-1/2/L metrics for title quality
+nltk                        # BLEU score tokenisation
+
+
+# ============================================================
+# System-level dependencies (NOT installed via pip)
+# ============================================================
+#
+# FFmpeg  — audio extraction in asr.py and api.py
+#   Ubuntu/Debian:  sudo apt install ffmpeg
+#   macOS:          brew install ffmpeg
+#   Windows:        https://ffmpeg.org/download.html
+#   (asr.py uses a hardcoded path — update check_ffmpeg() to use
+#    the system ffmpeg or set the path to your local binary)
+#
+# Ollama  — local LLM inference for chaptering.py
+#   Install:  https://ollama.com/download
+#   Run:      ollama serve
+#   Models:   ollama pull llama3.1:8b
+#             ollama pull llama3.2:latest
+# ============================================================
+
+
+
+
+
+
+
+
+
+
+
 # ── Core LLM (local inference via Ollama) ─────────────────────────────────────
 ollama>=0.2.0
 

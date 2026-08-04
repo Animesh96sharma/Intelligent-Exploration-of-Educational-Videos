@@ -493,37 +493,34 @@ def extract_video_metadata_from_slides(
     import json
     import torch
 
-    prompt = prompt = """
-            [INST] <image>
-
-            You are extracting metadata from an educational lecture video.
-
-            This image is one of the FIRST 4–5 slides of the lecture.
-            The title, author, organization, and domain may appear across multiple early slides.
-            Use this slide only as evidence and extract any metadata that is explicitly visible.
-
-            Return ONLY valid JSON:
-
-            {
-            "title": "",
-            "author": "",
-            "organization": "",
-            "domain": ""
-            }
-
-            Rules:
-            - Use ONLY information explicitly visible on this slide.
-            - Do NOT guess or infer missing information.
-            - If a field is not visible on this slide, return an empty string.
-            - The title may appear on a title slide, agenda slide, or introductory slide.
-            - The author may be listed as lecturer, instructor, presenter, professor, speaker, or researcher.
-            - The organization may be a university, company, laboratory, department, institute, or research group.
-            - The domain should be the academic or technical area explicitly mentioned (e.g., Computer Science, Machine Learning, Cybersecurity, Mathematics, Physics, Biology, Economics).
-            - Ignore decorative text, conference branding, page numbers, and logos unless they clearly identify the organization.
-            - Return JSON only. No explanations.
-
-            [/INST]
-            """
+    prompt = (
+        "[INST] <image>\n\n"
+        "You are extracting metadata from an educational lecture video.\n\n"
+        "This is one of the FIRST 4-5 slides. Extract any metadata explicitly visible.\n\n"
+        "Return ONLY valid JSON:\n"
+        "{\n"
+        "  \"title\": \"\",\n"
+        "  \"author\": \"\",\n"
+        "  \"organization\": \"\",\n"
+        "  \"domain\": \"\"\n"
+        "}\n\n"
+        "Rules:\n"
+        "- COPY the title EXACTLY as written on the slide — do NOT paraphrase or summarise.\n"
+        "- Include any series number in the title: e.g. 'Representation Learning 2' not 'Representation Learning'.\n"
+        "- The title is usually the largest text on the slide.\n"
+        "- Author name is often in smaller text below the title — read ALL text carefully.\n"
+        "- Look for author clues: 'By', 'Lecturer:', 'Presenter:', 'Instructor:', email addresses (use name before @).\n"
+        "- Organization may be a university, company, lab, department — copy it exactly.\n"
+        "- Domain: use the broad parent field, not a sub-topic.\n"
+        "  e.g. embeddings/transformers/CNNs → 'Machine Learning', not 'Embeddings'.\n"
+        "  e.g. proofs/induction/sets → 'Mathematics', not 'Mathematical Induction'.\n"
+        "  This ensures all videos in a series share the same domain.\n"
+        "- If a field is genuinely not visible, return empty string.\n"
+        "- NEVER use generic placeholders: 'Lecturer', 'Professor', 'Speaker',\n"
+        "  'University', 'Institution', 'Unknown', 'N/A'.\n"
+        "- Return JSON only. No explanation.\n"
+        "[/INST]"
+    )
 
     cap = cv2.VideoCapture(str(video_path))
 
