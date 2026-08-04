@@ -1,8 +1,8 @@
 Conda Activate- conda activate myenv
 
 For Subtask 1 
-source venv/bin/activate
-python backend/app/subtask1_segmentation/run_pipeline.py --video /home/umwise2526studentproj/Group3ProjectWork/data/raw/videos/video.mp4
+
+python project/bhavik/backend/app/subtask1_segmentation/run_pipeline.py --folder project/bhavik/data/raw/videos --skip-existing
 
 
 Added 3 different group for all of us and data folder is seperate now. Anyone who is working can now use their own folder to work. 

@@ -69,6 +69,7 @@ def free_ollama_vram() -> None:
     Fire-and-forget — silently does nothing if Ollama is not running.
     """
     import urllib.request
+    import time 
 
     payload = json.dumps({
         "model":      "llama3.2:latest",
@@ -84,6 +85,7 @@ def free_ollama_vram() -> None:
     try:
         urllib.request.urlopen(req, timeout=5)
         log.info("Ollama model unloaded from VRAM ✓")
+        time.sleep(3) 
     except Exception:
         pass
 
@@ -295,6 +297,15 @@ if __name__ == "__main__":
         description="Transcribe any video to a timestamped JSON using Whisper.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+
+    parser.add_argument(
+        "--video", required=True,
+        help="Path to the input video file (.mp4, .mkv, .avi, .webm, …)",
+    )
+    parser = argparse.ArgumentParser(
+        description="Transcribe any video to a timestamped JSON using Whisper.",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
     parser.add_argument(
         "--video", required=True,
         help="Path to the input video file (.mp4, .mkv, .avi, .webm, …)",
@@ -331,6 +342,7 @@ if __name__ == "__main__":
         "--keep-audio", action="store_true",
         help="Keep the extracted WAV file after transcription.",
     )
+
     args = parser.parse_args()
 
     run(

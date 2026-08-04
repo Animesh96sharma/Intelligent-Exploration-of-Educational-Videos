@@ -98,6 +98,7 @@ def free_ollama_vram() -> None:
     Fire-and-forget — silently does nothing if Ollama is not running.
     """
     import urllib.request
+    import time 
 
     payload = json.dumps({
         "model":      "llama3.2:latest",
@@ -113,6 +114,7 @@ def free_ollama_vram() -> None:
     try:
         urllib.request.urlopen(req, timeout=5)
         log.info("Ollama model unloaded from VRAM ✓")
+        time.sleep(3)
     except Exception:
         pass
 
@@ -477,6 +479,123 @@ def prefetch_worker(video_path: Path, runs: list[SlideRun],
     cap.release()
     out_queue.put(None)
 
+def extract_video_metadata_from_slides(
+    runs,
+    video_path,
+    processor,
+    model,
+    device,
+    max_slides=5,
+):
+
+    import cv2
+    from PIL import Image
+    import json
+    import torch
+
+    prompt = prompt = """
+            [INST] <image>
+
+            You are extracting metadata from an educational lecture video.
+
+            This image is one of the FIRST 4–5 slides of the lecture.
+            The title, author, organization, and domain may appear across multiple early slides.
+            Use this slide only as evidence and extract any metadata that is explicitly visible.
+
+            Return ONLY valid JSON:
+
+            {
+            "title": "",
+            "author": "",
+            "organization": "",
+            "domain": ""
+            }
+
+            Rules:
+            - Use ONLY information explicitly visible on this slide.
+            - Do NOT guess or infer missing information.
+            - If a field is not visible on this slide, return an empty string.
+            - The title may appear on a title slide, agenda slide, or introductory slide.
+            - The author may be listed as lecturer, instructor, presenter, professor, speaker, or researcher.
+            - The organization may be a university, company, laboratory, department, institute, or research group.
+            - The domain should be the academic or technical area explicitly mentioned (e.g., Computer Science, Machine Learning, Cybersecurity, Mathematics, Physics, Biology, Economics).
+            - Ignore decorative text, conference branding, page numbers, and logos unless they clearly identify the organization.
+            - Return JSON only. No explanations.
+
+            [/INST]
+            """
+
+    cap = cv2.VideoCapture(str(video_path))
+
+    collected = []
+
+    for run in runs[:max_slides]:
+
+        cap.set(cv2.CAP_PROP_POS_MSEC, run.rep_sec * 1000)
+
+        ret, frame = cap.read()
+
+        if not ret:
+            continue
+
+        img = Image.fromarray(
+            cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        )
+
+        inputs = processor(
+            text=prompt,
+            images=img,
+            return_tensors="pt"
+        ).to(device)
+
+        with torch.no_grad():
+            output = model.generate(
+                **inputs,
+                max_new_tokens=150,
+                do_sample=False
+            )
+
+        text = processor.decode(
+            output[0],
+            skip_special_tokens=True
+        )
+
+        try:
+            start = text.find("{")
+            end   = text.rfind("}") + 1
+
+            if start >= 0 and end > start:
+                obj = json.loads(text[start:end])
+                collected.append(obj)
+
+        except Exception:
+            pass
+
+    cap.release()
+
+    final = {
+        "title": "",
+        "author": "",
+        "organization": "",
+        "domain": "",
+    }
+
+    for field in final.keys():
+
+        values = [
+            x.get(field, "").strip()
+            for x in collected
+            if x.get(field, "").strip()
+        ]
+
+        if values:
+            final[field] = max(
+                values,
+                key=len
+            )
+
+    return final
+
 
 # ── STEP 7 · LLaVA captioning ────────────────────────────────────────────────
 def load_llava(device: str):
@@ -503,7 +622,6 @@ def load_llava(device: str):
     model.eval()
     log.info(f"LLaVA ready in {time.time()-t0:.1f}s")
     return processor, model
-
 
 CAPTION_PROMPT = (
     "[INST] <image>\n"
@@ -651,6 +769,21 @@ def run(
 
     processor, model_obj = load_llava(device)
 
+    log.info("Extracting title/author metadata from slides...")
+
+    video_meta = extract_video_metadata_from_slides(
+        runs=runs,
+        video_path=video,
+        processor=processor,
+        model=model_obj,
+        device=device,
+    )
+
+    log.info(f"Detected title  : {video_meta['title']}")
+    log.info(f"Detected author : {video_meta['author']}")
+    log.info(f"Detected org    : {video_meta['organization']}")
+    log.info(f"Detected domain : {video_meta['domain']}")
+
     frame_queue: queue.Queue = queue.Queue(maxsize=PREFETCH_SIZE)
     prefetch_thread = threading.Thread(
         target=prefetch_worker, args=(video, runs, frame_queue, fdir), daemon=True
@@ -718,27 +851,69 @@ def run(
     elapsed_total = time.time() - t_start
     output_data = {
         "metadata": {
-            "video":                    str(video),
-            "transcript":               str(transc),
-            "model":                    "llava-hf/llava-v1.6-mistral-7b-hf",
-            "device":                   device,
-            "sample_interval_sec":      SAMPLE_INTERVAL,
-            "diff_threshold":           DIFF_THRESHOLD,
-            "min_slide_duration_sec":   min_duration,
-            "max_static_duration_sec":  max_static,
-            "split_interval_sec":       split_interval,
-            "phash_threshold":          phash_threshold,
-            "batch_size":               batch_size,
-            "num_transcript_segments":  len(segments),
-            "num_unique_slides":        len(results),
-            "processing_time_sec":      round(elapsed_total, 2),
+            "video": str(video),
+            "transcript": str(transc),
+
+            "video_title":
+                video_meta["title"],
+
+            "video_author":
+                video_meta["author"],
+
+            "video_organization":
+                video_meta["organization"],
+
+            "video_domain":
+                video_meta["domain"],
+
+            "model":
+                "llava-hf/llava-v1.6-mistral-7b-hf",
+
+            "device":
+                device,
+
+            "sample_interval_sec":
+                SAMPLE_INTERVAL,
+
+            "diff_threshold":
+                DIFF_THRESHOLD,
+
+            "min_slide_duration_sec":
+                min_duration,
+
+            "max_static_duration_sec":
+                max_static,
+
+            "split_interval_sec":
+                split_interval,
+
+            "phash_threshold":
+                phash_threshold,
+
+            "batch_size":
+                batch_size,
+
+            "num_transcript_segments":
+                len(segments),
+
+            "num_unique_slides":
+                len(results),
+
+            "processing_time_sec":
+                round(elapsed_total, 2),
         },
         "slides": results,
+
     }
 
     out.parent.mkdir(parents=True, exist_ok=True)
+    final_output = {
+        "video_metadata": video_meta,
+        "slides": results
+    }
+
     with open(out, "w", encoding="utf-8") as f:
-        json.dump(output_data, f, indent=2, ensure_ascii=False)
+        json.dump(final_output, f, indent=2, ensure_ascii=False)
 
     log.info(f"Saved {len(results)} slide captions -> {out}")
     _preview(results)
