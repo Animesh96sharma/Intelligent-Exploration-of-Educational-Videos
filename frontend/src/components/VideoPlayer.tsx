@@ -396,15 +396,13 @@ export default function VideoPlayer({
                 </button>
 
                 <button
-                  type="button"
-                  className={`video-control-btn video-control-btn-panel ${panelOpen ? 'active' : ''}`}
                   onClick={() => setPanelOpen((current) => !current)}
                   aria-label={panelOpen ? 'Close video details panel' : 'Open video details panel'}
                   title="Video details panel"
+                  className="video-control-btn video-more-btn"
                 >
-                  <ListVideo size={18} />
-                  <span className="video-control-label">More</span>
-                  <ChevronRight size={16} className={panelOpen ? 'rotate-open' : ''} />
+                  <span className="video-more-btn__label">More</span>
+                  <ChevronRight size={16} />
                 </button>
 
                 <div className="video-time-readout">
@@ -417,13 +415,12 @@ export default function VideoPlayer({
               <div className="video-controls-right">
                 <div className="video-speed-menu-wrap">
                   <button
-                    type="button"
-                    className="video-control-btn"
+                    className="video-control-btn video-speed-btn"
                     onClick={() => setSpeedMenuOpen((current) => !current)}
                     aria-label="Playback speed"
                     title="Playback speed"
                   >
-                    <span className="video-speed-trigger">{playbackRate}x</span>
+                    {playbackRate}x
                   </button>
 
                   {speedMenuOpen ? (
@@ -446,11 +443,10 @@ export default function VideoPlayer({
                 </div>
 
                 <button
-                  type="button"
-                  className="video-control-btn icon-only"
+                  className="video-control-btn video-screenshot-btn"
                   onClick={handleScreenshot}
                   aria-label="Capture screenshot"
-                  title="Screenshot"
+                  title="Capture screenshot"
                 >
                   <Camera size={18} />
                 </button>

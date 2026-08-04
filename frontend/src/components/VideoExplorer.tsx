@@ -611,106 +611,43 @@ export default function VideoExplorer({
 
         <aside className="video-explorersidebar">
           <section className="sidebar-card">
-            <div className="results-head">
-              <h3>Playback tools</h3>
-              <span>{formatClock(currentTime)}</span>
-            </div>
-
-            <div className="info-block">
-              <button type="button" className="secondary-btn" onClick={handleAddBookmark}>
-                Add bookmark at current time
-              </button>
-
-              <button type="button" className="secondary-btn" onClick={handleCaptureScreenshot}>
-                Capture screenshot
-              </button>
-            </div>
-
-            <div className="info-block">
-              <label htmlFor="playback-rate-select">Playback speed</label>
-              <select
-                id="playback-rate-select"
-                value={String(playbackRate)}
-                onChange={(event) => setPlaybackRate(Number(event.target.value))}
-              >
-                <option value="0.75">0.75x</option>
-                <option value="1">1x</option>
-                <option value="1.25">1.25x</option>
-                <option value="1.5">1.5x</option>
-                <option value="2">2x</option>
-              </select>
-              <p className="meta">Currently selected: {playbackRate}x</p>
-            </div>
-
-            <video
-              ref={hiddenVideoRef}
-              src={getVideoSource(video)}
-              preload="metadata"
-              style={{ display: 'none' }}
-            />
-          </section>
-
-          <section className="sidebar-card">
-            <div className="results-head">
-              <h3>Progress</h3>
-              <span>{watchedPercent}% watched</span>
-            </div>
-            <div className="progress-mini">
-              <div className="progress-mini-bar">
-                <div
-                  className="progress-mini-bar-fill"
-                  style={{ width: `${Math.min(100, watchedPercent)}%` }}
-                />
-              </div>
-              <p>Last position: {formatClock(videoProgress?.currentTime ?? 0)}</p>
-            </div>
-          </section>
-
-          <section className="sidebar-card">
-            <div className="results-head">
-              <h3>Bookmarks</h3>
-              <span>{videoBookmarks.length} saved</span>
-            </div>
-
-            {videoBookmarks.length === 0 ? (
-              <p>No bookmarks yet.</p>
+            <h3>Related videos</h3>
+            {relatedVideos.length === 0 ? (
+              <p>No related videos found yet.</p>
             ) : (
-              <div className="bookmark-list">
-                {videoBookmarks.map((bookmark) => (
-                  <div key={bookmark.id} className="bookmark-row">
-                    <button
-                      type="button"
-                      className="inline-link"
-                      onClick={() => seekTo(bookmark.timestampSeconds)}
-                    >
-                      {bookmark.label ?? formatClock(bookmark.timestampSeconds)}
-                    </button>
-                    <button
-                      type="button"
-                      className="secondary-btn"
-                      onClick={() => onRemoveBookmark(bookmark.id)}
-                    >
-                      Remove
-                    </button>
-                  </div>
+              <div className="related-list">
+                {relatedVideos.map(({ video: related, overlap }) => (
+                  <article key={related.id} className="related-card related-card--actions">
+                    <div>
+                      <strong>{related.title}</strong>
+                      <span>{related.domain ?? 'General'}</span>
+                      <small>
+                        {overlap.length > 0 ? overlap.slice(0, 4).join(', ') : 'No shared concepts'}
+                      </small>
+                    </div>
+                    <div className="related-cardactions">
+                      <button
+                        className="secondary-btn"
+                        onClick={() => onToggleCompareVideo(related.id)}
+                      >
+                        Compare
+                      </button>
+                      <button
+                        className="primary-btn"
+                        onClick={() => onSelectVideo(related.id)}
+                      >
+                        Open
+                      </button>
+                    </div>
+                  </article>
                 ))}
               </div>
             )}
           </section>
-
-          <PlaylistPanel
-            video={video}
-            playlists={userState.playlists as Playlist[]}
-            allVideos={allVideos}
-            onSelectVideo={onSelectVideo}
-            onCreatePlaylist={onCreatePlaylist}
-            onAddVideoToPlaylist={onAddVideoToPlaylist}
-            onRemoveVideoFromPlaylist={onRemoveVideoFromPlaylist}
-          />
-
+          
           <section className="sidebar-card">
             <div className="results-head">
-              <h3>Notes & annotations</h3>
+              <h3>📝Notes & annotations</h3>
               <span>{videoNotes.length} saved</span>
             </div>
 
@@ -759,41 +696,68 @@ export default function VideoExplorer({
               </div>
             )}
           </section>
-
           <section className="sidebar-card">
-            <h3>Related videos</h3>
-            {relatedVideos.length === 0 ? (
-              <p>No related videos found yet.</p>
+            <div className="results-head">
+              <h3>Bookmarks</h3>
+               <span>Current Time: {formatClock(currentTime)}</span>
+              <span>{videoBookmarks.length} saved</span>
+            </div>
+
+
+
+            <div className="info-block">
+              <button type="button" className="secondary-btn" onClick={handleAddBookmark}>
+                Add bookmark at current time
+              </button>
+            </div>
+
+            <video
+              ref={hiddenVideoRef}
+              src={getVideoSource(video)}
+              preload="metadata"
+              style={{ display: 'none' }}
+            />
+            <div className="results-head">
+              <h3>Bookmarks</h3>
+              <span>{videoBookmarks.length} saved</span>
+            </div>
+
+            {videoBookmarks.length === 0 ? (
+              <p>No bookmarks yet.</p>
             ) : (
-              <div className="related-list">
-                {relatedVideos.map(({ video: related, overlap }) => (
-                  <article key={related.id} className="related-card related-card--actions">
-                    <div>
-                      <strong>{related.title}</strong>
-                      <span>{related.domain ?? 'General'}</span>
-                      <small>
-                        {overlap.length > 0 ? overlap.slice(0, 4).join(', ') : 'No shared concepts'}
-                      </small>
-                    </div>
-                    <div className="related-cardactions">
-                      <button
-                        className="secondary-btn"
-                        onClick={() => onToggleCompareVideo(related.id)}
-                      >
-                        Compare
-                      </button>
-                      <button
-                        className="primary-btn"
-                        onClick={() => onSelectVideo(related.id)}
-                      >
-                        Open
-                      </button>
-                    </div>
-                  </article>
+              <div className="bookmark-list">
+                {videoBookmarks.map((bookmark) => (
+                  <div key={bookmark.id} className="bookmark-row">
+                    <button
+                      type="button"
+                      className="inline-link"
+                      onClick={() => seekTo(bookmark.timestampSeconds)}
+                    >
+                      {bookmark.label ?? formatClock(bookmark.timestampSeconds)}
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary-btn"
+                      onClick={() => onRemoveBookmark(bookmark.id)}
+                    >
+                      Remove
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
           </section>
+
+    
+          <PlaylistPanel
+            video={video}
+            playlists={userState.playlists as Playlist[]}
+            allVideos={allVideos}
+            onSelectVideo={onSelectVideo}
+            onCreatePlaylist={onCreatePlaylist}
+            onAddVideoToPlaylist={onAddVideoToPlaylist}
+            onRemoveVideoFromPlaylist={onRemoveVideoFromPlaylist}
+          />
 
           <section className="sidebar-card">
             <div className="results-head">

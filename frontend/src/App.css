@@ -1251,6 +1251,18 @@ Keep this block at the very end of App.css
   position: relative;
 }
 
+.home-page .video-card-thumbnail-media,
+.home-page .video-card--tile,
+.home-page .video-card.video-card--tile {
+  outline: none;
+}
+
+.home-page .video-card--tile:focus-visible {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+  border-radius: 14px;
+}
+
 /* Mute button: top-right corner, independent element */
 
 .video-tile-mute-btn {
@@ -2065,9 +2077,11 @@ input[type="range"]:focus {
 
 @media (max-width: 720px) {
   .video-watch-meta,
-  .video-watch-meta__actions {
+  .video-watch-meta__actions
+  ..video-watch-meta__main {
     flex-direction: column;
     align-items: stretch;
+     margin-top: auto;
   }
 
   .video-watch-quick-actions {
@@ -3277,7 +3291,7 @@ input[type="range"]:focus {
   height: 4px;
   transform: translateY(-50%);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.724);
   pointer-events: none;
 }
 
@@ -3288,19 +3302,19 @@ input[type="range"]:focus {
   height: 4px;
   transform: translateY(-50%);
   border-radius: 999px;
-  background: #ff0202;
+  background: #bc0404e0;
   pointer-events: none;
 }
 
 .video-progress-marker {
   position: absolute;
   top: 50%;
-  width: 1px;
-  height: 4px;
+  width: 0.2px;
+  height: 2px;
   transform: translate(-50%, -50%);
   pointer-events: auto;
   z-index: 2;
-  background: rgba(247, 247, 247, 0.55);
+  background: rgba(75, 69, 69, 0.557);
 }
 
 .video-progress-thumb {
@@ -3309,21 +3323,21 @@ input[type="range"]:focus {
   width: 10px;
   height: 10px;
   border-radius: 999px;
-  background: #ffffff;
+  background: #bc0404e0;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 0 2px #bc0404e0;
   pointer-events: none;
 }
 
 .video-chapter-marker {
   position: absolute;
   top: 50%;
-  width: 4px;
+  width: 1px;
   height: 12px;
   transform: translate(-50%, -50%);
   border: none;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(78, 68, 68, 0.9);
 }
 
 .video-controls-row {
@@ -4857,8 +4871,37 @@ input[type="range"]:focus {
 
   .video-controls-row {
     flex-wrap: wrap;
+    justify-content: flex-start;
+    row-gap: 8px;
+  }
+
+  .video-controls-left,
+  .video-controls-right {
+    flex-wrap: wrap;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .video-controls-right {
+    justify-content: flex-end;
+  }
+
+
+  
+  .video-more-btn__label {
+    display: none;
+  }
+
+  .video-more-btn {
+    padding: 0 8px;
+  }
+
+  .video-speed-btn,
+  .video-screenshot-btn {
+    display: none;
   }
 }
+
 
 @media (max-width: 1024px) {
   .comparison-layout,
