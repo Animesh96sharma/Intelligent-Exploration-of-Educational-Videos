@@ -223,3 +223,31 @@ export interface VideoComparisonRecord {
 }
 
 export type ComparisonSelection = [string, string] | [];
+
+// Add to VideoRecord
+llmQuality?: {
+  coherenceScore?: number
+  informativenessScore?: number
+  concisenessScore?: number
+  feedback?: string
+}
+
+// Add new raw type
+export type RawEvaluationReport = {
+  aggregate?: {
+    total_videos_evaluated?: number
+    avg_concept_coverage?: number
+    avg_coherence_score?: number
+  }
+  per_video?: Record<string, {
+    video_id: string
+    video_title?: string
+    concept_coverage?: { coverage?: number; covered?: string[]; missing?: string[] }
+    llm_quality?: {
+      coherence_score?: number
+      informativeness_score?: number
+      conciseness_score?: number
+      feedback?: string
+    }
+  }>
+}

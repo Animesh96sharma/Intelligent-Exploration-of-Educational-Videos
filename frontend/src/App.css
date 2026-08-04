@@ -1568,7 +1568,7 @@ input[type="range"]:focus {
   color: var(--text-faint);
 }
 
-.video-grid,
+
 .node-grid,
 .stats-grid {
   display: grid;
@@ -1576,6 +1576,7 @@ input[type="range"]:focus {
 }
 
 .video-grid {
+  display:grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
@@ -1617,10 +1618,10 @@ input[type="range"]:focus {
 }
 
 .video-card {
-  display: flex;
+  display: flex-wrap;
   flex-direction: column;
   overflow: hidden;
-  padding: 0;
+  padding: 10px;
 }
 
 .video-cardsurface {
@@ -2025,6 +2026,22 @@ input[type="range"]:focus {
   box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
 }
 
+.video-utility-btn.active {
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.14);
+}
+
+.video-utility-btn.active svg {
+  color: #ffffff;
+}
+
+.video-utility-btn.active:hover {
+  background: #1f1f1f;
+  border-color: #1f1f1f;
+}
+
 .video-utility-btn:hover svg {
   color: var(--text);
 }
@@ -2032,6 +2049,14 @@ input[type="range"]:focus {
 .video-utility-btn:focus-visible {
   outline: 2px solid rgba(37, 99, 235, 0.22);
   outline-offset: 3px;
+}
+.video-tile-menu-popover button.active {
+  background: #000000;
+  color: #ffffff;
+}
+
+.video-tile-menu-popover button.active .menu-icon {
+  color: #ffffff;
 }
 
 .video-tile-menu-trigger--icon {
@@ -3274,7 +3299,7 @@ input[type="range"]:focus {
   width: 100%;
   height: 20px;
   cursor: pointer;
-  touch-action: none;
+  
 }
 
 .video-progress-track,
@@ -4599,11 +4624,10 @@ input[type="range"]:focus {
 }
 
 .results-head h3::before,
-.panel h3::before,
 .sidebar-card h3::before,
 .chapter-panel h3::before,
 .info-block h4::before,
-.panel h4::before {
+ {
   content: "";
   width: 10px;
   height: 10px;
@@ -6154,4 +6178,167 @@ input[type="range"]:focus {
   position: absolute;
   bottom: 14px;
   right: 16px;
+}
+
+
+/* === Comparison Table === */
+.comparison-table-wrapper {
+  margin-top: 24px;
+  overflow-x: auto;
+  border-radius: 14px;
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
+  background: var(--surface-panel, rgba(255, 255, 255, 0.03));
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.comparison-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--surface-panel-strong, rgba(20, 20, 24, 0.95));
+  z-index: 2;
+  padding: 18px 20px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.1));
+}
+
+.comparison-table tbody tr {
+  border-bottom: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+}
+
+.comparison-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.comparison-table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.comparison-table td {
+  padding: 16px 20px;
+  vertical-align: top;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.comparison-table-label-col {
+  width: 200px;
+  min-width: 180px;
+  font-weight: 1000;
+  align: center;
+  color: var(--text-muted, rgba(255, 255, 255, 0.7));
+  background: rgb(1, 1, 1);
+  white-space: nowrap;
+}
+
+.comparison-video-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.comparison-video-header span {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary, #fff);
+}
+
+.comparison-video-header .eyebrow {
+  margin: 0;
+}
+
+.comparison-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.comparison-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent, #7c9cff);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 0.15s ease;
+}
+
+.comparison-link:hover {
+  text-decoration-color: currentColor;
+}
+
+.comparison-empty {
+  color: var(--text-faint, rgba(255, 255, 255, 0.45));
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .comparison-table-label-col {
+    width: 140px;
+    min-width: 120px;
+    font-size: 0.85rem;
+  }
+
+  .comparison-table td {
+    padding: 12px 14px;
+  }
+}
+
+/* === LLM Quality Block === */
+.llm-quality-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.llm-quality-scores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quality-pill {
+  background: rgba(66, 90, 164, 0.881);
+  border: 1px solid rgba(66, 90, 164, 0.881);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 0.82rem;
+  color: var(--text-muted, rgba(255, 255, 255, 0.75));
+}
+
+.quality-pill strong {
+  color: var(--text-primary, #fff);
+  margin-left: 4px;
+}
+
+.llm-quality-feedback {
+  font-size: 0.88rem;
+  color: var(--text-muted, rgb(0, 0, 0));
+  line-height: 1.5;
+  margin: 0;
+  font-style: italic;
+}
+
+/* === Plain bullet lists (Learning Objectives, Prerequisites) === */
+.comparison-bullet-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.comparison-bullet-list li {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--text-primary, rgb(0, 0, 0));
 }

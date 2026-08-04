@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
-
-import type { UserVideoState, VideoBookmark, VideoNote } from './types/userState'
+import type { VideoRecord } from "../types/video"
+import type { Playlist, UserVideoState } from "../types/userState"
+import type {VideoBookmark, VideoNote } from './types/userState'
 import { buildProgress, createPlaylist, loadUserState, saveUserState } from './lib/userState'
 
-import type { AppDataset, VideoRecord } from './types/video'
+import type { AppDataset } from './types/video'
 import { loadAppDataset } from './lib/dataLoader'
 import { videoMatchesConcept } from './lib/analytics'
 
@@ -262,15 +263,15 @@ export default function App() {
   }
 
   function createNewPlaylist(name: string) {
-    const trimmed = name.trim()
-    if (!trimmed) return
-
-    const playlist = createPlaylist(trimmed)
-    setUserState((current) => ({
-      ...current,
-      playlists: [playlist, ...current.playlists],
-    }))
-  }
+  const trimmed = name.trim()
+  if (!trimmed) return null
+  const playlist = createPlaylist(trimmed)
+  setUserState((current) => ({
+    ...current,
+    playlists: [playlist, ...current.playlists],
+  }))
+  return playlist
+}
 
   function addVideoToPlaylist(playlistId: string, videoId: string) {
     setUserState((current) => ({
@@ -318,6 +319,62 @@ export default function App() {
       },
     }))
   }
+
+  function setVideoReaction(videoId: string, reaction: 'like' | 'dislike') {
+  setUserState((current) => {
+    const existing = current.reactions[videoId]
+    const nextReactions = { ...current.reactions }
+    if (existing === reaction) {
+      delete nextReactions[videoId]
+    } else {
+      nextReactions[videoId] = reaction
+    }
+    return { ...current, reactions: nextReactions }
+  })
+}
+
+function addToWatchLater(videoId: string) {
+  setUserState((current) =>
+    current.watchLater.includes(videoId)
+      ? current
+      : { ...current, watchLater: [...current.watchLater, videoId] }
+  )
+}
+
+function setVideoInterest(videoId: string, interested: boolean) {
+  setUserState((current) => {
+    const withoutId = current.notInterested.filter((id) => id !== videoId)
+    return {
+      ...current,
+      notInterested: interested ? withoutId : [...withoutId, videoId],
+    }
+  })
+}
+
+function shareVideo(videoId: string) {
+  const shareUrl = `${window.location.origin}/video/${videoId}`
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(shareUrl).catch(() => {})
+    return
+  }
+  const textArea = document.createElement('textarea')
+  textArea.value = shareUrl
+  textArea.style.position = 'absolute'
+  textArea.style.left = '-9999px'
+  document.body.appendChild(textArea)
+  textArea.select()
+  document.execCommand('copy')
+  document.body.removeChild(textArea)
+}
+
+function downloadVideo(video: VideoRecord) {
+  const src = (video as VideoRecord & { videoSrc?: string }).videoSrc
+  if (!src) return
+  const link = document.createElement('a')
+  link.href = src
+  link.download = `${video.title || video.id}.mp4`
+  link.click()
+}
 
   function handleOpenBrowse() {
     setView('browse')
@@ -571,20 +628,28 @@ export default function App() {
               selectedVideoId={selectedVideoId}
               comparisonVideoIds={comparisonVideoIds}
               onOpenVideo={handleOpenVideo}
-              onOpenCollection={handleOpenCollection}
-              onOpenNetwork={handleOpenNetwork}
               onToggleCompareVideo={handleToggleCompareVideo}
               onSelectConcept={handleSelectConcept}
+              onAddToWatchLater={addToWatchLater}
+              onAddVideoToPlaylist={addVideoToPlaylist}
+              onDownloadVideo={downloadVideo}
+              onShareVideo={shareVideo}
+              onSetReaction={setVideoReaction}
+              reactions={userState.reactions}
+              userState={userState}
+              onCreatePlaylist={createNewPlaylist}
             />
           )}
 
           {view === 'video' && selectedVideo && (
             <VideoExplorer
               video={selectedVideo}
-              allVideos={dataset.videos ?? []}
+              allVideos={dataset.videos}
               selectedConcept={selectedConcept}
+              comparisonVideoIds={comparisonVideoIds}
               onSelectConcept={handleSelectConcept}
               onSelectVideo={handleOpenVideo}
+              onOpenVideo={handleOpenVideo}
               onToggleCompareVideo={handleToggleCompareVideo}
               onOpenComparison={handleOpenComparison}
               onBrowseMoreVideos={handleOpenBrowse}
@@ -599,6 +664,8 @@ export default function App() {
               onAddVideoToPlaylist={addVideoToPlaylist}
               onRemoveVideoFromPlaylist={removeVideoFromPlaylist}
               onUpdateVideoProgress={updateVideoProgress}
+              onSetReaction={setVideoReaction}
+              onShareVideo={shareVideo}
             />
           )}
 
@@ -629,6 +696,7 @@ export default function App() {
               videos={comparisonVideos}
               allVideos={filteredVideos}
               selectedConcept={selectedConcept}
+              collectionAnalysis={dataset.collectionAnalysis}
               onOpenVideo={handleOpenVideo}
               onSelectConcept={handleSelectConcept}
               onToggleCompareVideo={handleToggleCompareVideo}

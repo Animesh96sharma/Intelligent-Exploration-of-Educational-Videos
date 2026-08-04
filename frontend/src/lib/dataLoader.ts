@@ -6,6 +6,7 @@ import type {
   RawCollectionAnalysis,
   RawVideoSummary,
   RawVideoMetadataFile,
+  RawEvaluationReport,
   VideoRecord,
 } from "../types/video";
 
@@ -123,6 +124,19 @@ async function fetchJson<T>(path: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+async function loadEvaluationReport(): Promise<RawEvaluationReport | undefined> {
+  try {
+    const report = await fetchJson<RawEvaluationReport>(
+      `${DATA_BASE}/collection_analysis/evaluation_report.json`
+    );
+    console.log("[dataLoader] evaluation_report loaded:", report);
+    return report;
+  } catch (error) {
+    console.warn("[dataLoader] evaluation_report not found:", error);
+    return undefined;
+  }
+}
+
 async function loadVideoMetadata(videoId: string): Promise<RawVideoMetadataFile | undefined> {
   try {
     const metadata = await fetchJson<RawVideoMetadataFile>(
@@ -136,11 +150,14 @@ async function loadVideoMetadata(videoId: string): Promise<RawVideoMetadataFile 
   }
 }
 
+type LlmQualityEntry = NonNullable<RawEvaluationReport["per_video"]>[string];
+
 function mergeVideoData(
   videoSummary: RawVideoSummary,
   chapterFile?: RawChapterSummariesFile,
   transcriptFile?: RawTranscriptFile,
-  metadataFile?: RawVideoMetadataFile
+  metadataFile?: RawVideoMetadataFile,
+  llmQualityEntry?: LlmQualityEntry
 ): VideoRecord {
   const chapterSummaryMap = new Map(
     (chapterFile?.chapter_summaries ?? []).map((chapter) => [
@@ -207,6 +224,8 @@ function mergeVideoData(
     summaryLong: videoSummary.summary_long,
     keyConcepts: mergedKeyConcepts,
     learningObjectives: mergedLearningObjectives,
+    // Video-level only objectives (no chapter-level merge) — used by ComparisonView
+    videoLearningObjectives: ensureStringArray(videoSummary.learning_objectives),
     prerequisites: ensureStringArray(videoSummary.prerequisites),
     topicProgression: videoSummary.topic_progression,
     difficultyLevel: normalizeDifficulty(videoSummary.difficulty_level),
@@ -233,6 +252,15 @@ function mergeVideoData(
           numSegments: sourceMetadata.num_segments,
         }
       : undefined,
+    // Video-level LLM quality evaluation (from evaluation_report.json)
+    llmQuality: llmQualityEntry?.llm_quality
+      ? {
+          coherenceScore: llmQualityEntry.llm_quality.coherence_score,
+          informativenessScore: llmQualityEntry.llm_quality.informativeness_score,
+          concisenessScore: llmQualityEntry.llm_quality.conciseness_score,
+          feedback: llmQualityEntry.llm_quality.feedback,
+        }
+      : undefined,
   };
 }
 
@@ -247,7 +275,10 @@ function normalizeCollectionAnalysis(
   };
 }
 
-export async function loadVideoRecord(videoId: string): Promise<VideoRecord> {
+export async function loadVideoRecord(
+  videoId: string,
+  evaluationReport?: RawEvaluationReport
+): Promise<VideoRecord> {
   const transcriptCandidates = [
     `${TRANSCRIPT_BASE}/${videoId}_transcripts.json`,
     `${TRANSCRIPT_BASE}/${videoId}_transcript.json`,
@@ -280,11 +311,15 @@ export async function loadVideoRecord(videoId: string): Promise<VideoRecord> {
     loadVideoMetadata(videoId),
   ]);
 
-  return mergeVideoData(videoSummary, chapterSummaries, transcriptFile, metadataFile);
+  const llmQualityEntry = evaluationReport?.per_video?.[videoId];
+
+  return mergeVideoData(videoSummary, chapterSummaries, transcriptFile, metadataFile, llmQualityEntry);
 }
 
-export async function loadAllVideos(): Promise<VideoRecord[]> {
-  const videos = await Promise.all(VIDEO_IDS.map((videoId) => loadVideoRecord(videoId)));
+export async function loadAllVideos(evaluationReport?: RawEvaluationReport): Promise<VideoRecord[]> {
+  const videos = await Promise.all(
+    VIDEO_IDS.map((videoId) => loadVideoRecord(videoId, evaluationReport))
+  );
   return videos.sort((a, b) => a.title.localeCompare(b.title));
 }
 
@@ -296,8 +331,10 @@ export async function loadCollectionAnalysis(): Promise<CollectionAnalysisRecord
 }
 
 export async function loadAppDataset(): Promise<AppDataset> {
+  const evaluationReport = await loadEvaluationReport();
+
   const [videos, collectionAnalysis] = await Promise.all([
-    loadAllVideos(),
+    loadAllVideos(evaluationReport),
     loadCollectionAnalysis().catch(() => undefined),
   ]);
 

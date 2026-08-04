@@ -1,3 +1,5 @@
+import type { Playlist, UserVideoState } from "../types/userState"
+
 export interface VideoBookmark {
   id: string
   videoId: string
@@ -51,4 +53,14 @@ export interface UserVideoState {
   playlists: Playlist[]
   notes: VideoNote[]
   progress: Record<string, VideoProgress>
+}
+
+export interface UserVideoState {
+  bookmarks: VideoBookmark[]
+  playlists: Playlist[]
+  notes: VideoNote[]
+  progress: Record<string, VideoProgress>
+  reactions: Record<string, 'like' | 'dislike'>
+  watchLater: string[]
+  notInterested: string[]
 }

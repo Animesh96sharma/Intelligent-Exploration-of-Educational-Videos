@@ -1,14 +1,23 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import type { VideoRecord } from "../types/video";
+import { ThumbsUp, ThumbsDown } from 'lucide-react'
 
 type HomePageProps = {
-  videos: VideoRecord[];
-  selectedVideoId: string | null;
-  comparisonVideoIds: string[];
-  onOpenVideo: (videoId: string) => void;
-  onToggleCompareVideo: (videoId: string) => void;
-  onSelectConcept: (concept: string) => void;
-};
+  videos: VideoRecord[]
+  selectedVideoId: string | null
+  comparisonVideoIds: string[]
+  onOpenVideo: (videoId: string) => void
+  onToggleCompareVideo: (videoId: string) => void
+  onSelectConcept: (concept: string) => void
+  onAddToWatchLater: (videoId: string) => void
+  onAddVideoToPlaylist: (playlistId: string, videoId: string) => void
+  onDownloadVideo: (video: VideoRecord) => void
+  onShareVideo: (videoId: string) => void
+  onSetReaction: (videoId: string, reaction: 'like' | 'dislike') => void
+  reactions: Record<string, 'like' | 'dislike'>
+  userState: UserVideoState           // needed to read userState.playlists
+  onCreatePlaylist: (name: string) => Playlist | null   // must return the created playlist
+}
 
 const TOP_CONCEPT_LIMIT = 10;
 
@@ -90,36 +99,6 @@ function ShareMenuIcon() {
   );
 }
 
-function InterestedIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
-      <path d="M7 11v8H4v-8h3Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path
-        d="M9 19h7.8a1.7 1.7 0 0 0 1.65-2.08l-1.04-4.38A1.7 1.7 0 0 0 15.76 11H13l.78-3.08A1.63 1.63 0 0 0 12.2 6L9 11v8Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function NotInterestedIcon() {
-  return (
-    <svg viewBox="0 0 24 24" className="menu-icon" aria-hidden="true">
-      <path d="M7 13V5H4v8h3Z" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path
-        d="M9 5h7.8a1.7 1.7 0 0 1 1.65 2.08l-1.04 4.38A1.7 1.7 0 0 1 15.76 13H13l.78 3.08A1.63 1.63 0 0 1 12.2 18L9 13V5Z"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
 export default function HomePage({
   videos,
   selectedVideoId,
@@ -127,6 +106,14 @@ export default function HomePage({
   onOpenVideo,
   onToggleCompareVideo,
   onSelectConcept,
+  onAddToWatchLater,
+  onAddVideoToPlaylist,
+  onDownloadVideo,
+  onShareVideo,
+  onSetReaction,
+  reactions,
+  userState,
+  onCreatePlaylist,
 }: HomePageProps) {
   const [activeConcept, setActiveConcept] = useState<string | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
@@ -168,9 +155,8 @@ export default function HomePage({
   }, [videos]);
 
   const displayedVideos = useMemo(() => {
-    if (!activeConcept) return videos;
-    return videos.filter((video) => video.keyConcepts.includes(activeConcept));
-  }, [videos, activeConcept]);
+  return activeConcept ? videos.filter((v) => v.keyConcepts.includes(activeConcept)) : videos
+}, [videos, activeConcept])
 
   const handleConceptFilterClick = (concept: string | null) => {
     setActiveConcept(concept);
@@ -239,55 +225,50 @@ export default function HomePage({
     }));
   };
 
-  const handleShare = async (videoId: string) => {
-    const shareUrl = `${window.location.origin}/video/${videoId}`;
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
-    try {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(shareUrl);
-        return;
-      }
-    } catch {
-      // fallback below
+  async function handleShareClick(videoId: string) {
+    await onShareVideo(videoId)
+    setCopiedId(videoId)
+    setTimeout(() => setCopiedId(null), 1500)
+  }
+
+  function handlePlaylistAction(video: VideoRecord) {
+  if (userState.playlists.length > 0) {
+    onAddVideoToPlaylist(userState.playlists[0].id, video.id)
+  } else {
+    const created = onCreatePlaylist('My Playlist')
+    if (created) {
+      onAddVideoToPlaylist(created.id, video.id)
     }
-
-    const textArea = document.createElement("textarea");
-    textArea.value = shareUrl;
-    textArea.setAttribute("readonly", "");
-    textArea.style.position = "absolute";
-    textArea.style.left = "-9999px";
-    document.body.appendChild(textArea);
-    textArea.select();
-    document.execCommand("copy");
-    document.body.removeChild(textArea);
-  };
+  }
+}
 
   const handleMenuAction = async (action: string, video: VideoRecord) => {
-    setOpenMenuId(null);
-
-    switch (action) {
-      case "watch-later":
-        console.log("Save to Watch Later:", video.id);
-        break;
-      case "playlist":
-        console.log("Add to Playlist:", video.id);
-        break;
-      case "download":
-        console.log("Download:", video.id);
-        break;
-      case "share":
-        await handleShare(video.id);
-        break;
-      case "interested":
-        console.log("Interested:", video.id);
-        break;
-      case "not-interested":
-        console.log("Not interested:", video.id);
-        break;
-      default:
-        break;
-    }
-  };
+  setOpenMenuId(null)
+  switch (action) {
+    case 'watch-later':
+      onAddToWatchLater(video.id)
+      break
+    case 'download':
+      onDownloadVideo(video)
+      break
+    case 'playlist':
+      handlePlaylistAction(video)
+      break
+    case 'share':
+      onShareVideo(video.id)
+      break
+    case 'like':
+      onSetReaction(video.id, 'like')
+      break
+    case 'dislike':
+      onSetReaction(video.id, 'dislike')
+      break
+    default:
+      break
+  }
+}
 
   return (
     <section className="home-page">
@@ -536,36 +517,33 @@ export default function HomePage({
                             <span>Download</span>
                           </button>
 
-                          <button
-                            type="button"
-                            onClick={() => {
-                              void handleMenuAction("share", video);
-                            }}
-                          >
+                          <button onClick={() => handleShareClick(video.id)}>
                             <ShareMenuIcon />
-                            <span>Share</span>
+                            <span>{copiedId === video.id ? 'Link copied!' : 'Share'}</span>
                           </button>
 
                           <div className="video-tile-menu-divider" />
 
                           <button
                             type="button"
+                            className={reactions[video.id] === 'like' ? 'active' : ''}
                             onClick={() => {
-                              void handleMenuAction("interested", video);
+                              void handleMenuAction('like', video)
                             }}
                           >
-                            <InterestedIcon />
-                            <span>Interested</span>
+                            <ThumbsUp className="menu-icon" aria-hidden="true" />
+                            <span>Like</span>
                           </button>
 
                           <button
                             type="button"
+                            className={reactions[video.id] === 'dislike' ? 'active' : ''}
                             onClick={() => {
-                              void handleMenuAction("not-interested", video);
+                              void handleMenuAction('dislike', video)
                             }}
                           >
-                            <NotInterestedIcon />
-                            <span>Not Interested</span>
+                            <ThumbsDown className="menu-icon" aria-hidden="true" />
+                            <span>Dislike</span>
                           </button>
                         </div>
                       ) : null}

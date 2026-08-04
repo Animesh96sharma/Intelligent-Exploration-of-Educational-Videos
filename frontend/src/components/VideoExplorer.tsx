@@ -10,10 +10,12 @@ type VideoExplorerProps = {
   video: VideoRecord
   allVideos: VideoRecord[]
   selectedConcept: string | null
+  comparisonVideoIds: string[]   // add this
   onSelectConcept: (concept: string | null) => void
   onSelectVideo: (videoId: string) => void
   onToggleCompareVideo: (videoId: string) => void
   onOpenComparison: (videoId?: string) => void
+  onOpenVideo: (videoId: string) => void
   onBrowseMoreVideos: () => void
   isVideoCompared: boolean
   userState: UserVideoState
@@ -26,6 +28,8 @@ type VideoExplorerProps = {
   onAddVideoToPlaylist: (playlistId: string, videoId: string) => void
   onRemoveVideoFromPlaylist: (playlistId: string, videoId: string) => void
   onUpdateVideoProgress: (videoId: string, currentTime: number, duration: number) => void
+  onSetReaction: (videoId: string, reaction: 'like' | 'dislike') => void
+  onShareVideo: (videoId: string) => void
 }
 
 function shuffleArray<T>(items: T[]) {
@@ -125,9 +129,11 @@ function getVideoSource(video: VideoRecord): string {
 export default function VideoExplorer({
   video,
   allVideos,
+  comparisonVideoIds,
   onSelectVideo,
   onToggleCompareVideo,
   onSelectConcept,
+  onOpenVideo,
   selectedConcept,
   onOpenComparison,
   onBrowseMoreVideos,
@@ -142,6 +148,8 @@ export default function VideoExplorer({
   onAddVideoToPlaylist,
   onRemoveVideoFromPlaylist,
   onUpdateVideoProgress,
+  onSetReaction,
+  onShareVideo,
 }: VideoExplorerProps) {
   const [selectedChapterIndex, setSelectedChapterIndex] = useState(0)
   const [currentTime, setCurrentTime] = useState(0)
@@ -152,6 +160,8 @@ export default function VideoExplorer({
   const hiddenVideoRef = useRef<HTMLVideoElement | null>(null)
   const [videoMenuOpen, setVideoMenuOpen] = useState(false)
   const videoMenuRef = useRef<HTMLDivElement | null>(null)
+  const currentReaction = userState.reactions[video.id] ?? null
+  
 
 
   const chapters = useMemo(() => ensureChapterArray(video?.chapters), [video?.chapters])
@@ -405,25 +415,36 @@ export default function VideoExplorer({
                 ) : null}
 
                 <div className="video-watch-quick-actions" aria-label="Video quick actions">
-                  <button type="button" className="video-utility-btn" aria-label="Like video">
+                  <button type="button" className={`video-utility-btn ${currentReaction === 'like' ? 'active' : ''}`}
+                    aria-label="Like video"
+                    onClick={() => onSetReaction(video.id, 'like')}
+                  >
                     <ThumbsUp size={18} />
                     <span>Like</span>
                   </button>
-
-                  <button type="button" className="video-utility-btn" aria-label="Dislike video">
+                  <button
+                    type="button"
+                    className={`video-utility-btn ${currentReaction === 'dislike' ? 'active' : ''}`}
+                    aria-label="Dislike video"
+                    onClick={() => onSetReaction(video.id, 'dislike')}
+                  >
                     <ThumbsDown size={18} />
                     <span>Dislike</span>
                   </button>
-
-                  <button type="button" className="video-utility-btn" aria-label="Share video">
+                  <button
+                    type="button"
+                    className="video-utility-btn"
+                    aria-label="Share video"
+                    onClick={() => onShareVideo(video.id)}
+                  >
                     <Share2 size={18} />
                     <span>Share</span>
                   </button>
 
-                  <button type="button" className="video-utility-btn" aria-label="Save to playlist">
+                  {/* <button type="button" className="video-utility-btn" aria-label="Save to playlist">
                     <ListPlus size={18} />
                     <span>Playlist</span>
-                  </button>
+                  </button> */}
                 </div>
 
                 <div
@@ -607,44 +628,48 @@ export default function VideoExplorer({
     </div>
   ) : null}
 </section>
-        </div>
-
-        <aside className="video-explorersidebar">
           <section className="sidebar-card">
             <h3>Related videos</h3>
             {relatedVideos.length === 0 ? (
               <p>No related videos found yet.</p>
             ) : (
               <div className="related-list">
-                {relatedVideos.map(({ video: related, overlap }) => (
-                  <article key={related.id} className="related-card related-card--actions">
-                    <div>
-                      <strong>{related.title}</strong>
-                      <span>{related.domain ?? 'General'}</span>
-                      <small>
-                        {overlap.length > 0 ? overlap.slice(0, 4).join(', ') : 'No shared concepts'}
-                      </small>
-                    </div>
-                    <div className="related-cardactions">
-                      <button
-                        className="secondary-btn"
-                        onClick={() => onToggleCompareVideo(related.id)}
-                      >
-                        Compare
-                      </button>
-                      <button
-                        className="primary-btn"
-                        onClick={() => onSelectVideo(related.id)}
-                      >
-                        Open
-                      </button>
-                    </div>
-                  </article>
-                ))}
+                {relatedVideos.map(({ video: related, overlap }) => {
+                  const isRelatedCompared = comparisonVideoIds.includes(related.id)
+                  return (
+                    <article key={related.id} className="related-card related-card--actions">
+                      <div>
+                        <strong>{related.title}</strong>
+                        <span>{related.domain ?? 'General'}</span>
+                        <small>
+                          {overlap.length > 0 ? overlap.slice(0, 4).join(', ') : 'No shared concepts'}
+                        </small>
+                      </div>
+                      <div className="related-cardactions">
+                        <button
+                          type="button"
+                          className={`secondary-btn ${isRelatedCompared ? 'is-selected' : ''}`}
+                          onClick={() => onToggleCompareVideo(related.id)}
+                        >
+                          {isRelatedCompared ? 'Remove' : 'Compare'}
+                        </button>
+                        <button
+                          type="button"
+                          className="primary-btn"
+                          onClick={() => onOpenVideo(related.id)}
+                        >
+                          Open
+                        </button>
+                      </div>
+                    </article>
+                  )
+                })}
               </div>
             )}
           </section>
-          
+        </div>
+
+        <aside className="video-explorersidebar">
           <section className="sidebar-card">
             <div className="results-head">
               <h3>📝Notes & annotations</h3>
