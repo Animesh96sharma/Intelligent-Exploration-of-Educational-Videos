@@ -7,6 +7,7 @@ import {
   Expand,
   Shrink,
   ChevronRight,
+  Captions,
 } from 'lucide-react'
 import type { SummaryDetailLevel } from '../types/video'
 
@@ -36,6 +37,7 @@ type VideoPlayerProps = {
   currentTime: number
   chapters?: ChapterItem[]
   transcript?: TranscriptItem[]
+  captionsSrc?: string 
   summary?: VideoSummaryContent
   summaryLevel?: SummaryDetailLevel
   onSummaryLevelChange?: (level: SummaryDetailLevel) => void
@@ -91,6 +93,7 @@ export default function VideoPlayer({
   currentTime,
   chapters = [],
   transcript = [],
+  captionsSrc,
   summary,
   summaryLevel = 'medium',
   onSummaryLevelChange,
@@ -111,11 +114,64 @@ export default function VideoPlayer({
   const [panelTab, setPanelTab] = useState<'chapters' | 'transcript' | 'summary'>('chapters')
   const [speedMenuOpen, setSpeedMenuOpen] = useState(false)
   const [isScrubbing, setIsScrubbing] = useState(false)
+  const [subtitlesEnabled, setSubtitlesEnabled] = useState(true)
 
   const resolvedSummary = useMemo(
     () => getSummaryText(summary, summaryLevel),
     [summary, summaryLevel]
   )
+
+  const resolvedCaptionsSrc = useMemo(
+    () =>
+      captionsSrc ??
+      `/data/processed/subtask1_segmentation/transcripts/${videoId}_transcripts.vtt`,
+    [captionsSrc, videoId]
+  )
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    const track = video.textTracks?.[0]
+    if (!track) return
+
+    const repositionCues = () => {
+      const cues = track.cues
+      if (!cues) return
+      for (let i = 0; i < cues.length; i += 1) {
+        const cue = cues[i] as VTTCue
+        cue.snapToLines = false
+        cue.line = 88 // percentage from top; keeps text above the controls bar
+        cue.position = 50
+        cue.align = 'center'
+      }
+    }
+
+    track.addEventListener('load', repositionCues)
+    repositionCues()
+
+    return () => {
+      track.removeEventListener('load', repositionCues)
+    }
+  }, [subtitlesEnabled, src])
+
+  useEffect(() => {
+  const video = videoRef.current
+  if (!video) return
+
+  const applyTrackMode = () => {
+    const track = video.textTracks?.[0]
+    if (track) {
+      track.mode = subtitlesEnabled ? 'showing' : 'hidden'
+    }
+  }
+
+  applyTrackMode()
+    video.addEventListener('loadedmetadata', applyTrackMode)
+    return () => {
+      video.removeEventListener('loadedmetadata', applyTrackMode)
+    }
+  }, [subtitlesEnabled, src])
 
   useEffect(() => {
     const video = videoRef.current
@@ -330,6 +386,13 @@ export default function VideoPlayer({
             onPause={() => setIsPlaying(false)}
             onTimeUpdate={(event) => onTimeUpdate(event.currentTarget.currentTime)}
           >
+            <track
+              kind="subtitles"
+              src={resolvedCaptionsSrc}
+              srcLang="en"
+              label="English"
+              default
+            />
             Your browser does not support the video tag for {title}.
           </video>
 
@@ -441,6 +504,17 @@ export default function VideoPlayer({
                     </div>
                   ) : null}
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSubtitlesEnabled((current) => !current)}
+                  aria-pressed={subtitlesEnabled}
+                  aria-label={subtitlesEnabled ? 'Turn off subtitles' : 'Turn on subtitles'}
+                  title="Subtitles (CC)"
+                  className={`video-control-btn icon-only video-subtitle-btn${subtitlesEnabled ? ' active' : ''}`}
+                >
+                  <Captions size={18} />
+                </button>
 
                 <button
                   className="video-control-btn video-screenshot-btn"
