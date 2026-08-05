@@ -128,48 +128,50 @@ export default function VideoPlayer({
     [captionsSrc, videoId]
   )
 
+  const trackRef = useRef<HTMLTrackElement | null>(null)
+
   useEffect(() => {
     const video = videoRef.current
-    if (!video) return
+    const trackEl = trackRef.current
+    if (!video || !trackEl) return
 
-    const track = video.textTracks?.[0]
-    if (!track) return
+    const textTrack = trackEl.track
+    if (!textTrack) return
 
     const repositionCues = () => {
-      const cues = track.cues
+      const cues = textTrack.cues
       if (!cues) return
       for (let i = 0; i < cues.length; i += 1) {
         const cue = cues[i] as VTTCue
         cue.snapToLines = false
-        cue.line = 88 // percentage from top; keeps text above the controls bar
+        cue.line = 88
         cue.position = 50
         cue.align = 'center'
       }
     }
 
-    track.addEventListener('load', repositionCues)
-    repositionCues()
+    const forceRender = () => {
+      textTrack.mode = subtitlesEnabled ? 'showing' : 'hidden'
+      repositionCues()
+
+      if (subtitlesEnabled) {
+        textTrack.mode = 'hidden'
+        requestAnimationFrame(() => {
+          textTrack.mode = 'showing'
+        })
+      }
+    }
+
+    const handleTrackLoad = () => {
+      repositionCues()
+      forceRender()
+    }
+
+    trackEl.addEventListener('load', handleTrackLoad)
+    forceRender()
 
     return () => {
-      track.removeEventListener('load', repositionCues)
-    }
-  }, [subtitlesEnabled, src])
-
-  useEffect(() => {
-  const video = videoRef.current
-  if (!video) return
-
-  const applyTrackMode = () => {
-    const track = video.textTracks?.[0]
-    if (track) {
-      track.mode = subtitlesEnabled ? 'showing' : 'hidden'
-    }
-  }
-
-  applyTrackMode()
-    video.addEventListener('loadedmetadata', applyTrackMode)
-    return () => {
-      video.removeEventListener('loadedmetadata', applyTrackMode)
+      trackEl.removeEventListener('load', handleTrackLoad)
     }
   }, [subtitlesEnabled, src])
 
@@ -387,6 +389,7 @@ export default function VideoPlayer({
             onTimeUpdate={(event) => onTimeUpdate(event.currentTarget.currentTime)}
           >
             <track
+              ref={trackRef}
               kind="subtitles"
               src={resolvedCaptionsSrc}
               srcLang="en"
