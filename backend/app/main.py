@@ -2,8 +2,8 @@
 backend/app/main.py
 
 FastAPI application entry point.
-Run: uvicorn backend.app.main:app --reload --port 8000
-Docs: http://localhost:8000/docs
+Run: uvicorn backend.app.main:app --reload --port 8001
+Docs: http://localhost:8001/docs
 """
 import logging
 from fastapi import FastAPI
@@ -25,7 +25,8 @@ app = FastAPI(
 # Allow frontend (Student C) to call from any origin during development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:5173",
+    "http://137.248.121.127:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,7 +39,7 @@ app.include_router(summaries_router)
 def root():
     return {
         "status": "running",
-        "docs":   "http://localhost:8000/docs",
+        "docs":   "http://localhost:8001/docs",
         "endpoints": [
             "GET  /api/videos",
             "GET  /api/summaries/{video_id}",
