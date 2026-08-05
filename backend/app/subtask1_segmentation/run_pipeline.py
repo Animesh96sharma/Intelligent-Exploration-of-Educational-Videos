@@ -120,7 +120,9 @@ def run_pipeline(video_path):
         "project/bhavik/backend/app/subtask1_segmentation/frame_captioning.py",
         "--video", video_path,
         "--transcript", transcript_path,
-        "--output", captions_path
+        "--output", captions_path,
+        "--save-frames",
+        "--frames-dir", f"data/processed/subtask1_segmentation/frames/{base_name}",
     ], check=True)
 
     print("Running Metadata Extraction...")

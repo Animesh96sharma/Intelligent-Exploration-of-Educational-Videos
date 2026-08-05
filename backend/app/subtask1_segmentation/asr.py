@@ -64,10 +64,7 @@ def check_ffmpeg() -> None:
         sys.exit(1)
 
 def free_ollama_vram() -> None:
-    """
-    Ask Ollama to unload its model from VRAM before we run.
-    Fire-and-forget — silently does nothing if Ollama is not running.
-    """
+
     import urllib.request
     import time 
 
@@ -231,6 +228,17 @@ def save_json(
         json.dump(output, f, indent=2, ensure_ascii=False)
     log.info(f"Transcript saved → {output_path}")
 
+def save_vtt(segments: list[Segment], output_path: Path) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write("WEBVTT\n\n")
+        for i, seg in enumerate(segments, start=1):
+            # VTT timestamp format: HH:MM:SS.mmm --> HH:MM:SS.mmm
+            f.write(f"{i}\n")
+            f.write(f"{seg.start_timestamp} --> {seg.end_timestamp}\n")
+            f.write(f"{seg.text}\n\n")
+    log.info(f"Subtitles saved → {output_path}")
+
 
 def print_summary(segments: list[Segment], n: int = 5) -> None:
     """Print first N segments to console for a quick sanity check."""
@@ -279,6 +287,8 @@ def run(
 
     # Step 3: Save
     save_json(segments, metadata, out)
+    vtt_path = out.with_suffix(".vtt")
+    save_vtt(segments, vtt_path)
     print_summary(segments)
 
     # Optional cleanup

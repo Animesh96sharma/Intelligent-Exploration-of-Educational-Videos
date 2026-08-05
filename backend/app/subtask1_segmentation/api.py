@@ -1,13 +1,14 @@
-
-
 import json
 import logging
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from fastapi.responses import StreamingResponse
+import mimetypes
 
 # ---------------------------------------------------------------------------
 # Config — adjust these paths to match your project layout
@@ -18,7 +19,7 @@ TRANSCRIPTS_DIR = BASE_DIR / "transcripts"
 CAPTIONS_DIR    = BASE_DIR / "captions"
 CHAPTERS_DIR    = BASE_DIR / "chapters"
 METADATA_DIR    = Path("/home/umwise2526studentproj/Group3ProjectWork/data/processed/metadata/subtask1_segmentation")
-
+VIDEOS_DIR      = Path("/home/umwise2526studentproj/Group3ProjectWork/project/bhavik/data/raw/videos")
 
 # ---------------------------------------------------------------------------
 # App setup
@@ -33,13 +34,143 @@ app = FastAPI(
     version="2.0.0",
 )
 
+FRAMES_DIR = Path("/home/umwise2526studentproj/Group3ProjectWork/data/processed/subtask1_segmentation/frames")
+FRAMES_DIR.mkdir(parents=True, exist_ok=True)
+
+# Serve frame images as static files
+app.mount("/frames", StaticFiles(directory=str(FRAMES_DIR)), name="frames")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # tighten in production
+    allow_origins=["http://localhost:5173",
+                   "http://137.248.121.127:5173"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+@app.get("/videos/{video_id}/frames", tags=["Videos"])
+def get_frames(video_id: str):
+    """
+    Get all saved slide frames for a video with their captions.
+    Images accessible at /frames/{video_id}/slide_XXXX_XXXs.jpg
+    """
+    frames_path = FRAMES_DIR / video_id
+    captions_path = CAPTIONS_DIR / f"{video_id}_captions.json"
+
+    if not frames_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"No frames found for '{video_id}'. Re-run frame captioning with --save-frames."
+        )
+
+    # Load captions to attach caption text to each frame
+    captions_map = {}
+    if captions_path.exists():
+        data   = json.loads(captions_path.read_text(encoding="utf-8"))
+        slides = data.get("slides", [])
+        for s in slides:
+            fp = s.get("frame_path", "")
+            if fp:
+                captions_map[Path(fp).name] = {
+                    "caption":    s.get("caption", ""),
+                    "slide_id":   s.get("slide_id"),
+                    "start":      s.get("slide_start"),
+                    "end":        s.get("slide_end"),
+                    "start_str":  s.get("slide_start_str"),
+                    "end_str":    s.get("slide_end_str"),
+                }
+
+    frames = []
+    for img in sorted(frames_path.glob("*.jpg")):
+        info = captions_map.get(img.name, {})
+        frames.append({
+            "filename":  img.name,
+            "url":       f"/frames/{video_id}/{img.name}",
+            "full_url":  f"http://137.248.121.127:8000/frames/{video_id}/{img.name}",
+            **info,
+        })
+
+    return {
+        "status":     "ok",
+        "video_id":   video_id,
+        "num_frames": len(frames),
+        "frames":     frames,
+    }
+
+@app.get("/videos/{video_id}/stream", tags=["Videos"])
+def stream_video(video_id: str, request: Request):
+    """
+    Stream a video file with range request support (seek/scrub in browser).
+    """
+    from fastapi import Request
+
+    # Try common extensions
+    video_path = None
+    for ext in (".mp4", ".mkv", ".avi", ".webm", ".mov"):
+        candidate = VIDEOS_DIR / f"{video_id}{ext}"
+        if candidate.exists():
+            video_path = candidate
+            break
+
+    if not video_path:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Video file not found for '{video_id}'."
+        )
+
+    file_size  = video_path.stat().st_size
+    media_type = mimetypes.guess_type(str(video_path))[0] or "video/mp4"
+
+    # Handle range requests — needed for seeking in browser/frontend
+    range_header = request.headers.get("range")
+
+    if range_header:
+        # Parse range: "bytes=start-end"
+        range_val   = range_header.strip().lower().replace("bytes=", "")
+        start_str, _, end_str = range_val.partition("-")
+        start = int(start_str) if start_str else 0
+        end   = int(end_str)   if end_str   else file_size - 1
+        end   = min(end, file_size - 1)
+
+        chunk_size = end - start + 1
+
+        def iter_file():
+            with open(video_path, "rb") as f:
+                f.seek(start)
+                remaining = chunk_size
+                while remaining > 0:
+                    data = f.read(min(1024 * 1024, remaining))  # 1MB chunks
+                    if not data:
+                        break
+                    yield data
+                    remaining -= len(data)
+
+        return StreamingResponse(
+            iter_file(),
+            status_code=206,
+            media_type=media_type,
+            headers={
+                "Content-Range":  f"bytes {start}-{end}/{file_size}",
+                "Accept-Ranges":  "bytes",
+                "Content-Length": str(chunk_size),
+            },
+        )
+
+        # No range header — stream the whole file
+    def iter_whole():
+        with open(video_path, "rb") as f:
+            while chunk := f.read(1024 * 1024):  # 1MB chunks
+                yield chunk
+
+    return StreamingResponse(
+        iter_whole(),
+        media_type=media_type,
+        headers={
+            "Content-Length": str(file_size),
+            "Accept-Ranges":  "bytes",
+        },
+    )
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -114,10 +245,12 @@ def status():
             "GET /status",
             "GET /videos",
             "GET /videos/{video_id}",
+            "GET /videos/{video_id}/stream",
             "GET /videos/{video_id}/transcript",
             "GET /videos/{video_id}/captions",
             "GET /videos/{video_id}/chapters",
             "GET /videos/{video_id}/metadata",
+            "GET /videos/{video_id}/frames",
         ],
     )
 
@@ -147,6 +280,8 @@ def list_videos():
                 author       = vm.get("author", "")
                 organization = vm.get("organization", "")
                 domain       = vm.get("domain", "")
+                if isinstance(domain, list):
+                    domain = ", ".join(domain)
             except Exception:
                 pass
 
