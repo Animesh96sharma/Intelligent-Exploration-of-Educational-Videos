@@ -22,17 +22,23 @@ function getVideoStreamUrl(videoId: string): string {
 }
 
 // Remove Fallback once Sub-task pipe run on 33 videos
-const FALLBACK_VIDEO_IDS = [
-  "tib_av_00000_720p",
-  "tib_av_16257_720p",
-  "tib_av_16258_720p",
-  "tib_av_16259_720p",
-  "tib_av_16260_720p",
-  "tib_av_16261_1080p",
-  "tib_av_21899_720p",
-  "tib_av_34032_480p",
-  "tib_av_34035_480p",
-];
+// const FALLBACK_VIDEO_IDS = [
+//   "tib_av_00000_720p",
+//   "tib_av_16257_720p",
+//   "tib_av_16258_720p",
+//   "tib_av_16259_720p",
+//   "tib_av_16260_720p",
+//   "tib_av_16261_1080p",
+//   "tib_av_21899_720p",
+//   "tib_av_34032_480p",
+//   "tib_av_34035_480p",
+// ];
+
+type VideosApiResponse = {
+  status: string;
+  total: number;
+  videos: { video_id: string }[];
+};
 
 type RawTranscriptSegment = {
   start: number;
@@ -144,34 +150,38 @@ async function fetchJson<T>(path: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-//Once it sub-task2 run on all the videos, enable this
-
-// async function loadVideoIds(): Promise<string[]> {
-//   const data = await fetchJson<{ video_id: string }[] | string[]>(
-//     `${METADATA_API_BASE}/videos`
-//   );
-//   return Array.isArray(data)
-//     ? data.map((item) => (typeof item === "string" ? item : item.video_id))
-//     : [];
-// }
+async function loadVideoIds(): Promise<string[]> {
+  try {
+    const data = await fetchJson<VideosApiResponse>(`${METADATA_API_BASE}/videos`);
+    const ids = (data.videos ?? []).map((item) => item.video_id);
+    console.log("[dataLoader] video list loaded:", ids);
+    if (ids.length === 0) {
+      console.error("[dataLoader] API returned zero videos");
+    }
+    return ids;
+  } catch (error) {
+    console.error("[dataLoader] failed to load video list from API:", error);
+    return [];
+  }
+}
 
 
 // And disable this 
-async function loadVideoIds(): Promise<string[]> {
-  try {
-    const data = await fetchJson<{ video_id: string }[] | string[]>(
-      `${METADATA_API_BASE}/videos` 
-    );
-    const ids = Array.isArray(data)
-      ? data.map((item) => (typeof item === "string" ? item : item.video_id))
-      : [];
-    console.log("[dataLoader] video list loaded:", ids);
-    return ids.length > 0 ? ids : FALLBACK_VIDEO_IDS;
-  } catch (error) {
-    console.warn("[dataLoader] failed to load video list, using fallback:", error);
-    return FALLBACK_VIDEO_IDS;
-  }
-}
+// async function loadVideoIds(): Promise<string[]> {
+//   try {
+//     const data = await fetchJson<{ video_id: string }[] | string[]>(
+//       `${METADATA_API_BASE}/videos` 
+//     );
+//     const ids = Array.isArray(data)
+//       ? data.map((item) => (typeof item === "string" ? item : item.video_id))
+//       : [];
+//     console.log("[dataLoader] video list loaded:", ids);
+//     return ids.length > 0 ? ids : FALLBACK_VIDEO_IDS;
+//   } catch (error) {
+//     console.warn("[dataLoader] failed to load video list, using fallback:", error);
+//     return FALLBACK_VIDEO_IDS;
+//   }
+// }
 
 
 
@@ -214,6 +224,21 @@ async function loadTranscript(
     return transcript;
   } catch (error) {
     console.warn("[dataLoader] no transcript found for video:", videoId, error);
+    return undefined;
+  }
+}
+
+async function loadVideoSummary(
+  videoId: string
+): Promise<RawVideoSummary | undefined> {
+  try {
+    const summary = await fetchJson<RawVideoSummary>(
+      `${SUMMARY_API_BASE}/summaries/${videoId}`
+    );
+    console.log("[dataLoader] summary loaded:", videoId);
+    return summary;
+  } catch (error) {
+    console.warn("[dataLoader] no summary found for video:", videoId, error);
     return undefined;
   }
 }
@@ -337,16 +362,20 @@ function mergeVideoData(
 export async function loadVideoRecord(
   videoId: string,
   evaluationReport?: RawEvaluationReport
-): Promise<VideoRecord> {
+): Promise<VideoRecord | undefined> {
   const [videoSummary, chapterSummaries, transcriptFile, metadataFile] =
     await Promise.all([
-      fetchJson<RawVideoSummary>(`${SUMMARY_API_BASE}/summaries/${videoId}`),
+      loadVideoSummary(videoId),
       fetchJson<RawChapterSummariesFile>(
         `${SUMMARY_API_BASE}/summaries/${videoId}/chapters`
       ).catch(() => undefined),
       loadTranscript(videoId),
       loadVideoMetadata(videoId),
     ]);
+
+  if (!videoSummary) {
+    return undefined;
+  }
 
   const llmQualityEntry = evaluationReport?.per_video?.[videoId];
 
@@ -366,7 +395,9 @@ export async function loadAllVideos(
   const videos = await Promise.all(
     videoIds.map((videoId) => loadVideoRecord(videoId, evaluationReport))
   );
-  return videos.sort((a, b) => a.title.localeCompare(b.title));
+  return videos
+    .filter((video): video is VideoRecord => video !== undefined)
+    .sort((a, b) => a.title.localeCompare(b.title));
 }
 
 export async function loadCollectionAnalysis(): Promise<CollectionAnalysisRecord> {
