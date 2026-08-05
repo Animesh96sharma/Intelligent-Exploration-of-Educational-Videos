@@ -10,10 +10,16 @@ import type {
   VideoRecord,
 } from "../types/video";
 
-const DATA_BASE = "/data/processed/subtask2_summarization";
-const TRANSCRIPT_BASE = "/data/processed/subtask1_segmentation/transcripts";
-const METADATA_BASE = "/data/processed/metadata/subtask1_segmentation";
+// --- API base URLs (from .env) ---
+// Metadata/raw-data service (transcripts, captions, chapters, metadata, video list)
+const METADATA_API_BASE =
+  import.meta.env.VITE_METADATA_API_URL ?? "http://localhost:8000";
+// Summarization service (video/chapter summaries, collection analysis, evaluation, search)
+const SUMMARY_API_BASE =
+  import.meta.env.VITE_SUMMARY_API_URL ?? "http://localhost:8001/api";
 
+// Videos are large local files not yet served by either API.
+// Keep this map until the backend team adds a streaming endpoint (e.g. /videos/{id}/stream).
 const VIDEO_FILE_MAP: Record<string, string> = {
   tib_av_00000_720p: "/data/raw/videos/tib_av_00000_720p.mp4",
   tib_av_16257_720p: "/data/raw/videos/tib_av_16257_720p.mp4",
@@ -26,7 +32,8 @@ const VIDEO_FILE_MAP: Record<string, string> = {
   tib_av_34035_480p: "/data/raw/videos/tib_av_34035_480p.mp4",
 };
 
-const VIDEO_IDS = Object.keys(VIDEO_FILE_MAP);
+// Fallback list used only if GET /videos fails (e.g. backend offline during dev)
+const FALLBACK_VIDEO_IDS = Object.keys(VIDEO_FILE_MAP);
 
 type RawTranscriptSegment = {
   start: number;
@@ -50,6 +57,11 @@ type RawTranscriptFile = {
   };
   segments?: RawTranscriptSegment[];
 };
+
+// ---------------------------------------------------------------------------
+// Normalizer / utility functions — UNCHANGED from the static-file version.
+// These operate on already-fetched JSON, so they don't care about data source.
+// ---------------------------------------------------------------------------
 
 function ensureStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -116,18 +128,51 @@ function normalizeEntities(
   );
 }
 
+function normalizeCollectionAnalysis(
+  raw: RawCollectionAnalysis
+): CollectionAnalysisRecord {
+  return {
+    totalVideos: raw.total_videos,
+    overview: raw.collection_overview,
+    commonConcepts: raw.common_concepts ?? {},
+    uniqueConcepts: raw.unique_concepts ?? {},
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Fetch helpers — UPDATED to call the backend APIs instead of /data/... files.
+// ---------------------------------------------------------------------------
+
 async function fetchJson<T>(path: string): Promise<T> {
   const response = await fetch(path);
   if (!response.ok) {
-    throw new Error(`Failed to fetch ${path}: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch ${path}: ${response.status} ${response.statusText}`
+    );
   }
   return response.json() as Promise<T>;
+}
+
+async function loadVideoIds(): Promise<string[]> {
+  try {
+    const data = await fetchJson<{ video_id: string }[] | string[]>(
+      `${METADATA_API_BASE}/videos/`
+    );
+    const ids = Array.isArray(data)
+      ? data.map((item) => (typeof item === "string" ? item : item.video_id))
+      : [];
+    console.log("[dataLoader] video list loaded:", ids);
+    return ids.length > 0 ? ids : FALLBACK_VIDEO_IDS;
+  } catch (error) {
+    console.warn("[dataLoader] failed to load video list, using fallback:", error);
+    return FALLBACK_VIDEO_IDS;
+  }
 }
 
 async function loadEvaluationReport(): Promise<RawEvaluationReport | undefined> {
   try {
     const report = await fetchJson<RawEvaluationReport>(
-      `${DATA_BASE}/collection_analysis/evaluation_report.json`
+      `${SUMMARY_API_BASE}/evaluation/report`
     );
     console.log("[dataLoader] evaluation_report loaded:", report);
     return report;
@@ -137,10 +182,12 @@ async function loadEvaluationReport(): Promise<RawEvaluationReport | undefined> 
   }
 }
 
-async function loadVideoMetadata(videoId: string): Promise<RawVideoMetadataFile | undefined> {
+async function loadVideoMetadata(
+  videoId: string
+): Promise<RawVideoMetadataFile | undefined> {
   try {
     const metadata = await fetchJson<RawVideoMetadataFile>(
-      `${METADATA_BASE}/${videoId}_metadata.json`
+      `${METADATA_API_BASE}/videos/${videoId}/metadata`
     );
     console.log("[dataLoader] metadata loaded:", videoId, metadata);
     return metadata;
@@ -149,6 +196,25 @@ async function loadVideoMetadata(videoId: string): Promise<RawVideoMetadataFile 
     return undefined;
   }
 }
+
+async function loadTranscript(
+  videoId: string
+): Promise<RawTranscriptFile | undefined> {
+  try {
+    const transcript = await fetchJson<RawTranscriptFile>(
+      `${METADATA_API_BASE}/videos/${videoId}/transcript`
+    );
+    console.log("[dataLoader] transcript loaded:", videoId, transcript);
+    return transcript;
+  } catch (error) {
+    console.warn("[dataLoader] no transcript found for video:", videoId, error);
+    return undefined;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Merge logic — UNCHANGED. Takes already-fetched JSON objects as input.
+// ---------------------------------------------------------------------------
 
 type LlmQualityEntry = NonNullable<RawEvaluationReport["per_video"]>[string];
 
@@ -166,31 +232,35 @@ function mergeVideoData(
     ])
   );
 
-  const chapters: ChapterRecord[] = videoSummary.chapter_timeline.map((timelineItem) => {
-    const detailed = chapterSummaryMap.get(timelineItem.chapter_index);
+  const chapters: ChapterRecord[] = videoSummary.chapter_timeline.map(
+    (timelineItem) => {
+      const detailed = chapterSummaryMap.get(timelineItem.chapter_index);
 
-    return {
-      id:
-        detailed?.chapter_id ??
-        `${videoSummary.video_id}_ch${timelineItem.chapter_index}`,
-      index: timelineItem.chapter_index,
-      title: detailed?.title ?? timelineItem.title,
-      startTime: timelineItem.start_time,
-      endTime: timelineItem.end_time,
-      durationSeconds:
-        detailed?.duration_seconds ??
-        Math.max(0, timelineItem.end_time - timelineItem.start_time),
-      summaryShort: detailed?.summary_short ?? timelineItem.summary_short ?? "",
-      summaryMedium: detailed?.summary_medium,
-      summaryLong: detailed?.summary_long,
-      keyConcepts: ensureStringArray(detailed?.key_concepts ?? timelineItem.key_concepts),
-      learningObjectives: ensureStringArray(detailed?.learning_objectives),
-      hasVisuals: detailed?.has_visuals ?? false,
-      visualDescription: detailed?.visual_description,
-      difficultyLevel: normalizeDifficulty(detailed?.difficulty_level),
-      estimatedReadTimeSeconds: detailed?.estimated_read_time_seconds,
-    };
-  });
+      return {
+        id:
+          detailed?.chapter_id ??
+          `${videoSummary.video_id}_ch${timelineItem.chapter_index}`,
+        index: timelineItem.chapter_index,
+        title: detailed?.title ?? timelineItem.title,
+        startTime: timelineItem.start_time,
+        endTime: timelineItem.end_time,
+        durationSeconds:
+          detailed?.duration_seconds ??
+          Math.max(0, timelineItem.end_time - timelineItem.start_time),
+        summaryShort: detailed?.summary_short ?? timelineItem.summary_short ?? "",
+        summaryMedium: detailed?.summary_medium,
+        summaryLong: detailed?.summary_long,
+        keyConcepts: ensureStringArray(
+          detailed?.key_concepts ?? timelineItem.key_concepts
+        ),
+        learningObjectives: ensureStringArray(detailed?.learning_objectives),
+        hasVisuals: detailed?.has_visuals ?? false,
+        visualDescription: detailed?.visual_description,
+        difficultyLevel: normalizeDifficulty(detailed?.difficulty_level),
+        estimatedReadTimeSeconds: detailed?.estimated_read_time_seconds,
+      };
+    }
+  );
 
   const mergedKeyConcepts = Array.from(
     new Set([
@@ -234,7 +304,7 @@ function mergeVideoData(
     hasMathematicalContent: Boolean(videoSummary.has_mathematical_content),
     hasDiagrams: Boolean(videoSummary.has_diagrams),
     chapters,
-    // New fields from metadata file
+    // Fields from metadata endpoint
     author: videoMetadata?.author || undefined,
     organization: videoMetadata?.organization || undefined,
     description: videoMetadata?.description || undefined,
@@ -252,7 +322,7 @@ function mergeVideoData(
           numSegments: sourceMetadata.num_segments,
         }
       : undefined,
-    // Video-level LLM quality evaluation (from evaluation_report.json)
+    // Video-level LLM quality evaluation (from evaluation report endpoint)
     llmQuality: llmQualityEntry?.llm_quality
       ? {
           coherenceScore: llmQualityEntry.llm_quality.coherence_score,
@@ -264,70 +334,54 @@ function mergeVideoData(
   };
 }
 
-function normalizeCollectionAnalysis(
-  raw: RawCollectionAnalysis
-): CollectionAnalysisRecord {
-  return {
-    totalVideos: raw.total_videos,
-    overview: raw.collection_overview,
-    commonConcepts: raw.common_concepts ?? {},
-    uniqueConcepts: raw.unique_concepts ?? {},
-  };
-}
+// ---------------------------------------------------------------------------
+// Public loaders — UPDATED to call the summarization API for summaries/chapters
+// ---------------------------------------------------------------------------
 
 export async function loadVideoRecord(
   videoId: string,
   evaluationReport?: RawEvaluationReport
 ): Promise<VideoRecord> {
-  const transcriptCandidates = [
-    `${TRANSCRIPT_BASE}/${videoId}_transcripts.json`,
-    `${TRANSCRIPT_BASE}/${videoId}_transcript.json`,
-    `${TRANSCRIPT_BASE}/${videoId}.json`,
-  ];
-
-  const loadTranscript = async (): Promise<RawTranscriptFile | undefined> => {
-    for (const path of transcriptCandidates) {
-      try {
-        const transcript = await fetchJson<RawTranscriptFile>(path);
-        console.log("[dataLoader] transcript loaded:", videoId, path, transcript);
-        return transcript;
-      } catch (error) {
-        console.warn("[dataLoader] transcript not found:", videoId, path, error);
-      }
-    }
-
-    console.warn("[dataLoader] no transcript found for video:", videoId);
-    return undefined;
-  };
-
-  const [videoSummary, chapterSummaries, transcriptFile, metadataFile] = await Promise.all([
-    fetchJson<RawVideoSummary>(
-      `${DATA_BASE}/video_summaries/${videoId}_video_summary.json`
-    ),
-    fetchJson<RawChapterSummariesFile>(
-      `${DATA_BASE}/chapter_summaries/${videoId}_chapter_summaries.json`
-    ).catch(() => undefined),
-    loadTranscript(),
-    loadVideoMetadata(videoId),
-  ]);
+  const [videoSummary, chapterSummaries, transcriptFile, metadataFile] =
+    await Promise.all([
+      fetchJson<RawVideoSummary>(`${SUMMARY_API_BASE}/summaries/${videoId}`),
+      fetchJson<RawChapterSummariesFile>(
+        `${SUMMARY_API_BASE}/summaries/${videoId}/chapters`
+      ).catch(() => undefined),
+      loadTranscript(videoId),
+      loadVideoMetadata(videoId),
+    ]);
 
   const llmQualityEntry = evaluationReport?.per_video?.[videoId];
 
-  return mergeVideoData(videoSummary, chapterSummaries, transcriptFile, metadataFile, llmQualityEntry);
+  return mergeVideoData(
+    videoSummary,
+    chapterSummaries,
+    transcriptFile,
+    metadataFile,
+    llmQualityEntry
+  );
 }
 
-export async function loadAllVideos(evaluationReport?: RawEvaluationReport): Promise<VideoRecord[]> {
+export async function loadAllVideos(
+  evaluationReport?: RawEvaluationReport
+): Promise<VideoRecord[]> {
+  const videoIds = await loadVideoIds();
   const videos = await Promise.all(
-    VIDEO_IDS.map((videoId) => loadVideoRecord(videoId, evaluationReport))
+    videoIds.map((videoId) => loadVideoRecord(videoId, evaluationReport))
   );
   return videos.sort((a, b) => a.title.localeCompare(b.title));
 }
 
 export async function loadCollectionAnalysis(): Promise<CollectionAnalysisRecord> {
   const raw = await fetchJson<RawCollectionAnalysis>(
-    `${DATA_BASE}/collection_analysis/collection_analysis.json`
+    `${SUMMARY_API_BASE}/collection/analysis`
   );
   return normalizeCollectionAnalysis(raw);
+}
+
+export async function searchVideos(query: string) {
+  return fetchJson(`${SUMMARY_API_BASE}/search?q=${encodeURIComponent(query)}`);
 }
 
 export async function loadAppDataset(): Promise<AppDataset> {
