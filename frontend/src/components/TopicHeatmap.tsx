@@ -148,7 +148,7 @@ export default function TopicHeatmap({
           onScroll={handleBodyScroll}
         >
           <div style={{ width: gridWidth, height: gridHeight, position: 'relative' }}>
-            {rows.map((row, rowIdx) => (
+            {rows.map((row) => (
               <div
                 key={row.videoId}
                 className="topic-heatmap-row"

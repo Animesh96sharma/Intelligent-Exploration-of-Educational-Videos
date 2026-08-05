@@ -2103,7 +2103,7 @@ input[type="range"]:focus {
 @media (max-width: 720px) {
   .video-watch-meta,
   .video-watch-meta__actions
-  ..video-watch-meta__main {
+  .video-watch-meta__main {
     flex-direction: column;
     align-items: stretch;
      margin-top: auto;
@@ -4680,8 +4680,7 @@ input[type="range"]:focus {
 .results-head h3::before,
 .sidebar-card h3::before,
 .chapter-panel h3::before,
-.info-block h4::before,
- {
+.info-block h4::before {
   content: "";
   width: 10px;
   height: 10px;

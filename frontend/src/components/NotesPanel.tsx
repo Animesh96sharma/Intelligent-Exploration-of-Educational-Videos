@@ -54,8 +54,8 @@ export default function NotesPanel({
           {notes.map((note) => (
             <article key={note.id} className="note-card">
               <div className="note-card-head">
-                <button type="button" className="inline-link" onClick={() => onJumpToTime(note.timestamp)}>
-                  {formatTimeLabel(note.timestamp)}
+                <button type="button" className="inline-link" onClick={() =>      onJumpToTime(note.timestampSeconds)}>
+                  {formatTimeLabel(note.timestampSeconds)}
                 </button>
                 <button type="button" className="secondary-btn small" onClick={() => onRemoveNote(note.id)}>
                   Delete

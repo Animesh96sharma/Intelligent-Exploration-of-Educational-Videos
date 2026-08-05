@@ -15,9 +15,7 @@ type CollectionAnalysisProps = {
   onOpenComparison: (videoId?: string) => void
 }
 
-function formatMinutes(seconds: number) {
-  return `${Math.round(seconds / 60)} min`
-}
+
 
 function formatPercent(value: number) {
   return `${Math.round(value * 100)}%`
@@ -52,11 +50,6 @@ export default function CollectionAnalysis({
     [safeVideos],
   )
 
-  const totalDuration = useMemo(
-    () => safeVideos.reduce((sum, video) => sum + video.duration, 0),
-    [safeVideos],
-  )
-
   const domains = useMemo(
     () =>
       Array.from(
@@ -71,8 +64,8 @@ export default function CollectionAnalysis({
 
   const suggestedOrder = useMemo(
     () =>
-      (analysis.overview?.suggestedviewingorder ?? []).filter(
-        (item) => item?.videoid && visibleVideoIds.has(item.videoid),
+      (analysis.overview?.suggested_viewing_order ?? []).filter(
+        (item: { video_id?: string; reason?: string }) => item?.video_id && visibleVideoIds.has(item.video_id)
       ),
     [analysis, visibleVideoIds],
   )
@@ -95,7 +88,7 @@ export default function CollectionAnalysis({
     () =>
       Object.entries(analysis.uniqueConcepts ?? {})
         .filter(([videoId]) => visibleVideoIds.has(videoId))
-        .sort((a, b) => (b[1]?.uniqueconcepts?.length ?? 0) - (a[1]?.uniqueconcepts?.length ?? 0)),
+        .sort((a, b) => (b[1]?.unique_concepts?.length ?? 0) - (a[1]?.unique_concepts?.length ?? 0)),
     [analysis, visibleVideoIds],
   )
 
@@ -213,10 +206,10 @@ return (
 
           <article className="insight-tile">
             <span className="eyebrow">Most unique video</span>
-            <strong>{mostUniqueVideo?.[1]?.videotitle ?? 'Not available'}</strong>
+            <strong>{mostUniqueVideo?.[1]?.video_title ?? 'Not available'}</strong>
             <p>
               {mostUniqueVideo
-                ? `${mostUniqueVideo[1]?.uniqueconcepts?.length ?? 0} unique concepts stand out in this video.`
+                ? `${mostUniqueVideo[1]?.unique_concepts?.length ?? 0} unique concepts stand out in this video.`
                 : 'No unique concept profile is available.'}
             </p>
           </article>
@@ -239,9 +232,7 @@ return (
             <span className="eyebrow">Suggested starting video</span>
             <strong>
               {suggestedStart
-                ? safeVideos.find((video) => video.id === suggestedStart.videoid)?.title ??
-                  suggestedStart.videoid
-                : 'Not available'}
+                ? safeVideos.find((video) => video.id === suggestedStart.video_id)?.title ?? suggestedStart.video_id : 'Not available'}
             </strong>
             <p>{suggestedStart?.reason ?? 'No guided entry point is available.'}</p>
           </article>
@@ -253,13 +244,13 @@ return (
           {analysis.overview ? (
             <section>
 
-              {analysis.overview.collectionsummary ? <p>{analysis.overview.collectionsummary}</p> : null}
+              {analysis.overview.collection_summary ? <p>{analysis.overview.collection_summary}</p> : null}
 
-              {Array.isArray(analysis.overview.mainthemes) && analysis.overview.mainthemes.length > 0 ? (
+              {Array.isArray(analysis.overview.main_themes) && analysis.overview.main_themes.length > 0 ? (
                 <>
                   <h4>Main themes</h4>
                   <div className="chip-group">
-                    {analysis.overview.mainthemes.map((theme) => (
+                    {analysis.overview.main_themes.map((theme: string) => (
                       <button
                         key={theme}
                         type="button"
@@ -273,17 +264,17 @@ return (
                 </>
               ) : null}
 
-              {analysis.overview.difficultyprogression ? (
+              {analysis.overview.difficulty_progression ? (
                 <>
                   <h4>Difficulty progression</h4>
-                  <p>{analysis.overview.difficultyprogression}</p>
+                  <p>{analysis.overview.difficulty_progression}</p>
                 </>
               ) : null}
 
-              {analysis.overview.targetaudience ? (
+              {analysis.overview.target_audience ? (
                 <>
                   <h4>Target audience</h4>
-                  <p>{analysis.overview.targetaudience}</p>
+                  <p>{analysis.overview.target_audience}</p>
                 </>
               ) : null}
             </section>
@@ -419,23 +410,23 @@ return (
               <p>No recommended sequence is available for the current filtered set.</p>
             ) : (
               <div className="learning-path">
-                {suggestedOrder.map((item, index) => {
-                  const video = safeVideos.find((v) => v.id === item.videoid)
+                {suggestedOrder.map((item: { video_id?: string; reason?: string }, index: number) => {
+                  const video = safeVideos.find((v) => v.id === item.video_id)
 
                   return (
-                    <article key={item.videoid} className="learning-step">
+                    <article key={item.video_id} className="learning-step">
                       <div className="learning-stepmarker">
                         <span>{index + 1}</span>
                       </div>
 
                       <div className="learning-stepcontent">
-                        <strong>{video?.title ?? item.videoid}</strong>
+                        <strong>{video?.title ?? item.video_id}</strong>
                         <p>{item.reason}</p>
                         <div className="related-cardactions">
-                          <button className="secondary-btn" onClick={() => onToggleCompareVideo(item.videoid)}>
+                          <button className="secondary-btn" onClick={() => item.video_id && onToggleCompareVideo(item.video_id)}>
                             Compare
                           </button>
-                          <button className="primary-btn" onClick={() => onOpenVideo(item.videoid)}>
+                          <button className="primary-btn" onClick={() => item.video_id && onOpenVideo(item.video_id)}>
                             Open
                           </button>
                         </div>

@@ -259,19 +259,6 @@ export default function VideoExplorer({
     [userState.notes, video.id]
   )
 
-  const videoProgress = userState.progress[video.id]
-  const watchedPercent =
-    videoProgress?.duration && videoProgress.duration > 0
-      ? Math.round((videoProgress.currentTime / videoProgress.duration) * 100)
-      : 0
-
-  function handleSelectChapter(index: number) {
-    if (index < 0 || index >= chapters.length) return
-    setSelectedChapterIndex(index)
-    const nextChapter = chapters[index]
-    if (nextChapter) seekTo(nextChapter.startTime ?? 0)
-  }
-
   function seekTo(time: number) {
     const safeTime = Math.max(0, time)
     setCurrentTime(safeTime)
@@ -289,7 +276,7 @@ export default function VideoExplorer({
     const bookmark: VideoBookmark = {
       id: createId(),
       videoId: video.id,
-      chapterId: activePlaybackChapter?.id ?? selectedChapter?.id ?? null,
+      chapterId: activePlaybackChapter?.id ?? selectedChapter?.id ?? undefined,
       timestampSeconds: currentTime,
       label: `${video.title} @ ${formatClock(currentTime)}`,
       createdAt: new Date().toISOString(),
@@ -304,7 +291,7 @@ export default function VideoExplorer({
     const note: VideoNote = {
       id: createId(),
       videoId: video.id,
-      chapterId: activePlaybackChapter?.id ?? selectedChapter?.id ?? null,
+      chapterId: activePlaybackChapter?.id ?? selectedChapter?.id ?? undefined,
       timestampSeconds: currentTime,
       text: trimmed,
       createdAt: new Date().toISOString(),

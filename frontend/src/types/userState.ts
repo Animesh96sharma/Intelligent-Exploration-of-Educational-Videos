@@ -1,11 +1,9 @@
-import type { Playlist, UserVideoState } from "../types/userState"
-
 export interface VideoBookmark {
   id: string
   videoId: string
   chapterId?: string
-  title: string
-  timestamp: number
+  label?: string
+  timestampSeconds: number
   createdAt: string
 }
 
@@ -25,7 +23,7 @@ export interface VideoNote {
   id: string
   videoId: string
   chapterId?: string
-  timestamp: number
+  timestampSeconds: number
   text: string
   createdAt: string
   updatedAt: string
@@ -46,13 +44,6 @@ export interface SubtitleTrack {
   language: string
   src: string
   default?: boolean
-}
-
-export interface UserVideoState {
-  bookmarks: VideoBookmark[]
-  playlists: Playlist[]
-  notes: VideoNote[]
-  progress: Record<string, VideoProgress>
 }
 
 export interface UserVideoState {

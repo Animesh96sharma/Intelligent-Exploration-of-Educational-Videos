@@ -165,6 +165,13 @@ export interface VideoRecord {
   summaryLong?: string;
   keyConcepts: string[];
   learningObjectives: string[];
+  videoLearningObjectives: string[];
+  llmQuality?: {               
+    coherenceScore?: number;
+    informativenessScore?: number;
+    concisenessScore?: number;
+    feedback?: string;
+  };
   prerequisites: string[];
   topicProgression?: string;
   difficultyLevel?: string;
@@ -187,6 +194,7 @@ export interface VideoRecord {
     processingTimeSeconds: number;
     realtimeFactor: number;
     numSegments: number;
+  };
 }
 
 export interface CollectionAnalysisRecord {
@@ -220,17 +228,16 @@ export interface VideoComparisonRecord {
   leftUniqueConcepts: string[];
   rightUniqueConcepts: string[];
   similarityScore: number;
+  llmQuality?: {
+    coherenceScore?: number;
+    informativenessScore?: number;
+    concisenessScore?: number;
+    feedback?: string;
+  };
 }
 
 export type ComparisonSelection = [string, string] | [];
-
-
-llmQuality?: {
-  coherenceScore?: number
-  informativenessScore?: number
-  concisenessScore?: number
-  feedback?: string
-}
+  
 
 
 export type RawEvaluationReport = {

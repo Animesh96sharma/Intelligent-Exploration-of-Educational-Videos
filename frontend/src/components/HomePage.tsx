@@ -1,6 +1,7 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import type { VideoRecord } from "../types/video";
 import { ThumbsUp, ThumbsDown } from 'lucide-react'
+import type { Playlist, UserVideoState } from "../types/userState"
 
 type HomePageProps = {
   videos: VideoRecord[]
@@ -15,9 +16,9 @@ type HomePageProps = {
   onShareVideo: (videoId: string) => void
   onSetReaction: (videoId: string, reaction: 'like' | 'dislike') => void
   reactions: Record<string, 'like' | 'dislike'>
-  userState: UserVideoState    
-  onCreatePlaylist: (name: string) => Playlist | null   
-  playlist
+  userState: UserVideoState
+  onCreatePlaylist: (name: string) => Playlist | null
+  playlist: Playlist[]
 }
 
 const TOP_CONCEPT_LIMIT = 10;

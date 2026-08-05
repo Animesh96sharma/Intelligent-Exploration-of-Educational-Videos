@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
-import type { VideoRecord } from "../types/video"
-import type { Playlist, UserVideoState } from "../types/userState"
+import type { VideoRecord } from "./types/video"
+import type { UserVideoState } from "./types/userState"
 import type {VideoBookmark, VideoNote } from './types/userState'
 import { buildProgress, createPlaylist, loadUserState, saveUserState } from './lib/userState'
 
@@ -29,47 +29,7 @@ type ViewMode =
   | 'network'
   | 'compare'
 
-const NAV_ICONS = {
-  home: 'M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5',
-  collection: 'M4 6.5h16M4 12h16M4 17.5h16',
-  network:
-    'M8 6a2 2 0 1 1-4 0a2 2 0 0 1 4 0Zm12 0a2 2 0 1 1-4 0a2 2 0 0 1 4 0Zm-6 12a2 2 0 1 1-4 0a2 2 0 0 1 4 0ZM7.5 7.5l3 8M16.5 7.5l-3 8',
-  compare: 'M4 7h6M4 12h6M4 17h6M14 7h6M14 12h6M14 17h6',
-  about: 'M12 8h.01M11 12h1v5h1M12 22a10 10 0 1 0 0-20a10 10 0 0 0 0 20Z',
-  metadata: 'M5 4h14M5 9h14M5 14h14M5 19h14',
-} as const
 
-function NavIcon({ path }: { path: string }) {
-  return (
-    <span className="nav-icon" aria-hidden="true">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-        <path
-          d={path}
-          stroke="currentColor"
-          strokeWidth="1.9"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </span>
-  )
-}
-
-function SearchIcon() {
-  return (
-    <span className="nav-icon" aria-hidden="true">
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
-        <path
-          d="M21 21l-4.35-4.35M10.8 18a7.2 7.2 0 1 1 0-14.4a7.2 7.2 0 0 1 0 14.4Z"
-          stroke="currentColor"
-          strokeWidth="1.9"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-    </span>
-  )
-}
 
 const NAV_ITEMS: { key: ViewMode; label: string }[] = [
   { key: 'browse', label: 'Home'},
@@ -84,13 +44,11 @@ export default function App() {
   const [dataset, setDataset] = useState<AppDataset | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  const [userState, setUserState] = useState<UserVideoState>(() => loadUserState())
+  const [userState, setUserState] = useState<UserVideoState>(loadUserState())
   const [view, setView] = useState<ViewMode>('home')
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null)
   const [selectedConcept, setSelectedConcept] = useState<string | null>(null)
   const [comparisonVideoIds, setComparisonVideoIds] = useState<string[]>([])
-
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedDomain, setSelectedDomain] = useState('all')
   const [selectedDifficulty, setSelectedDifficulty] = useState('all')
@@ -339,16 +297,6 @@ function addToWatchLater(videoId: string) {
       ? current
       : { ...current, watchLater: [...current.watchLater, videoId] }
   )
-}
-
-function setVideoInterest(videoId: string, interested: boolean) {
-  setUserState((current) => {
-    const withoutId = current.notInterested.filter((id) => id !== videoId)
-    return {
-      ...current,
-      notInterested: interested ? withoutId : [...withoutId, videoId],
-    }
-  })
 }
 
 function shareVideo(videoId: string) {
@@ -638,6 +586,7 @@ function downloadVideo(video: VideoRecord) {
               reactions={userState.reactions}
               userState={userState}
               onCreatePlaylist={createNewPlaylist}
+              playlist={userState.playlists}
             />
           )}
 

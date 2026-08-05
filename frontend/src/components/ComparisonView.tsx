@@ -1,11 +1,13 @@
 import { useMemo, type ReactNode } from 'react'
 import type { VideoRecord } from '../types/video'
 import { buildVideoComparison } from '../lib/analytics'
+import type { CollectionAnalysisRecord } from '../types/video'
 
 type ComparisonViewProps = {
   videos: VideoRecord[]
   allVideos: VideoRecord[]
   selectedConcept: string | null
+  collectionAnalysis?: CollectionAnalysisRecord
   onOpenVideo: (videoId: string) => void
   onSelectConcept: (concept: string | null) => void
   onToggleCompareVideo: (videoId: string) => void
