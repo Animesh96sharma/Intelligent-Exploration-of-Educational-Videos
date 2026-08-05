@@ -3401,6 +3401,56 @@ input[type="range"]:focus {
   background: rgba(255,255,255,0.24);
 }
 
+.video-subtitle-btn {
+  position: relative;
+}
+
+.video-subtitle-btn.active {
+  background: rgba(94, 82, 82, 0.28);
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.55);
+}
+
+.video-subtitle-btn:not(.active) svg {
+  opacity: 0.65;
+}
+
+.video-element::-webkit-media-text-track-display {
+  bottom: 20px !important;
+}
+
+.video-element::cue {
+  background: rgba(0, 0, 0, 0.75);
+  color: #fff;
+  font-size: 1.05rem;
+  line-height: 1.4;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+@media (max-width: 640px) {
+  .video-element::cue {
+    font-size: 0.92rem;
+  }
+}
+
+.video-subtitle-btn::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 14px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.video-subtitle-btn.active::after {
+  opacity: 0.9;
+}
+
 .video-control-btn-panel {
   padding-inline: 12px;
 }
@@ -3409,6 +3459,8 @@ input[type="range"]:focus {
   font-size: 0.9rem;
   line-height: 1;
 }
+
+
 
 .rotate-open {
   transform: rotate(90deg);
