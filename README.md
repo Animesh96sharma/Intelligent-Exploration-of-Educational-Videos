@@ -23,8 +23,21 @@ npm install
 
 3. Start the development environment:
 
-'''bash
+'''bash for dev
 npm run dev
+
+for prod-
+
+npm run build
+
+# Check api port status
+
+grep -o "137.248.121.127:800[01]" dist/assets/*.js
+
+# start pm2
+
+pm2 restart eduvid-frontend
+
 
 Open the local URL shown in the terminal, usually:
 
