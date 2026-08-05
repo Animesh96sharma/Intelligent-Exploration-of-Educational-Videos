@@ -43,7 +43,8 @@ app.mount("/frames", StaticFiles(directory=str(FRAMES_DIR)), name="frames")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:5173",
-                   "http://137.248.121.127:5173"],
+                   "http://137.248.121.127:5173","http://localhost:5174",
+                   "http://137.248.121.127:5174"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
