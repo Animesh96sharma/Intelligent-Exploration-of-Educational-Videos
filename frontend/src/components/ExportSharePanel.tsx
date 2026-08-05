@@ -43,7 +43,6 @@ export default function ExportSharePanel({
     try {
       await navigator.clipboard.writeText(shareUrl)
     } catch {
-      // ignore
     }
   }
 

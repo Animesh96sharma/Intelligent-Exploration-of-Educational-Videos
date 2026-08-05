@@ -1,5 +1,3 @@
-import Logo from "./Logo";
-
 type AboutPageProps = {
   onStartExploring: () => void;
 };

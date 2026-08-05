@@ -273,12 +273,6 @@ export default function SimilarityMatrixCanvas({
           {tooltip.text}
         </div>
       ) : null}
-
-      <p className="similarity-hint">
-        Drag the zoom slider to resize cells, scroll in any direction to browse the full matrix,
-        search to filter by title, and toggle clustering to group highly similar videos together.
-        Click a cell to open the video or send the pair to comparison.
-      </p>
     </div>
   )
 }

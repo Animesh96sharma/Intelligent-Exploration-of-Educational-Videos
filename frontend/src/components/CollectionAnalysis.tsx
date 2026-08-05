@@ -1,9 +1,8 @@
-import { Fragment, useMemo } from 'react'
+import { useMemo } from 'react'
 import type { CollectionAnalysisRecord, VideoRecord } from '../types/video'
 import { buildSimilarityRecords } from '../lib/analytics'
 import SimilarityMatrixCanvas from './SimilarityMatrixCanvas'
 import TopicHeatmap from './TopicHeatmap'
-import ConceptCluster from './ConceptCluster'
 import ConceptWeightCluster from './ConceptWeightCluster'
 
 type CollectionAnalysisProps = {
@@ -133,7 +132,6 @@ export default function CollectionAnalysis({
   const suggestedStart = suggestedOrder[0] ?? null
 
   const visibleCount = safeVideos.length
-  const totalCollectionCount = analysis.totalVideos
 
   if (safeVideos.length === 0) {
   return (
@@ -181,8 +179,6 @@ return (
           </div>
         ) : null}
       </div>
-
-    {/* keep the rest of the component unchanged */}
 
       <div className="stats-grid">
         <article className="stat-card">
@@ -449,11 +445,7 @@ return (
                 })}
               </div>
             )}
-          </section>
-
-
-
-          
+          </section> 
         </aside>
       </div>
     </section>

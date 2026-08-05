@@ -2,15 +2,14 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ChapterRecord, SummaryDetailLevel, VideoRecord } from '../types/video'
 import type { Playlist, UserVideoState, VideoBookmark, VideoNote } from '../types/userState'
 import VideoPlayer from './VideoPlayer'
-import VideoTimeline from './VideoTimeline'
 import PlaylistPanel from './PlaylistPanel'
-import { ListPlus, Share2, ThumbsDown, ThumbsUp } from 'lucide-react'
+import { Share2, ThumbsDown, ThumbsUp } from 'lucide-react'
 
 type VideoExplorerProps = {
   video: VideoRecord
   allVideos: VideoRecord[]
   selectedConcept: string | null
-  comparisonVideoIds: string[]   // add this
+  comparisonVideoIds: string[]
   onSelectConcept: (concept: string | null) => void
   onSelectVideo: (videoId: string) => void
   onToggleCompareVideo: (videoId: string) => void

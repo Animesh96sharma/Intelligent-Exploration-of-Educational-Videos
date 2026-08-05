@@ -224,7 +224,7 @@ export interface VideoComparisonRecord {
 
 export type ComparisonSelection = [string, string] | [];
 
-// Add to VideoRecord
+
 llmQuality?: {
   coherenceScore?: number
   informativenessScore?: number
@@ -232,7 +232,7 @@ llmQuality?: {
   feedback?: string
 }
 
-// Add new raw type
+
 export type RawEvaluationReport = {
   aggregate?: {
     total_videos_evaluated?: number

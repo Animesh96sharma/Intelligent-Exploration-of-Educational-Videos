@@ -3070,6 +3070,8 @@ input[type="range"]:focus {
 .legend-dot--amber { background: #d97706; }
 .legend-dot--teal { background: #0f766e; }
 .legend-dot--slate { background: #475569; }
+.legend-dot--pinkcomp { background: #e11d48; }
+.legend-dot--green { background: #16a34a; }
 
 .network-graph-wrap {
   width: 100%;

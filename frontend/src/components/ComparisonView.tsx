@@ -1,4 +1,3 @@
-// src/components/ComparisonView.tsx
 import { useMemo, type ReactNode } from 'react'
 import type { VideoRecord } from '../types/video'
 import { buildVideoComparison } from '../lib/analytics'
@@ -123,7 +122,7 @@ export default function ComparisonView({
     [rightVideo, allVideos]
   )
 
-  // --- No two distinct videos selected yet: keep original selection grid ---
+  // Available video selection grid
   if (!leftVideo || !rightVideo || leftVideo.id === rightVideo.id) {
     return (
       <section className="comparison-page">
@@ -171,7 +170,7 @@ export default function ComparisonView({
     )
   }
 
-  // --- Row definitions for the comparison table ---
+  // Comparison table view
   const rows: { label: string; left: ReactNode; right: ReactNode }[] = [
     {
       label: 'Video Title',
@@ -268,7 +267,6 @@ export default function ComparisonView({
 
   return (
     <section className="comparison-page">
-      {/* --- Kept exactly as before --- */}
       <div className="page-intro">
         <div className="page-intro-copy">
           <h2>Side-by-Side comparison of Educational videos</h2>
@@ -310,7 +308,6 @@ export default function ComparisonView({
         </article>
       </div>
 
-      {/* --- New table-based comparison replaces the old two-panel layout --- */}
       <div className="comparison-table-wrapper">
         <table className="comparison-table">
           <thead>

@@ -15,8 +15,9 @@ type HomePageProps = {
   onShareVideo: (videoId: string) => void
   onSetReaction: (videoId: string, reaction: 'like' | 'dislike') => void
   reactions: Record<string, 'like' | 'dislike'>
-  userState: UserVideoState           // needed to read userState.playlists
-  onCreatePlaylist: (name: string) => Playlist | null   // must return the created playlist
+  userState: UserVideoState    
+  onCreatePlaylist: (name: string) => Playlist | null   
+  playlist
 }
 
 const TOP_CONCEPT_LIMIT = 10;

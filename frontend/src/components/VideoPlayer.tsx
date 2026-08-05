@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEve
 import {
   Play,
   Pause,
-  ListVideo,
   Camera,
   Expand,
   Shrink,

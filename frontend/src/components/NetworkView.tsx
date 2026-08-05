@@ -75,11 +75,13 @@ function getVideoById(videos: VideoRecord[], id: string) {
 function getDomainColor(domain?: string) {
   const value = (domain ?? 'general').toLowerCase()
 
+  if (value.includes('mathematics')|| value.includes('Mathematics') || value.includes('functions')|| value.includes('complex') || value.includes('holomorphic') || value.includes('integrals')|| value.includes('matrix') || value.includes('Jacobian')) return '#0f766e'
+  if (value.includes('sql')|| value.includes('information') || value.includes('keywords')|| value.includes('target') || value.includes('Search') || value.includes('evaluation')|| value.includes('Structured') || value.includes('data')) return '#d97706'
   if (value.includes('vision')) return '#7c3aed'
-  if (value.includes('nlp') || value.includes('language')) return '#db2777'
-  if (value.includes('database')) return '#d97706'
-  if (value.includes('data')) return '#0f766e'
+  if (value.includes('nlp') || value.includes('language')|| value.includes('Document Freuency') || value.includes('IDF value') || value.includes('Term frequency')) return '#db2777'
   if (value.includes('neural') || value.includes('machine') || value.includes('ai')) return '#2563eb'
+  if (value.includes('finance')) return '#3fb14e'
+  if (value.includes('computer science')) return '#dd37b9'
 
   return '#475569'
 }
@@ -421,11 +423,13 @@ return (
               </div>
 
               <div className="network-legend">
+                <span><i className="legend-dot legend-dot--pinkcomp" /> Computer Science</span>
                 <span><i className="legend-dot legend-dot--blue" /> AI / ML</span>
-                <span><i className="legend-dot legend-dot--purple" /> Vision</span>
+                <span><i className="legend-dot legend-dot--purple" /> ComputerVision</span>
                 <span><i className="legend-dot legend-dot--pink" /> NLP</span>
                 <span><i className="legend-dot legend-dot--amber" /> Databases</span>
-                <span><i className="legend-dot legend-dot--teal" /> Data</span>
+                <span><i className="legend-dot legend-dot--teal" /> Mathematics</span>
+                <span><i className="legend-dot legend-dot--green" /> Finance</span>
                 <span><i className="legend-dot legend-dot--slate" /> General</span>
               </div>
 

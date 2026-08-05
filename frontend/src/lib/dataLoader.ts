@@ -10,17 +10,13 @@ import type {
   VideoRecord,
 } from "../types/video";
 
-// --- API base URLs (from .env) ---
-// Metadata/raw-data service (transcripts, captions, chapters, metadata, video list)
+
 const METADATA_API_BASE =
   import.meta.env.VITE_METADATA_API_URL ?? "http://localhost:8000";
-// Summarization service (video/chapter summaries, collection analysis, evaluation, search)
+
 const SUMMARY_API_BASE =
   import.meta.env.VITE_SUMMARY_API_URL ?? "http://localhost:8001/api";
 
-// Videos are large local files not yet served by either API.
-// Keep this map until the backend team adds a streaming endpoint (e.g. /videos/{id}/stream).
-// Videos are streamed directly from the metadata/raw-data service.
 function getVideoStreamUrl(videoId: string): string {
   return `${METADATA_API_BASE}/videos/${videoId}/stream`;
 }
@@ -61,10 +57,6 @@ type RawTranscriptFile = {
   segments?: RawTranscriptSegment[];
 };
 
-// ---------------------------------------------------------------------------
-// Normalizer / utility functions — UNCHANGED from the static-file version.
-// These operate on already-fetched JSON, so they don't care about data source.
-// ---------------------------------------------------------------------------
 
 function ensureStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
@@ -142,10 +134,6 @@ function normalizeCollectionAnalysis(
   };
 }
 
-// ---------------------------------------------------------------------------
-// Fetch helpers — UPDATED to call the backend APIs instead of /data/... files.
-// ---------------------------------------------------------------------------
-
 async function fetchJson<T>(path: string): Promise<T> {
   const response = await fetch(path);
   if (!response.ok) {
@@ -172,7 +160,7 @@ async function fetchJson<T>(path: string): Promise<T> {
 async function loadVideoIds(): Promise<string[]> {
   try {
     const data = await fetchJson<{ video_id: string }[] | string[]>(
-      `${METADATA_API_BASE}/videos`   // no trailing slash — matches backend route
+      `${METADATA_API_BASE}/videos` 
     );
     const ids = Array.isArray(data)
       ? data.map((item) => (typeof item === "string" ? item : item.video_id))
@@ -229,10 +217,6 @@ async function loadTranscript(
     return undefined;
   }
 }
-
-// ---------------------------------------------------------------------------
-// Merge logic — UNCHANGED. Takes already-fetched JSON objects as input.
-// ---------------------------------------------------------------------------
 
 type LlmQualityEntry = NonNullable<RawEvaluationReport["per_video"]>[string];
 
@@ -312,7 +296,6 @@ function mergeVideoData(
     summaryLong: videoSummary.summary_long,
     keyConcepts: mergedKeyConcepts,
     learningObjectives: mergedLearningObjectives,
-    // Video-level only objectives (no chapter-level merge) — used by ComparisonView
     videoLearningObjectives: ensureStringArray(videoSummary.learning_objectives),
     prerequisites: ensureStringArray(videoSummary.prerequisites),
     topicProgression: videoSummary.topic_progression,
@@ -322,7 +305,6 @@ function mergeVideoData(
     hasMathematicalContent: Boolean(videoSummary.has_mathematical_content),
     hasDiagrams: Boolean(videoSummary.has_diagrams),
     chapters,
-    // Fields from metadata endpoint
     author: videoMetadata?.author || undefined,
     organization: videoMetadata?.organization || undefined,
     description: videoMetadata?.description || undefined,
@@ -340,7 +322,7 @@ function mergeVideoData(
           numSegments: sourceMetadata.num_segments,
         }
       : undefined,
-    // Video-level LLM quality evaluation (from evaluation report endpoint)
+
     llmQuality: llmQualityEntry?.llm_quality
       ? {
           coherenceScore: llmQualityEntry.llm_quality.coherence_score,
@@ -351,10 +333,6 @@ function mergeVideoData(
       : undefined,
   };
 }
-
-// ---------------------------------------------------------------------------
-// Public loaders — UPDATED to call the summarization API for summaries/chapters
-// ---------------------------------------------------------------------------
 
 export async function loadVideoRecord(
   videoId: string,
