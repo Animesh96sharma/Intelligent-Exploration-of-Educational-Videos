@@ -20,20 +20,23 @@ const SUMMARY_API_BASE =
 
 // Videos are large local files not yet served by either API.
 // Keep this map until the backend team adds a streaming endpoint (e.g. /videos/{id}/stream).
-const VIDEO_FILE_MAP: Record<string, string> = {
-  tib_av_00000_720p: "/data/raw/videos/tib_av_00000_720p.mp4",
-  tib_av_16257_720p: "/data/raw/videos/tib_av_16257_720p.mp4",
-  tib_av_16258_720p: "/data/raw/videos/tib_av_16258_720p.mp4",
-  tib_av_16259_720p: "/data/raw/videos/tib_av_16259_720p.mp4",
-  tib_av_16260_720p: "/data/raw/videos/tib_av_16260_720p.mp4",
-  tib_av_16261_1080p: "/data/raw/videos/tib_av_16261_1080p.mp4",
-  tib_av_21899_720p: "/data/raw/videos/tib_av_21899_720p.mp4",
-  tib_av_34032_480p: "/data/raw/videos/tib_av_34032_480p.mp4",
-  tib_av_34035_480p: "/data/raw/videos/tib_av_34035_480p.mp4",
-};
+// Videos are streamed directly from the metadata/raw-data service.
+function getVideoStreamUrl(videoId: string): string {
+  return `${METADATA_API_BASE}/videos/${videoId}/stream`;
+}
 
-// Fallback list used only if GET /videos fails (e.g. backend offline during dev)
-const FALLBACK_VIDEO_IDS = Object.keys(VIDEO_FILE_MAP);
+// Remove Fallback once Sub-task pipe run on 33 videos
+const FALLBACK_VIDEO_IDS = [
+  "tib_av_00000_720p",
+  "tib_av_16257_720p",
+  "tib_av_16258_720p",
+  "tib_av_16259_720p",
+  "tib_av_16260_720p",
+  "tib_av_16261_1080p",
+  "tib_av_21899_720p",
+  "tib_av_34032_480p",
+  "tib_av_34035_480p",
+];
 
 type RawTranscriptSegment = {
   start: number;
@@ -153,10 +156,23 @@ async function fetchJson<T>(path: string): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+//Once it sub-task2 run on all the videos, enable this
+
+// async function loadVideoIds(): Promise<string[]> {
+//   const data = await fetchJson<{ video_id: string }[] | string[]>(
+//     `${METADATA_API_BASE}/videos`
+//   );
+//   return Array.isArray(data)
+//     ? data.map((item) => (typeof item === "string" ? item : item.video_id))
+//     : [];
+// }
+
+
+// And disable this 
 async function loadVideoIds(): Promise<string[]> {
   try {
     const data = await fetchJson<{ video_id: string }[] | string[]>(
-      `${METADATA_API_BASE}/videos/`
+      `${METADATA_API_BASE}/videos`   // no trailing slash — matches backend route
     );
     const ids = Array.isArray(data)
       ? data.map((item) => (typeof item === "string" ? item : item.video_id))
@@ -168,6 +184,8 @@ async function loadVideoIds(): Promise<string[]> {
     return FALLBACK_VIDEO_IDS;
   }
 }
+
+
 
 async function loadEvaluationReport(): Promise<RawEvaluationReport | undefined> {
   try {
@@ -286,7 +304,7 @@ function mergeVideoData(
     domain: videoMetadata?.domain || videoSummary.domain || chapterFile?.domain,
     duration: videoSummary.duration,
     totalChapters: videoSummary.total_chapters,
-    videoSrc: VIDEO_FILE_MAP[videoSummary.video_id] ?? "",
+    videoSrc: getVideoStreamUrl(videoSummary.video_id),
     posterSrc: undefined,
     transcript: normalizeTranscript(transcriptFile),
     summaryShort: videoSummary.summary_short,
