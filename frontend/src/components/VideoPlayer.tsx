@@ -7,6 +7,8 @@ import {
   Shrink,
   ChevronRight,
   Captions,
+  RotateCcw, 
+  RotateCw,
 } from 'lucide-react'
 import type { SummaryDetailLevel } from '../types/video'
 
@@ -130,49 +132,53 @@ export default function VideoPlayer({
   const trackRef = useRef<HTMLTrackElement | null>(null)
 
   useEffect(() => {
-    const video = videoRef.current
-    const trackEl = trackRef.current
-    if (!video || !trackEl) return
+  const video = videoRef.current
+  const trackEl = trackRef.current
+  if (!video || !trackEl) return
 
-    const textTrack = trackEl.track
-    if (!textTrack) return
+  const textTrack = trackEl.track
+  if (!textTrack) return
 
-    const repositionCues = () => {
-      const cues = textTrack.cues
-      if (!cues) return
-      for (let i = 0; i < cues.length; i += 1) {
-        const cue = cues[i] as VTTCue
-        cue.snapToLines = false
-        cue.line = 88
-        cue.position = 50
-        cue.align = 'center'
-      }
+  const repositionCues = () => {
+  const cues = textTrack.cues
+  if (!cues) return
+  for (let i = 0; i < cues.length; i += 1) {
+    const cue = cues[i] as VTTCue
+    cue.snapToLines = false
+    cue.line = 85
+    cue.position = 70
+    cue.align = 'center'
+    cue.size = 90
+  }
+}
+
+  const forceRender = () => {
+    textTrack.mode = subtitlesEnabled ? 'showing' : 'hidden'
+    repositionCues()
+
+    if (subtitlesEnabled) {
+      textTrack.mode = 'hidden'
+      requestAnimationFrame(() => {
+        textTrack.mode = 'showing'
+      })
     }
+  }
 
-    const forceRender = () => {
-      textTrack.mode = subtitlesEnabled ? 'showing' : 'hidden'
-      repositionCues()
+  // ✅ removed the nested useState/useEffect — they're gone from here now
 
-      if (subtitlesEnabled) {
-        textTrack.mode = 'hidden'
-        requestAnimationFrame(() => {
-          textTrack.mode = 'showing'
-        })
-      }
-    }
-
-    const handleTrackLoad = () => {
-      repositionCues()
-      forceRender()
-    }
-
-    trackEl.addEventListener('load', handleTrackLoad)
+  const handleTrackLoad = () => {
+    repositionCues()
     forceRender()
+  }
 
-    return () => {
-      trackEl.removeEventListener('load', handleTrackLoad)
-    }
-  }, [subtitlesEnabled, src])
+  trackEl.addEventListener('load', handleTrackLoad)
+  forceRender()
+
+  return () => {
+    trackEl.removeEventListener('load', handleTrackLoad)
+  }
+}, [subtitlesEnabled, src])
+
 
   useEffect(() => {
     const video = videoRef.current
@@ -225,6 +231,13 @@ export default function VideoPlayer({
     } catch (error) {
       console.error('Video playback toggle failed', error)
     }
+  }
+
+  function handleSkip(deltaSeconds: number) {
+    const video = videoRef.current
+    if (!video) return
+    const safeTime = Math.max(0, Math.min(currentTime + deltaSeconds, duration || 0))
+    handleSeek(safeTime)
   }
 
   function handleSeek(nextTime: number) {
@@ -397,6 +410,38 @@ export default function VideoPlayer({
             />
             Your browser does not support the video tag for {title}.
           </video>
+
+          <div className="video-center-controls">
+            <button
+              type="button"
+              className="video-control-btn video-skip-btn"
+              onClick={() => handleSkip(-10)}
+              aria-label="Rewind 10 seconds"
+              title="Rewind 10s"
+            >
+              <RotateCcw size={26} />
+            </button>
+
+            <button
+              type="button"
+              className="video-control-btn video-center-play-btn"
+              onClick={handlePlayPause}
+              aria-label={isPlaying ? 'Pause' : 'Play'}
+              title={isPlaying ? 'Pause' : 'Play'}
+            >
+              {isPlaying ? <Pause size={34} /> : <Play size={34} />}
+            </button>
+
+            <button
+              type="button"
+              className="video-control-btn video-skip-btn"
+              onClick={() => handleSkip(10)}
+              aria-label="Forward 10 seconds"
+              title="Forward 10s"
+            >
+              <RotateCw size={26} />
+            </button>
+          </div>
 
           <div className="video-controls">
             <div

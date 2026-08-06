@@ -67,19 +67,13 @@ type RawTranscriptFile = {
 function ensureStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value
-      .flatMap((item) =>
-        typeof item === "string"
-          ? item.split(",").map((part) => part.trim())
-          : []
-      )
+      .filter((item): item is string => typeof item === "string")
+      .map((item) => item.trim())
       .filter(Boolean);
   }
 
   if (typeof value === "string") {
-    return value
-      .split(",")
-      .map((part) => part.trim())
-      .filter(Boolean);
+    return [value.trim()].filter(Boolean);
   }
 
   return [];

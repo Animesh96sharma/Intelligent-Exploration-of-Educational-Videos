@@ -38,7 +38,7 @@ export default function PlaylistPanel({
   return (
     <section className="sidebar-card">
       <div className="results-head">
-        <h3>My Playlists</h3>
+        <h3>☰ My Playlists</h3>
         <span>{playlists.length} total</span>
       </div>
 

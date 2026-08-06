@@ -431,7 +431,7 @@ export default function VideoExplorer({
                     <ListPlus size={18} />
                     <span>Playlist</span>
                   </button> */}
-                </div>
+                
 
                 <div
                   ref={videoMenuRef}
@@ -496,6 +496,7 @@ export default function VideoExplorer({
                       ) : null}
                     </div>
                   ) : null}
+                  </div>
                 </div>
               </div>
             </div>
@@ -550,21 +551,10 @@ export default function VideoExplorer({
   {detailsExpanded ? (
     <div className="video-details-collapsiblecontent">
       <section className="sidebar-card">
-        <div className="info-block">
-          <div className="chip-group">
-            <span className="chip static">{video.domain ?? 'Educational video'}</span>
-            <span className="chip static">{video.speaker ?? 'Unknown speaker'}</span>
-            <span className="chip static">{video.totalChapters ?? chapters.length} chapters</span>
-            <span className="chip static">{formatDurationMinutes(video.duration)}</span>
-            {video.difficultyLevel ? (
-              <span className="chip static">{video.difficultyLevel}</span>
-            ) : null}
-          </div>
-        </div>
 
         {selectedChapterObjectives.length > 0 ? (
           <div className="info-block">
-            <h4>Learning objectives</h4>
+            <h4>✦Learning objectives</h4>
             <ul className="clean-list">
               {selectedChapterObjectives.map((objective) => (
                 <li key={objective}>{objective}</li>
@@ -575,7 +565,7 @@ export default function VideoExplorer({
 
         {selectedChapterConcepts.length > 0 ? (
           <div className="info-block">
-            <h4>Important chapter concepts</h4>
+            <h4>↗Important chapter concepts</h4>
             <div className="chip-group">
               {selectedChapterConcepts.map((concept) => (
                 <button
@@ -592,10 +582,10 @@ export default function VideoExplorer({
         ) : null}
 
         <div className="info-block">
-          <h4>Important concepts</h4>
+          <h4>↗Important concepts</h4>
           <div className="chip-group">
             {videoConcepts.length === 0 ? (
-              <p>No concepts available.</p>
+              <p>✗No concepts available.</p>
             ) : (
               videoConcepts.map((concept) => (
                 <button
@@ -609,6 +599,16 @@ export default function VideoExplorer({
               ))
             )}
           </div>
+        </div>
+
+        <div className="video-meta-list">
+          <h4>📖Domain: {video.domain ?? 'Educational video'}</h4>
+          <h4>🗣Speaker: {video.speaker ?? 'Unknown speaker'}</h4>
+          <h4>📚Total Chapters: {video.totalChapters ?? chapters.length}</h4>
+          <h4>ⴵ Duration: {formatDurationMinutes(video.duration)}</h4>
+          {video.difficultyLevel ? (
+            <h4>🚩Difficulty: {video.difficultyLevel}</h4>
+          ) : null}
         </div>
       </section>
     </div>
@@ -709,7 +709,7 @@ export default function VideoExplorer({
           </section>
           <section className="sidebar-card">
             <div className="results-head">
-              <h3>Bookmarks</h3>
+              <h3>🔖Bookmarks</h3>
                <span>Current Time: {formatClock(currentTime)}</span>
               <span>{videoBookmarks.length} saved</span>
             </div>

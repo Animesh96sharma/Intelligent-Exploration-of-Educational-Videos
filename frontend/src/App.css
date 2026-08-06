@@ -205,7 +205,7 @@ Keep this block at the very end of App.css
   justify-content: space-between;
   gap: 12px;
   border-radius: 0;
-  background: rgba(198, 194, 194, 0);
+  background: rgba(17, 17, 17, 0.048);
   border: none;
   border-bottom: 1px solid rgba(15, 23, 42, 0.08);
   box-shadow: none;
@@ -1869,6 +1869,22 @@ input[type="range"]:focus {
   cursor: pointer;
 }
 
+.video-meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.video-meta-list h4 {
+  margin: 0;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+
+
 .chip.muted {
   background: var(--surface-soft-2);
   color: var(--text-faint);
@@ -1957,9 +1973,27 @@ input[type="range"]:focus {
   flex-wrap: wrap;
 }
 
+.video-watch-card video::cue,
+.video-element::cue {
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 0.5rem;
+  line-height: 1.0;
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: normal;
+  word-wrap: break-word;
+}
+
+@media (max-width: 640px) {
+  .video-watch-card video::cue,
+  .video-element::cue {
+    font-size: 0.5rem;
+  }
+}
+
 .video-watch-meta__main {
   min-width: 0;
-  flex: 1 1 420px;
 }
 
 .video-watch-meta__main h2 {
@@ -3381,6 +3415,54 @@ input[type="range"]:focus {
   gap: 8px;
 }
 
+.video-center-controls {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  z-index: 5;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.video-watch-card:hover .video-center-controls,
+.video-center-controls:focus-within {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+
+.video-center-play-btn,
+.video-skip-btn {
+  background: rgba(0, 0, 0, 0.815);
+  border: none;
+  border-radius: 50%;
+  color: #000000dc;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.video-center-play-btn {
+  width: 64px;
+  height: 64px;
+}
+
+.video-skip-btn {
+  width: 46px;
+  height: 46px;
+}
+
+.video-center-play-btn:hover,
+.video-skip-btn:hover {
+  background: rgba(0, 0, 0, 0.75);
+}
+
 .video-control-btn {
   display: inline-flex;
   align-items: center;
@@ -3418,21 +3500,6 @@ input[type="range"]:focus {
 
 .video-element::-webkit-media-text-track-display {
   bottom: 20px !important;
-}
-
-.video-element::cue {
-  background: rgba(0, 0, 0, 0.75);
-  color: #fff;
-  font-size: 1.05rem;
-  line-height: 1.4;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-@media (max-width: 640px) {
-  .video-element::cue {
-    font-size: 0.92rem;
-  }
 }
 
 .video-subtitle-btn::after {
@@ -4677,8 +4744,8 @@ input[type="range"]:focus {
   gap: 10px;
 }
 
-.results-head h3::before,
-.sidebar-card h3::before,
+
+/* .sidebar-card h3::before,
 .chapter-panel h3::before,
 .info-block h4::before {
   content: "";
@@ -4688,9 +4755,9 @@ input[type="range"]:focus {
   flex: 0 0 auto;
   background: linear-gradient(135deg, #2563eb, #7c3aed);
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
-}
+} */
 
-.collection-page .panel h3::before,
+/* .collection-page .panel h3::before,
 .collection-page .results-head h3::before {
   background: linear-gradient(135deg, #7c3aed, #ec4899);
   box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.08);
@@ -4705,7 +4772,7 @@ input[type="range"]:focus {
 .metadata-page .panel h3::before {
   background: linear-gradient(135deg, #f59e0b, #2563eb);
   box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.08);
-}
+} */
 
 /* 4) Shared premium cards */
 .video-card,
@@ -6119,7 +6186,7 @@ input[type="range"]:focus {
 
   .video-details-collapsible,
   .timeline-vertical-section {
-    order: 3;
+    order: 0;
   }
 }
 

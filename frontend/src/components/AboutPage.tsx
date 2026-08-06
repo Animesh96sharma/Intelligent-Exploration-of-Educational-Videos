@@ -245,7 +245,7 @@ export default function AboutPage({ onStartExploring }: AboutPageProps) {
           </div>
         </section>
 
-        <section className="about-note">
+        {/* <section className="about-note">
           <div className="about-note__icon" aria-hidden="true">ℹ️</div>
           <div>
             <h3>About this demonstration</h3>
@@ -256,7 +256,7 @@ export default function AboutPage({ onStartExploring }: AboutPageProps) {
               and video processing infrastructure.
             </p>
           </div>
-        </section>
+        </section> */}
       </div>
     </section>
   );
