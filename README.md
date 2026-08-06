@@ -6,44 +6,9 @@ Conda Activate- conda activate myenv
 
 source venv/bin/activate
 python backend/app/subtask1_segmentation/run_pipeline.py --video /home/umwise2526studentproj/Group3ProjectWork/data/raw/videos/video.mp4
---------------------------------------
-
-# EduVid Explorer Frontend- SubTask3
-
-## Requirements
-- Node.js 18+ recommended
-- npm installed
-
-## Setup
-1. Open a terminal in the `frontend` folder.
-2. Install dependencies:
-
-```bash
-npm install
-
-3. Start the development environment:
-
-'''bash for dev
-npm run dev
-
-for prod-
-
-npm run build
-
-# Check api port status
-
-grep -o "137.248.121.127:800[01]" dist/assets/*.js
-
-# start pm2
-
-pm2 restart eduvid-frontend
 
 
-Open the local URL shown in the terminal, usually:
-
-http://localhost:5173
-
-
+Added 3 different group for all of us and data folder is seperate now. Anyone who is working can now use their own folder to work. 
 
 # Intelligent-Exploration-of-Educational-Videos
 University Project work- will add details about the project
