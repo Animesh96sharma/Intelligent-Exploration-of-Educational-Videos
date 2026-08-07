@@ -1,0 +1,195 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# .gitignore — Intelligent Exploration of Educational Videos
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── SECURITY: Environment & Secrets ──────────────────────────────────────────
+.env
+.env.*
+!.env.example          # allow only the example/template file
+.envrc
+*.secret
+*.secrets
+*.key
+*.pem
+*.p12
+*.pfx
+secrets/
+credentials/
+.pypirc
+
+# ── SECURITY: Frontend env files (Vite) ──────────────────────────────────────
+# These expose internal server IPs and API endpoints — never commit them
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# ── SECURITY: Local absolute/machine-specific paths ──────────────────────────
+# e.g. /home/umwise2526studentproj/... paths found in old .gitignore
+*.Markdown.md
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Python
+# ══════════════════════════════════════════════════════════════════════════════
+__pycache__/
+*.py[codz]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+.eggs/
+MANIFEST
+.installed.cfg
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+
+# Installers
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual environments
+.venv
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.pixi
+__pypackages__/
+.pdm-python
+.pdm-build/
+
+# Type checkers & linters
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+.ruff_cache/
+cython_debug/
+
+# Testing & coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py.cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Jupyter
+.ipynb_checkpoints
+profile_default/
+ipython_config.py
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath
+*.sage.py
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Django / Flask / Scrapy
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+instance/
+.webassets-cache
+.scrapy
+
+# Sphinx
+docs/_build/
+
+# Translations
+*.mo
+*.pot
+
+# Marimo
+marimo/_static/
+marimo/_lsp/
+__marimo__/
+
+# Abstra
+.abstra/
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Node / Frontend (Vite + React)
+# ══════════════════════════════════════════════════════════════════════════════
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Data & Media (large / generated / potentially sensitive)
+# ══════════════════════════════════════════════════════════════════════════════
+data/
+**/data/
+../data/
+frontend/public/data/
+
+*.csv
+*.jsonl
+output.csv
+media.jsonl
+series.jsonl
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Editor & OS
+# ══════════════════════════════════════════════════════════════════════════════
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Cursor AI
+.cursorignore
+.cursorindexingignore
+
+# Spyder / Rope
+.spyderproject
+.spyproject
+.ropeproject
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Misc artefacts
+# ══════════════════════════════════════════════════════════════════════════════
+=0.2.0
+/site
+*.manifest
+*.spec
+*.log

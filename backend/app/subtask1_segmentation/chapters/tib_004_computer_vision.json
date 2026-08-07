@@ -1,0 +1,118 @@
+{
+  "video_id": "tib_004",
+  "video_title": "Computer Vision: From Pixels to Understanding",
+  "video_url": "https://av.tib.eu/media/tib_004",
+  "duration": 3840,
+  "language": "en",
+  "speaker": "Prof. David Chen",
+  "domain": "computer_vision",
+  "chapters": [
+    {
+      "chapter_id": "tib_004_ch1",
+      "chapter_index": 1,
+      "title": "What is Computer Vision? Motivation and Applications",
+      "start_time": 0,
+      "end_time": 540,
+      "transcript": "Welcome to Computer Vision. Today we explore how machines can understand and interpret visual information from the world. Computer vision is one of the most challenging and exciting areas of artificial intelligence. The human visual system is remarkably sophisticated - we can recognize objects, understand scenes, track motion, and infer 3D structure effortlessly. For computers, this is incredibly difficult. An image to a computer is just a grid of numbers - pixel values ranging from 0 to 255. Understanding what these numbers represent requires sophisticated algorithms. The applications of computer vision are everywhere: autonomous vehicles need to detect pedestrians, traffic signs, and other cars; medical imaging uses computer vision to detect tumors in X-rays and MRIs; facial recognition unlocks your phone; augmented reality overlays digital information onto the real world; agriculture uses drones with computer vision to monitor crop health; retail uses it for cashier-less checkout. The history of computer vision dates back to the 1960s when Larry Roberts wrote his PhD thesis on 'Machine Perception of Three-Dimensional Solids'. Since then, the field has seen dramatic progress, especially with the advent of deep learning in 2012 when AlexNet revolutionized image classification. Today we'll cover the fundamental building blocks: image representation, feature detection, image filtering, edge detection, and an introduction to convolutional neural networks.",
+      "frame_captions": [
+        "Title slide: Computer Vision, Prof. David Chen",
+        "Example: Self-driving car camera view with detected objects highlighted",
+        "Medical X-ray with tumor detection overlay",
+        "Timeline of computer vision from 1960s to present"
+      ],
+      "keywords": ["computer vision", "applications", "autonomous vehicles", "medical imaging", "image representation", "pixels"]
+    },
+    {
+      "chapter_id": "tib_004_ch2",
+      "chapter_index": 2,
+      "title": "Digital Image Representation and Color Spaces",
+      "start_time": 540,
+      "end_time": 1140,
+      "transcript": "Let's understand how computers represent images. A digital image is a 2D array of pixels. For a grayscale image, each pixel is a single number representing intensity, typically from 0 (black) to 255 (white). This gives us 256 possible shades of gray. For a color image, we typically use three channels: Red, Green, and Blue - the RGB color space. Each pixel is represented by three numbers: (R, G, B). This means each pixel requires 3 bytes of storage, or 24 bits per pixel, giving us over 16 million possible colors. The resolution of an image is the number of pixels - for example, 1920x1080 (Full HD) contains about 2 million pixels. A typical 4K image is 3840x2160, about 8 million pixels. Image size in memory is width times height times channels. A 4K RGB image uses 3840 * 2160 * 3 = approximately 25 megabytes. For video, we have 30 frames per second, so 10 seconds of 4K video is about 7.5 gigabytes of raw data - this is why video compression is essential. Beyond RGB, other color spaces are useful for different tasks. HSV (Hue, Saturation, Value) separates color information from intensity. Hue represents the color itself (red, green, blue), Saturation represents color purity, and Value represents brightness. This is useful because it matches how humans perceive color. Lab color space is designed to be perceptually uniform - a change of the same amount in color value should produce a change of about the same visual importance. YUV color space separates luminance (brightness) from chrominance (color), which is used in video compression because humans are more sensitive to brightness changes than color changes.",
+      "frame_captions": [
+        "Diagram: Grayscale pixel values 0-255 as shades from black to white",
+        "RGB color cube visualization showing 16.7 million colors",
+        "Comparison: RGB vs HSV color space representations of same image",
+        "Table: Image sizes for different resolutions (720p, 1080p, 4K)"
+      ],
+      "keywords": ["pixels", "RGB", "color spaces", "HSV", "image resolution", "digital image representation", "bit depth"]
+    },
+    {
+      "chapter_id": "tib_004_ch3",
+      "chapter_index": 3,
+      "title": "Image Filtering and Convolution",
+      "start_time": 1140,
+      "end_time": 1800,
+      "transcript": "Image filtering is one of the most fundamental operations in computer vision. At its core, filtering is about modifying or enhancing an image by applying a kernel or filter to each pixel based on its neighbors. The mathematical operation is called convolution. Convolution works by sliding a small matrix called a kernel over the image. At each position, we compute the sum of element-wise multiplication between the kernel and the image patch underneath it. The result becomes the new pixel value. For example, a 3x3 averaging filter has all values 1/9. When applied, each output pixel becomes the average of its 3x3 neighborhood, resulting in a blurred image. This is useful for reducing noise. A Gaussian blur uses a kernel where weights decrease with distance from the center, following a Gaussian distribution. This produces a more natural-looking blur that better preserves edges. Sharpening filters emphasize differences between neighboring pixels. The kernel for sharpening typically has a large positive center and negative surrounding values. For example, a kernel like [[0, -1, 0], [-1, 5, -1], [0, -1, 0]] will enhance edges and make the image appear sharper. Edge detection is crucial for understanding image structure. The Sobel operator uses two kernels - one for horizontal changes and one for vertical changes. The horizontal Sobel kernel detects vertical edges: [[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]]. The vertical Sobel kernel detects horizontal edges: [[-1, -2, -1], [0, 0, 0], [1, 2, 1]]. By combining these, we get the gradient magnitude and direction at each pixel, which tells us where edges are and their orientation. The Laplacian operator is a second-order derivative that detects edges regardless of orientation, using a kernel like [[0, 1, 0], [1, -4, 1], [0, 1, 0]]. It's particularly sensitive to noise, so it's often applied after Gaussian blur - this combination is called the Laplacian of Gaussian or LoG.",
+      "frame_captions": [
+        "Animation: 3x3 kernel sliding over image during convolution",
+        "Comparison: Original image vs Gaussian blur vs Sharpened image",
+        "Sobel kernel visualization showing horizontal and vertical edge detection",
+        "Edge detection examples: Original image, gradient magnitude, edge map"
+      ],
+      "keywords": ["convolution", "image filtering", "kernel", "edge detection", "Sobel operator", "Gaussian blur", "Laplacian"]
+    },
+    {
+      "chapter_id": "tib_004_ch4",
+      "chapter_index": 4,
+      "title": "Feature Detection: Corners and Blobs",
+      "start_time": 1800,
+      "end_time": 2400,
+      "transcript": "After filtering, the next important concept is feature detection. Features are distinctive patterns in an image that can be reliably detected and matched across different views of the same scene. Good features are repeatable (can be found in multiple images), distinctive (different from other features), and locally invariant (robust to small changes). The most important type of feature is corners. Corners are points where two edges meet, creating a location that can be precisely localized. The Harris Corner Detector, proposed by Chris Harris and Mike Stephens in 1988, is one of the most famous corner detection algorithms. It works by examining the intensity changes when shifting a small window in different directions. In flat regions, shifting in any direction causes little change. Along edges, shifting perpendicular to the edge causes large change, but shifting along the edge causes little change. At corners, shifting in any direction causes large change. Harris computes a corner response score using the image gradients. Points with high response are corners. For blob detection, we look for regions that differ in properties from surrounding areas. The Laplacian of Gaussian (LoG) can detect blobs at different scales. By using a scale-space representation - applying Gaussian blur with different sigma values - we can detect blobs of different sizes. The Difference of Gaussians (DoG) is an efficient approximation of LoG, formed by subtracting two blurred versions of the image at different scales. This approach was used in the famous SIFT (Scale-Invariant Feature Transform) algorithm, which detects and describes features that are invariant to scale and rotation. SIFT works by first detecting keypoints at different scales using DoG, then eliminating low-contrast and edge responses, assigning orientation based on gradient directions, and finally creating a 128-dimensional descriptor vector that uniquely describes the local image patch around each keypoint. These descriptors can be matched across images even under significant viewpoint changes.",
+      "frame_captions": [
+        "Harris corner detector visualization with corner response heatmap",
+        "Comparison: Edge vs Corner - showing gradient changes in different directions",
+        "Scale-space pyramid showing images at different blur levels",
+        "SIFT keypoint visualization with orientation arrows at detected features"
+      ],
+      "keywords": ["feature detection", "Harris corner detector", "corner detection", "blob detection", "SIFT", "scale-space", "DoG"]
+    },
+    {
+      "chapter_id": "tib_004_ch5",
+      "chapter_index": 5,
+      "title": "Image Segmentation",
+      "start_time": 2400,
+      "end_time": 3000,
+      "transcript": "Image segmentation is the process of partitioning an image into meaningful regions or segments. Unlike edge detection which finds boundaries, segmentation assigns every pixel to a region, giving us a complete understanding of the image's structure. The goal is to simplify the image representation into something more meaningful and easier to analyze. Semantic segmentation assigns a class label to every pixel - for example, in a street scene, pixels might be labeled as road, car, pedestrian, building, sky, etc. All pixels belonging to the same class get the same label, regardless of which specific object they belong to. Instance segmentation goes further by distinguishing between different objects of the same class. For example, each car in a street scene gets a unique label, so we can count and track individual cars. The simplest segmentation method is thresholding. For grayscale images, we choose a threshold value T. Pixels with intensity greater than T become white, others black. This works well for images with clear bimodal histograms where objects and background have distinct intensity ranges. Otsu's method automatically finds the optimal threshold by maximizing the variance between the two resulting classes. For more complex images, region-based methods work by growing regions from seed points. Region growing starts with seed pixels and adds neighboring pixels that are similar according to some criterion, like color difference below a threshold. The watershed algorithm treats the image gradient as a topographic surface. It floods from local minima, placing barriers where water from different minima would meet. These barriers become the segmentation boundaries. The watershed algorithm is powerful but can over-segment noisy images. Graph-based segmentation treats the image as a graph where pixels are nodes and edges represent similarity between adjacent pixels. The segmentation is obtained by cutting edges between regions. The Normalized Cuts algorithm by Shi and Malik (2000) partitions the graph to minimize the cut cost while balancing region sizes. More recently, deep learning methods have revolutionized segmentation. Fully Convolutional Networks (FCN) replace the fully connected layers in CNNs with convolutional layers to produce a dense pixel-wise output. U-Net, originally developed for biomedical image segmentation, has an encoder-decoder architecture with skip connections that preserve spatial information. Mask R-CNN extends Faster R-CNN by adding a mask prediction branch, enabling instance segmentation with high accuracy.",
+      "frame_captions": [
+        "Semantic segmentation example: Street scene with different colors for each class",
+        "Instance segmentation showing each car and pedestrian uniquely colored",
+        "Otsu thresholding visualization: original image, histogram, binary output",
+        "Watershed algorithm diagram showing flooding and dam construction",
+        "U-Net architecture diagram showing encoder-decoder with skip connections"
+      ],
+      "keywords": ["image segmentation", "semantic segmentation", "instance segmentation", "thresholding", "Otsu method", "watershed algorithm", "U-Net", "Mask R-CNN"]
+    },
+    {
+      "chapter_id": "tib_004_ch6",
+      "chapter_index": 6,
+      "title": "Object Detection and Recognition",
+      "start_time": 3000,
+      "end_time": 3540,
+      "transcript": "Object detection is the task of finding and localizing objects of specific classes in an image. Unlike classification which just tells us what object is present, detection tells us where each object is by drawing bounding boxes around them. This is fundamental for autonomous driving, surveillance, robotics, and image search. The traditional approach to object detection used sliding windows. We would slide a window of different sizes across the image at different scales, extract features from each window, and classify whether the window contains an object. This approach is computationally expensive because we might examine hundreds of thousands of windows per image. Features like HOG (Histogram of Oriented Gradients) were designed for this purpose. HOG computes histograms of gradient orientations in local cells, normalizes them across blocks, and concatenates them into a feature vector. Combined with a linear SVM classifier, HOG was state-of-the-art for pedestrian detection before deep learning. The breakthrough came with Region-based Convolutional Neural Networks or R-CNN. Instead of sliding windows, R-CNN uses a region proposal algorithm like Selective Search to generate about 2000 candidate regions that are likely to contain objects. Each region is warped to a fixed size and passed through a CNN to extract features, then classified with an SVM. While much faster than sliding windows, R-CNN is still slow because each region requires a separate CNN forward pass. Fast R-CNN improved this by running the CNN on the entire image once to produce a feature map, then projecting region proposals onto this feature map and using RoI (Region of Interest) pooling to extract fixed-size features for each region. This is dramatically faster because the CNN runs only once. Faster R-CNN introduced the Region Proposal Network (RPN), which learns to propose regions using the same CNN features, making the entire system end-to-end trainable and much faster. YOLO (You Only Look Once) takes a completely different approach. It treats detection as a regression problem, dividing the image into a grid and predicting bounding boxes and class probabilities directly in one forward pass. YOLO is extremely fast - capable of real-time detection at over 30 frames per second - but may struggle with small objects. SSD (Single Shot MultiBox Detector) combines the speed of YOLO with better accuracy by using feature maps at different scales to detect objects of different sizes. Modern detectors like EfficientDet achieve state-of-the-art accuracy with efficient architecture design using neural architecture search.",
+      "frame_captions": [
+        "Object detection visualization with bounding boxes around cars, pedestrians, traffic lights",
+        "Sliding window approach diagram showing windows at multiple scales",
+        "HOG feature visualization showing gradient orientations",
+        "R-CNN architecture: Region proposals → CNN → Classifier → Bounding box regression",
+        "YOLO grid prediction visualization showing bounding boxes per grid cell"
+      ],
+      "keywords": ["object detection", "bounding boxes", "R-CNN", "Fast R-CNN", "Faster R-CNN", "YOLO", "SSD", "HOG features", "sliding window"]
+    },
+    {
+      "chapter_id": "tib_004_ch7",
+      "chapter_index": 7,
+      "title": "Summary and Next Steps: Deep Learning for Vision",
+      "start_time": 3540,
+      "end_time": 3840,
+      "transcript": "Let's recap what we've covered today. We started with the fundamentals of digital image representation and color spaces, understanding how computers see images as arrays of numbers. We learned about image filtering and convolution - the building blocks for image processing operations like blurring, sharpening, and edge detection. We explored feature detection, focusing on corners and blobs, with algorithms like Harris corner detector and SIFT. We covered image segmentation techniques from simple thresholding to advanced graph-based and deep learning methods. Finally, we discussed object detection, tracing its evolution from sliding windows to modern deep learning approaches like R-CNN and YOLO. These concepts form the foundation of modern computer vision. In the next few lectures, we'll dive deeper into Convolutional Neural Networks, which have revolutionized the field. We'll cover CNN architectures like AlexNet, VGG, ResNet, and Inception. We'll learn about transfer learning - how to use pre-trained networks for new tasks with limited data. We'll explore applications like facial recognition, pose estimation, and video analysis. For next time, please read the paper 'ImageNet Classification with Deep Convolutional Neural Networks' by Krizhevsky et al. (2012) - this is the AlexNet paper that started the deep learning revolution in computer vision. Also, install PyTorch or TensorFlow on your machines - we'll be coding CNNs from scratch in the next lecture. Are there any questions? Yes? Good question about real-time detection - we'll cover speed-accuracy tradeoffs in detail when we discuss YOLO and other real-time detectors. Any other questions? Great. See you next week.",
+      "frame_captions": [
+        "Summary slide: All topics covered - Image representation, Filtering, Features, Segmentation, Detection",
+        "Preview of next lecture: CNN architectures (AlexNet, VGG, ResNet)",
+        "Famous AlexNet architecture diagram from 2012 paper",
+        "QR code to lecture slides and reading materials"
+      ],
+      "keywords": ["summary", "recap", "CNN", "AlexNet", "deep learning", "next lecture", "PyTorch", "TensorFlow"]
+    }
+  ]
+}

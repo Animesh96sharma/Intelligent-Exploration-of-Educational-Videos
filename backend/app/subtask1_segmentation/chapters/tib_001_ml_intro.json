@@ -1,0 +1,118 @@
+{
+  "video_id": "tib_001",
+  "video_title": "Introduction to Machine Learning",
+  "video_url": "https://av.tib.eu/media/tib_001",
+  "duration": 3720,
+  "language": "en",
+  "speaker": "Prof. Anna Müller",
+  "domain": "machine_learning",
+  "chapters": [
+    {
+      "chapter_id": "tib_001_ch1",
+      "chapter_index": 1,
+      "title": "Course Overview and Motivation",
+      "start_time": 0,
+      "end_time": 420,
+      "transcript": "Welcome everyone to the Introduction to Machine Learning course. My name is Prof. Anna Müller and I will be your instructor for this semester. Today we begin our journey into one of the most transformative fields in computer science. Machine learning is fundamentally about enabling computers to learn from data without being explicitly programmed for each task. Think about how Netflix recommends movies to you, how your email filters spam, or how your phone recognizes your face — all of these are powered by machine learning algorithms. Over the next few months, we will cover the theoretical foundations, practical implementations, and real-world applications of machine learning. By the end of this course, you will be able to design, implement, and evaluate your own machine learning systems. Today specifically, we'll get an overview of what machine learning is, why it matters, and what the different types of machine learning problems look like. We will also briefly touch on the history of the field and talk about some landmark moments that have shaped where we are today. Make sure you have Python 3.10 installed and the packages listed on the course website — we will start coding in the next lecture.",
+      "frame_captions": [
+        "Title slide: Introduction to Machine Learning, Prof. Anna Müller, TU Berlin",
+        "Slide showing Netflix recommendation interface as ML example",
+        "Timeline diagram showing history of AI and ML from 1950 to 2024",
+        "Course roadmap showing 14 weeks of topics"
+      ],
+      "keywords": ["machine learning", "introduction", "overview", "applications", "course structure"]
+    },
+    {
+      "chapter_id": "tib_001_ch2",
+      "chapter_index": 2,
+      "title": "What is Machine Learning? Core Definitions",
+      "start_time": 420,
+      "end_time": 960,
+      "transcript": "So what exactly is machine learning? Arthur Samuel, one of the pioneers of the field, defined machine learning in 1959 as the field of study that gives computers the ability to learn without being explicitly programmed. A more modern and formal definition comes from Tom Mitchell in 1997: a computer program is said to learn from experience E with respect to some class of tasks T and performance measure P, if its performance at tasks in T, as measured by P, improves with experience E. Let's unpack this with a concrete example. Suppose we want to build a spam filter. The task T is classifying emails as spam or not spam. The experience E is a large dataset of labeled emails — emails that humans have already marked as spam or legitimate. The performance measure P could be the percentage of emails correctly classified. As the algorithm sees more labeled examples, its performance on new, unseen emails should improve. This is fundamentally different from traditional programming where we write explicit rules like: if the email contains the word 'lottery' then mark as spam. In machine learning, the algorithm discovers these rules automatically from data. This distinction is crucial and is what makes machine learning so powerful for complex problems where writing rules manually would be impossible — like image recognition or natural language understanding. The key ingredients for any machine learning system are: data, a model or hypothesis class, a loss function to measure performance, and an optimization algorithm to improve the model.",
+      "frame_captions": [
+        "Quote slide: Arthur Samuel 1959 definition of machine learning",
+        "Formal definition by Tom Mitchell with components highlighted",
+        "Comparison diagram: Traditional Programming vs Machine Learning paradigm",
+        "Slide listing four key ingredients: Data, Model, Loss Function, Optimizer"
+      ],
+      "keywords": ["definition", "Arthur Samuel", "Tom Mitchell", "task", "experience", "performance", "spam filter"]
+    },
+    {
+      "chapter_id": "tib_001_ch3",
+      "chapter_index": 3,
+      "title": "Types of Machine Learning: Supervised Learning",
+      "start_time": 960,
+      "end_time": 1560,
+      "transcript": "Machine learning problems are broadly categorized into three types: supervised learning, unsupervised learning, and reinforcement learning. Let's start with supervised learning, which is the most common type and the one we will spend most of our course on. In supervised learning, we have a dataset consisting of input-output pairs. The inputs are called features or predictors, and the outputs are called labels or targets. The goal is to learn a mapping function from inputs to outputs such that when we see a new input, we can predict its output accurately. Think of it as learning with a teacher — the training data provides supervision in the form of correct answers. There are two main subtypes of supervised learning. The first is classification, where the output is a discrete category. Examples include: email spam detection where the output is spam or not spam, image classification where the output is a class label like cat, dog, or car, and medical diagnosis where the output might be a disease category. The second subtype is regression, where the output is a continuous numerical value. Examples include: predicting house prices based on features like size and location, forecasting stock prices or weather temperatures, and estimating a patient's risk score. A critical concept in supervised learning is the training and test split. We divide our data into a training set, which the model learns from, and a test set, which we use to evaluate how well the model generalizes to new, unseen data. We never let the model see the test data during training — otherwise we are cheating and our evaluation will be misleadingly optimistic. We also often use a validation set to tune hyperparameters. Common supervised learning algorithms include linear regression, logistic regression, decision trees, random forests, support vector machines, and neural networks.",
+      "frame_captions": [
+        "Three-way diagram showing Supervised, Unsupervised, and Reinforcement Learning",
+        "Supervised learning diagram with input features and output labels arrows",
+        "Classification examples: spam detection, image recognition, medical diagnosis",
+        "Regression examples: house price prediction with scatter plot",
+        "Train-validation-test split diagram with 60-20-20 percentages"
+      ],
+      "keywords": ["supervised learning", "classification", "regression", "training set", "test set", "labels", "features"]
+    },
+    {
+      "chapter_id": "tib_001_ch4",
+      "chapter_index": 4,
+      "title": "Types of Machine Learning: Unsupervised and Reinforcement Learning",
+      "start_time": 1560,
+      "end_time": 2100,
+      "transcript": "Now let us move to unsupervised learning. Here we have data without any labels — no correct answers provided. The goal is to discover hidden patterns, structures, or representations in the data on its own. Imagine you have millions of customer transactions but no one has labeled what type of customer each person is. An unsupervised learning algorithm could discover that there are natural groups — perhaps budget shoppers, premium buyers, and occasional purchasers — without anyone telling it these categories exist. The most common unsupervised learning tasks are clustering, where the algorithm groups similar data points together; dimensionality reduction, where we compress high-dimensional data into fewer dimensions while preserving important structure; and density estimation, where we model the underlying probability distribution of the data. Popular algorithms include K-means clustering, hierarchical clustering, Principal Component Analysis or PCA for dimensionality reduction, and autoencoders. Reinforcement learning is quite different from both supervised and unsupervised learning. Here, an agent learns to make decisions by interacting with an environment. The agent takes actions, receives rewards or penalties, and tries to maximize its cumulative reward over time. There is no dataset of correct input-output pairs — instead, the agent must explore and discover good strategies through trial and error. Famous examples of reinforcement learning include AlphaGo, which defeated the world champion at the board game Go, and OpenAI's GPT models which used reinforcement learning from human feedback to improve their responses. Reinforcement learning is conceptually elegant but can be very challenging to apply in practice due to the difficulty of defining good reward functions and the large amount of interaction data typically required.",
+      "frame_captions": [
+        "Customer clustering visualization showing three distinct customer groups",
+        "PCA dimensionality reduction diagram from 3D to 2D",
+        "Reinforcement learning loop diagram: Agent, Environment, Action, Reward, State",
+        "Photo of AlphaGo match against Lee Sedol",
+        "Comparison table: Supervised vs Unsupervised vs Reinforcement Learning"
+      ],
+      "keywords": ["unsupervised learning", "clustering", "dimensionality reduction", "reinforcement learning", "agent", "reward", "K-means", "PCA"]
+    },
+    {
+      "chapter_id": "tib_001_ch5",
+      "chapter_index": 5,
+      "title": "The Machine Learning Pipeline",
+      "start_time": 2100,
+      "end_time": 2700,
+      "transcript": "Let's now talk about the practical side of doing machine learning — what does a typical ML project actually look like from start to finish? This is something that textbooks often skip, but it is absolutely essential for your success as a machine learning practitioner. The machine learning pipeline consists of several stages that you will repeat iteratively. The first stage is problem definition. Before writing a single line of code, you need to clearly define what you are trying to predict or decide, what data you have available, how you will measure success, and what the constraints are in terms of latency, interpretability, and fairness. The second stage is data collection and exploration. Real-world machine learning is dominated by data work — finding, collecting, cleaning, and understanding your data. This stage is often called Exploratory Data Analysis or EDA. You want to understand distributions, identify outliers, check for missing values, and spot potential data quality issues early. The third stage is feature engineering and preprocessing. Raw data is rarely in the right format for machine learning algorithms. You need to encode categorical variables, normalize numerical features, handle missing values, and potentially create new features that better capture the underlying patterns. The fourth stage is model selection and training. You choose one or more model architectures, train them on your training data, and tune their hyperparameters using your validation set. The fifth stage is evaluation. You assess your model's performance using appropriate metrics on the held-out test set. Accuracy is often not enough — you also need to consider precision, recall, F1 score, AUC-ROC, and domain-specific metrics. The final stage is deployment and monitoring. Once satisfied with your model, you integrate it into a production system and monitor it over time for performance degradation, data drift, and unexpected behaviors.",
+      "frame_captions": [
+        "Circular diagram of ML pipeline: Problem Definition, Data, Features, Model, Evaluation, Deployment",
+        "EDA screenshot showing pandas describe() output and distribution plots",
+        "Feature engineering table showing raw vs processed features",
+        "Model comparison table with accuracy, precision, recall, F1 columns"
+      ],
+      "keywords": ["ML pipeline", "data collection", "EDA", "feature engineering", "model selection", "evaluation", "deployment", "preprocessing"]
+    },
+    {
+      "chapter_id": "tib_001_ch6",
+      "chapter_index": 6,
+      "title": "Overfitting, Underfitting, and the Bias-Variance Tradeoff",
+      "start_time": 2700,
+      "end_time": 3300,
+      "transcript": "One of the most fundamental concepts in machine learning is the bias-variance tradeoff, and the related phenomena of overfitting and underfitting. Understanding these concepts will help you diagnose problems with your models and decide how to fix them. Let's start with generalization — the goal of machine learning is not to perform well on the training data, but to perform well on new, unseen data. A model that memorizes the training data perfectly but fails on new examples is useless in practice. This is called overfitting. An overfit model has learned the noise and random fluctuations in the training data rather than the true underlying pattern. It has too much complexity relative to the amount of training data. Signs of overfitting include very low training error but high test error. On the other hand, underfitting occurs when your model is too simple to capture the underlying pattern in the data. An underfit model performs poorly on both the training set and the test set. This often happens when you use too simple a model for a complex problem, or when you do not train long enough. The bias-variance tradeoff formalizes this relationship. Bias refers to the error introduced by approximating a complex real-world problem with a simpler model. High bias means underfitting. Variance refers to the model's sensitivity to small fluctuations in the training data. High variance means overfitting. The total expected error can be decomposed into bias squared plus variance plus irreducible noise. We want to find the sweet spot that minimizes total error. Common techniques to combat overfitting include: collecting more training data, using regularization techniques like L1 and L2 regularization, dropout in neural networks, cross-validation, and early stopping. To combat underfitting, you can use a more complex model, add more relevant features, reduce regularization, or train for longer.",
+      "frame_captions": [
+        "Three polynomial fit diagrams showing underfitting (degree 1), good fit (degree 3), overfitting (degree 10)",
+        "Bias-variance decomposition equation on blackboard",
+        "U-shaped total error curve showing bias-variance tradeoff",
+        "Training vs validation loss curves showing overfitting pattern",
+        "Table of regularization techniques and when to use them"
+      ],
+      "keywords": ["overfitting", "underfitting", "bias-variance tradeoff", "generalization", "regularization", "cross-validation", "L1", "L2"]
+    },
+    {
+      "chapter_id": "tib_001_ch7",
+      "chapter_index": 7,
+      "title": "Summary, Q&A, and Next Lecture Preview",
+      "start_time": 3300,
+      "end_time": 3720,
+      "transcript": "Alright, let us wrap up today's lecture. We covered a lot of ground. We started with the core definition of machine learning and why it is different from traditional programming. We then explored the three main types of machine learning: supervised learning with classification and regression tasks, unsupervised learning with clustering and dimensionality reduction, and reinforcement learning with agents and rewards. We walked through the typical machine learning pipeline from problem definition through to deployment and monitoring. And finally we discussed the critical concepts of overfitting, underfitting, and the bias-variance tradeoff. These are the foundations upon which everything else in this course builds. In the next lecture, we will get hands-on with our first machine learning algorithm: linear regression. We will derive it from first principles, implement it from scratch in Python using NumPy, and then use scikit-learn to apply it to a real dataset. Please make sure you have Python and scikit-learn installed before next class. Are there any questions? Yes, in the back — ah, great question. You're asking whether deep learning is a type of machine learning. Yes, absolutely — deep learning is a subfield of machine learning that uses neural networks with many layers. We will cover deep learning in the second half of the course starting around week eight. Any other questions? No? Great. See you all on Thursday. The lecture slides and a reading list are already posted on the course portal.",
+      "frame_captions": [
+        "Summary slide listing all topics covered today",
+        "Preview slide for next lecture: Linear Regression from Scratch",
+        "QR code linking to course portal and slides"
+      ],
+      "keywords": ["summary", "recap", "linear regression", "next lecture", "scikit-learn", "deep learning preview"]
+    }
+  ]
+}
