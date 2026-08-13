@@ -1,5 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap');
+/* @import "./App.css"; */
 @import "tailwindcss";
-@import "./App.css";
+
 
 :root {
   color-scheme: light;
@@ -14,9 +16,12 @@
   --color-surface: #ffffff;
   --color-text: #0f172a;
   --color-text-soft: #334155;
+  --color-surface-soft: #f8fafc;
+  --color-text-faint: #64748b;
   --color-border: #d9e2ec;
   --radius-lg: 18px;
   --radius-md: 14px;
   --shadow-sm: 0 8px 20px rgba(15,23,42,0.05);
   --shadow-md: 0 18px 40px rgba(15,23,42,0.08);
+  --font-display: "Playfair Display", serif;
 }

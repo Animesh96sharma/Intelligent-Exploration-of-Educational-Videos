@@ -990,7 +990,6 @@ Keep this block at the very end of App.css
 .collection-page,
 .network-page,
 .comparison-page,
-.about-page,
 .metadata-page {
   width: 100%;
   max-width: var(--page-max-width);
@@ -1006,8 +1005,7 @@ Keep this block at the very end of App.css
 .collection-hero,
 .page-intro-network,
 .comparison-hero,
-.video-explorer__header,
-.about-hero {
+.video-explorer__header {
   background: linear-gradient(135deg, var(--surface), var(--surface-soft));
   border: 1px solid var(--border);
   box-shadow: var(--shadow-md);
@@ -1042,8 +1040,7 @@ Keep this block at the very end of App.css
 .collection-hero h2,
 .page-intro-network h2,
 .comparison-hero h2,
-.video-explorer__header h2,
-.about-hero h2 {
+.video-explorer__header h2 {
   color: var(--text);
   margin: 8px 0 10px;
   font-size: clamp(1.75rem, 2.2vw, 2.5rem);
@@ -1058,7 +1055,6 @@ Keep this block at the very end of App.css
 .page-intro-network p,
 .comparison-hero p,
 .video-explorer__header p,
-.about-hero p,
 .panel p,
 .video-card p,
 .node-card p,
@@ -4299,302 +4295,6 @@ input[type="range"]:focus {
   }
 }
 
-/* About */
-
-.about-page--rich {
-  min-height: calc(100vh - 180px);
-  background:
-    radial-gradient(circle at top left, rgba(59, 130, 246, 0.08), transparent 30%),
-    radial-gradient(circle at top right, rgba(99, 102, 241, 0.08), transparent 28%),
-    linear-gradient(180deg, #f8fbff 0%, #f4f7fb 100%);
-  padding: 0;
-}
-
-.about-shell {
-  width: 100%;
-  max-width: var(--page-max-width);
-  margin: 0 auto;
-  display: grid;
-  gap: 24px;
-}
-
-.about-hero-banner {
-  display: block;
-  padding: 34px;
-  border-radius: 28px;
-  background: linear-gradient(135deg, var(--surface), var(--surface-soft));
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-md);
-  color: var(--text);
-}
-
-.about-hero-banner__brand {
-  display: block;
-}
-
-.about-hero-banner__logo {
-  display: none;
-}
-
-.about-hero-banner__brand-copy h2 {
-  margin: 6px 0 14px;
-  font-size: clamp(2rem, 4vw, 3rem);
-  line-height: 1.08;
-  color: var(--text);
-}
-
-.about-hero-banner__brand-copy p {
-  max-width: 70ch;
-  color: var(--text-soft);
-  line-height: 1.75;
-}
-
-.about-hero-banner__stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 24px;
-  margin-bottom: 20px;
-}
-
-.about-mini-stat {
-  padding: 16px 18px;
-  border-radius: 18px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  backdrop-filter: none;
-}
-
-.about-mini-stat span {
-  display: block;
-  font-size: 0.82rem;
-  color: var(--text-faint);
-  margin-bottom: 6px;
-}
-
-.about-mini-stat strong {
-  font-size: 1rem;
-  color: var(--text);
-}
-
-.about-card {
-  background: #ffffff;
-  border: 1px solid rgba(148, 163, 184, 0.22);
-  border-radius: 24px;
-  padding: 28px;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
-}
-
-.about-card h3 {
-  margin: 0 0 16px;
-  color: #0f172a;
-  font-size: 1.55rem;
-}
-
-.about-card p {
-  color: #334155;
-  line-height: 1.8;
-  margin: 0 0 14px;
-}
-
-.about-card__head {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.about-card__icon {
-  font-size: 1.6rem;
-}
-
-.about-two-col-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
-}
-
-.about-section-stack {
-  display: grid;
-  gap: 18px;
-}
-
-.about-section-heading h3 {
-  margin: 0 0 8px;
-  font-size: 1.7rem;
-  color: #0f172a;
-}
-
-.about-section-heading p {
-  margin: 0;
-  color: #475569;
-  line-height: 1.8;
-}
-
-.student-track-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 20px;
-}
-
-.student-track {
-  overflow: hidden;
-  border-radius: 24px;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  background: #ffffff;
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
-}
-
-.student-track__top {
-  padding: 24px;
-  color: #fff;
-}
-
-.student-track--blue .student-track__top {
-  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
-}
-
-.student-track--purple .student-track__top {
-  background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-}
-
-.student-track--orange .student-track__top {
-  background: linear-gradient(135deg, #f97316 0%, #ef4444 100%);
-}
-
-.student-track__label {
-  margin: 0 0 8px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  opacity: 0.92;
-}
-
-.student-track__top h4 {
-  margin: 0 0 10px;
-  font-size: 1.45rem;
-  line-height: 1.2;
-}
-
-.student-track__top p {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.92);
-  line-height: 1.7;
-}
-
-.student-track__body {
-  padding: 24px;
-}
-
-.student-track__body h5 {
-  margin: 0 0 12px;
-  font-size: 0.98rem;
-  color: #0f172a;
-}
-
-.student-track__body .clean-list {
-  margin-bottom: 18px;
-}
-
-.student-track__body .clean-list li {
-  color: #334155;
-  line-height: 1.7;
-}
-
-.reference-list {
-  display: grid;
-  gap: 16px;
-}
-
-.reference-item {
-  border-left: 4px solid transparent;
-  padding-left: 16px;
-}
-
-.reference-item--blue {
-  border-left-color: #3b82f6;
-}
-
-.reference-item--purple {
-  border-left-color: #8b5cf6;
-}
-
-.reference-item--orange {
-  border-left-color: #f97316;
-}
-
-.reference-item h4 {
-  margin: 0 0 6px;
-  color: #0f172a;
-}
-
-.reference-item p {
-  margin: 0;
-}
-
-.reference-item a {
-  color: #000000;
-  text-decoration: none;
-}
-
-.reference-item a:hover {
-  text-decoration: underline;
-}
-
-.about-evaluation-banner {
-  padding: 30px;
-  border-radius: 28px;
-  background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
-  color: #fff;
-  box-shadow: 0 22px 48px rgba(124, 58, 237, 0.2);
-}
-
-.about-evaluation-banner h3 {
-  margin: 0 0 20px;
-  font-size: 1.7rem;
-}
-
-.about-evaluation-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px;
-}
-
-.about-evaluation-grid h4 {
-  margin: 0 0 12px;
-  color: #fff;
-}
-
-.about-evaluation-grid .clean-list li {
-  color: rgba(250, 245, 255, 0.95);
-}
-
-.about-note {
-  display: grid;
-  grid-template-columns: 40px 1fr;
-  gap: 14px;
-  padding: 24px;
-  border-radius: 22px;
-  background: #fefce8;
-  border: 1px solid #fde68a;
-}
-
-.about-note__icon {
-  font-size: 1.6rem;
-}
-
-.about-note h3 {
-  margin: 0 0 8px;
-  color: #854d0e;
-}
-
-.about-note p {
-  margin: 0;
-  color: #92400e;
-  line-height: 1.75;
-}
-
 /* Footer */
 
 .app-footer {
@@ -5055,11 +4755,7 @@ input[type="range"]:focus {
   .video-explorer__layout,
   .filters-bar,
   .landing-card-grid,
-  .landing-capabilities-grid,
-  .student-track-grid,
-  .about-two-col-list,
-  .about-evaluation-grid,
-  .about-hero-banner__stats {
+  .landing-capabilities-grid {
     grid-template-columns: 1fr;
   }
 
@@ -5109,9 +4805,7 @@ input[type="range"]:focus {
   .collection-page,
   .network-page,
   .comparison-page,
-  .about-page,
   .metadata-page,
-  .about-shell,
   .app-footer {
     max-width: 100%;
   }
@@ -5132,19 +4826,7 @@ input[type="range"]:focus {
   }
 }
 
-  .about-shell {
-    width: min(100% - 24px, 1180px);
-  }
 
-  .about-hero-banner,
-  .about-hero-banner__brand {
-    grid-template-columns: 1fr;
-    padding: 24px;
-  }
-
-  .about-card,
-  .about-evaluation-banner,
-  .about-note,
   .landing-detail-card,
   .home-hero,
   .page-intro-copy,
@@ -5864,8 +5546,7 @@ input[type="range"]:focus {
   .collection-hero p,
   .page-intro-network p,
   .comparison-hero p,
-  .video-explorer-header p,
-  .about-hero p {
+  .video-explorer-header p{
     display: none;
   }
 }
@@ -5877,8 +5558,7 @@ input[type="range"]:focus {
   .collection-hero,
   .page-intro-network,
   .comparison-hero,
-  .video-explorer-header,
-  .about-hero {
+  .video-explorer-header {
     flex-direction: column;
     align-items: stretch;
     padding: 20px;
@@ -5902,8 +5582,7 @@ input[type="range"]:focus {
   .collection-hero,
   .page-intro-network,
   .comparison-hero,
-  .video-explorer-header,
-  .about-hero {
+  .video-explorer-header {
     flex-direction: column;
     align-items: stretch;
     padding: 20px;
@@ -5916,8 +5595,7 @@ input[type="range"]:focus {
   .collection-hero > p,
   .page-intro-network > p,
   .comparison-hero > p,
-  .video-explorer-header > p,
-  .about-hero > p {
+  .video-explorer-header > p{
     display: none;
   }
 
@@ -5927,8 +5605,7 @@ input[type="range"]:focus {
   .collection-hero h2,
   .page-intro-network h2,
   .comparison-hero h2,
-  .video-explorer-header h2,
-  .about-hero h2 {
+  .video-explorer-header h2{
     font-size: clamp(1.4rem, 5vw, 1.8rem);
     margin: 4px 0 0;
   }
@@ -6002,25 +5679,6 @@ input[type="range"]:focus {
   .table-video-actions .secondary-btn {
     flex: 1 1 auto;
     justify-content: center;
-  }
-}
-
-/* ---------------------------------------------------------
-   5. About page — stack stat banners, two-col lists, and
-      student-track cards on mobile.
-   --------------------------------------------------------- */
-@media (max-width: 900px) {
-  .about-hero-banner__stats,
-  .about-two-col-list,
-  .student-track-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
-}
-
-@media (max-width: 640px) {
-  .about-hero-banner__stats > * {
-    text-align: center;
   }
 }
 
