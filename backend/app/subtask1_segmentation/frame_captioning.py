@@ -15,16 +15,21 @@ CHANGES IN v4
     vector of (caption + first 200 chars of transcript).  chaptering.py uses
     these to score topic-shift boundaries without needing extra LLM calls.
 
+3.  AUTHOR/ORG EXTRACTION  (new step before general captioning)
+    Runs a focused LLaVA prompt on the first 3 slides specifically hunting
+    for the presenter name and institution — saved under 'video_metadata'.
+
 PIPELINE
 --------
 1.  Scan video at SAMPLE_INTERVAL -> raw SlideRuns (visual change detection)
 2.  Merge runs shorter than MIN_SLIDE_DURATION (removes flicker)
 3.  Split runs longer than MAX_STATIC_DURATION using transcript boundaries
-4.  [NEW] pHash dedup — merge visually identical runs (revisited slides)
-5.  Caption one representative frame per run with LLaVA-1.6-Mistral-7B
-6.  Attach aggregated transcript text to each run
-7.  [NEW] Embed captions with sentence-transformer
-8.  Save one JSON record per run
+4.  pHash dedup — merge visually identical runs (revisited slides)
+5.  Extract author/org from first 3 slides with focused LLaVA prompt
+6.  Caption one representative frame per run with LLaVA-1.6-Mistral-7B
+7.  Attach aggregated transcript text to each run
+8.  Embed captions with sentence-transformer
+9.  Save one JSON record per run + video_metadata
 
 INSTALL
 -------
@@ -52,7 +57,6 @@ import argparse
 import gc
 import json
 import logging
-import math
 import os
 import queue
 import sys
@@ -72,14 +76,14 @@ logging.basicConfig(
 log = logging.getLogger("slide_captioner")
 
 # ── tuning knobs ──────────────────────────────────────────────────────────────
-SAMPLE_INTERVAL     = 1.0    # seconds between sampled frames during scan
-DIFF_THRESHOLD      = 0.05   # pixel-diff (0-1) that counts as a slide change
-MIN_SLIDE_DURATION  = 5.0    # merge runs shorter than this (removes flicker)
-MAX_STATIC_DURATION = 300.0  # split runs longer than this using transcript (5 min)
-SPLIT_INTERVAL      = 180.0  # target sub-segment length when splitting (3 min)
+SAMPLE_INTERVAL     = 1.0
+DIFF_THRESHOLD      = 0.05
+MIN_SLIDE_DURATION  = 5.0
+MAX_STATIC_DURATION = 300.0
+SPLIT_INTERVAL      = 180.0
 BATCH_SIZE          = 2
 PREFETCH_SIZE       = 8
-PHASH_THRESHOLD     = 8      # Hamming distance <= this = "same slide"
+PHASH_THRESHOLD     = 8
 EMBED_MODEL         = "all-MiniLM-L6-v2"
 
 
@@ -324,9 +328,8 @@ def split_long_runs(
     return result
 
 
-# ── STEP 4 (NEW) · pHash deduplication ───────────────────────────────────────
+# ── STEP 4 · pHash deduplication ─────────────────────────────────────────────
 def phash_of_frame(video_path: Path, timestamp_sec: float):
-    """Return perceptual hash of the frame at timestamp_sec, or None on failure."""
     try:
         import cv2
         import imagehash
@@ -341,7 +344,7 @@ def phash_of_frame(video_path: Path, timestamp_sec: float):
     if not ret or frame is None:
         return None
     img = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
-    return imagehash.phash(img, hash_size=16)   # 256-bit hash
+    return imagehash.phash(img, hash_size=16)
 
 
 def dedup_runs_by_phash(
@@ -349,30 +352,16 @@ def dedup_runs_by_phash(
     video_path: Path,
     threshold:  int = PHASH_THRESHOLD,
 ) -> list[SlideRun]:
-    """
-    Merge visually identical SlideRuns.
-
-    Handles:
-      - Presenter accidentally advances and goes back  (A → B → A again)
-      - Same title / agenda slide shown multiple times
-
-    Each run's representative frame is hashed.  If a run's hash is within
-    `threshold` Hamming distance of an earlier run's hash, it is merged into
-    that earlier run (transcript text is appended, end_sec extended if later).
-    """
     try:
-        import imagehash   # noqa: F401
+        import imagehash  # noqa: F401
     except ImportError:
-        log.warning(
-            "imagehash not installed — skipping pHash dedup.  "
-            "Run:  pip install imagehash"
-        )
+        log.warning("imagehash not installed — skipping pHash dedup. Run: pip install imagehash")
         return runs
 
     log.info(f"pHash dedup: comparing {len(runs)} runs (threshold={threshold}) ...")
 
-    canonical_hashes: list            = []
-    canonical_runs:   list[SlideRun]  = []
+    canonical_hashes: list           = []
+    canonical_runs:   list[SlideRun] = []
 
     for run in runs:
         h = phash_of_frame(video_path, run.rep_sec)
@@ -425,7 +414,7 @@ def attach_transcripts(runs: list[SlideRun], segments: list[dict]) -> None:
         r._transcript = " ".join(texts)
 
 
-# ── STEP 6 · prefetch frames ──────────────────────────────────────────────────
+# ── STEP 6 · prefetch frames ─────────────────────────────────────────────────
 def prefetch_worker(video_path: Path, runs: list[SlideRun],
                     out_queue: queue.Queue, fdir: Optional[Path]) -> None:
     try:
@@ -455,24 +444,124 @@ def prefetch_worker(video_path: Path, runs: list[SlideRun],
     out_queue.put(None)
 
 
-# ── STEP 7 · LLaVA captioning ────────────────────────────────────────────────
+# ── STEP 7 · author/org extraction from first 3 slides ───────────────────────
+def extract_author_from_early_slides(
+    runs:       list[SlideRun],
+    video_path: Path,
+    processor,
+    model,
+    device:     str,
+    max_slides: int = 3,
+) -> dict:
+    """
+    Run a focused LLaVA prompt on the first 3 slides to extract author/org.
+    Kept separate from general captioning so we use a targeted prompt.
+    Picks the longest non-empty value found across all slides for each field.
+    """
+    import cv2
+    import torch
+    from PIL import Image
+
+    AUTHOR_PROMPT = (
+        "[INST] <image>\n"
+        "Look carefully at ALL text on this slide and extract:\n"
+        "1. The full name of the presenter, lecturer, author, or speaker.\n"
+        "2. The university, company, department, or institution name.\n\n"
+        "Rules:\n"
+        "- Read every piece of text on the slide, including small text.\n"
+        "- Names are often below the title in smaller font.\n"
+        "- Look for keywords: 'By', 'Presenter:', 'Lecturer:', 'Author:', "
+        "'Instructor:', or email addresses (use the name part before @).\n"
+        "- Organization may be a logo caption, department line, or watermark.\n"
+        "- If a field is genuinely not visible on this slide, return empty string.\n"
+        "- NEVER use generic placeholders like 'Lecturer', 'Professor', "
+        "'Speaker', 'University', 'Institution', or 'Unknown'.\n\n"
+        "Return ONLY valid JSON, nothing else:\n"
+        "{\"author\": \"<exact full name or empty string>\", "
+        "\"organization\": \"<exact institution name or empty string>\"}\n"
+        "[/INST]"
+    )
+
+    # Generic words to reject
+    BAD_VALUES = {
+        "lecturer", "professor", "speaker", "presenter", "instructor",
+        "author", "university", "institution", "college", "school",
+        "unknown", "n/a", "none", "not available", "not visible",
+    }
+
+    cap       = cv2.VideoCapture(str(video_path))
+    collected = []
+
+    for run in runs[:max_slides]:
+        cap.set(cv2.CAP_PROP_POS_MSEC, run.rep_sec * 1000)
+        ret, frame = cap.read()
+        if not ret or frame is None:
+            continue
+
+        img    = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+        inputs = processor(
+            text=AUTHOR_PROMPT, images=img, return_tensors="pt"
+        ).to(device)
+
+        with torch.no_grad():
+            output = model.generate(**inputs, max_new_tokens=80, do_sample=False)
+
+        decoded = processor.decode(output[0], skip_special_tokens=True)
+
+        start = decoded.find("{")
+        end   = decoded.rfind("}") + 1
+        if start >= 0 and end > start:
+            try:
+                obj = json.loads(decoded[start:end])
+                for f in ("author", "organization"):
+                    val = obj.get(f, "").strip()
+                    if val.lower() in BAD_VALUES or len(val) < 3:
+                        obj[f] = ""
+                collected.append(obj)
+                log.info(
+                    f"  Slide {run.slide_id}: "
+                    f"author='{obj.get('author') or '(not found)'}' "
+                    f"org='{obj.get('organization') or '(not found)'}'"
+                )
+            except Exception:
+                log.warning(f"  Slide {run.slide_id}: could not parse author JSON")
+
+    cap.release()
+
+    # Pick the longest non-empty value across all slides for each field
+    result = {"author": "", "organization": ""}
+    for f in result:
+        values = [x.get(f, "").strip() for x in collected if x.get(f, "").strip()]
+        if values:
+            result[f] = max(values, key=len)
+
+    return result
+
+
+# ── STEP 8 · LLaVA captioning ────────────────────────────────────────────────
 def load_llava(device: str):
     try:
         import torch
-        from transformers import LlavaNextProcessor, LlavaNextForConditionalGeneration, BitsAndBytesConfig
+        from transformers import (
+            LlavaNextProcessor,
+            LlavaNextForConditionalGeneration,
+            BitsAndBytesConfig,
+        )
     except ImportError:
         log.error("pip install transformers torch bitsandbytes accelerate"); sys.exit(1)
 
-    model_id = "llava-hf/llava-v1.6-mistral-7b-hf"
+    model_id  = "llava-hf/llava-v1.6-mistral-7b-hf"
     log.info(f"Loading LLaVA '{model_id}' in 4-bit ...")
-    t0 = time.time()
+    t0        = time.time()
     processor = LlavaNextProcessor.from_pretrained(model_id)
     processor.tokenizer.pad_token = processor.tokenizer.eos_token
 
     import torch as _torch
     quant = BitsAndBytesConfig(
-        load_in_4bit=True, bnb_4bit_compute_dtype=_torch.float16,
-        bnb_4bit_quant_type="nf4", bnb_4bit_use_double_quant=True,
+        load_in_4bit=True,
+        bnb_4bit_compute_dtype=_torch.float16,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_use_double_quant=True,
     )
     model = LlavaNextForConditionalGeneration.from_pretrained(
         model_id, quantization_config=quant, device_map="auto"
@@ -532,27 +621,19 @@ def caption_batch(images: list, processor, model, device: str) -> list[str]:
         return caps
 
 
-# ── STEP 8 (NEW) · embed captions ────────────────────────────────────────────
+# ── STEP 9 · embed captions ───────────────────────────────────────────────────
 def embed_captions(slides: list[dict], model_name: str = EMBED_MODEL) -> list[dict]:
-    """
-    Add an 'embedding' field to each slide dict.
-
-    The vector is computed from  (caption + first 200 chars of transcript)
-    so it captures both the visual content and the spoken context.
-    chaptering.py uses these to score topic-shift boundaries via cosine
-    similarity without needing any extra LLM calls per slide.
-    """
     try:
         from sentence_transformers import SentenceTransformer
     except ImportError:
         log.warning(
-            "sentence-transformers not installed — skipping embeddings.  "
-            "Run:  pip install sentence-transformers"
+            "sentence-transformers not installed — skipping embeddings. "
+            "Run: pip install sentence-transformers"
         )
         return slides
 
     log.info(f"Embedding {len(slides)} slide captions with '{model_name}' ...")
-    model = SentenceTransformer(model_name)
+    embed_model = SentenceTransformer(model_name)
 
     texts = []
     for s in slides:
@@ -560,7 +641,7 @@ def embed_captions(slides: list[dict], model_name: str = EMBED_MODEL) -> list[di
         transc = (s.get("transcript") or "").strip()[:200]
         texts.append(f"{cap}. {transc}".strip(". "))
 
-    vectors = model.encode(texts, batch_size=64, show_progress_bar=False)
+    vectors = embed_model.encode(texts, batch_size=64, show_progress_bar=False)
     for s, vec in zip(slides, vectors):
         s["embedding"] = vec.tolist()
 
@@ -591,7 +672,7 @@ def run(
     out    = Path(output_path) if output_path else \
              video.parent / (video.stem + "_slide_captions.json")
 
-    if not video.exists():  log.error(f"Video not found: {video}");      sys.exit(1)
+    if not video.exists():  log.error(f"Video not found: {video}");       sys.exit(1)
     if not transc.exists(): log.error(f"Transcript not found: {transc}"); sys.exit(1)
 
     fdir = None
@@ -619,14 +700,29 @@ def run(
     runs = scan_video(video, video_duration)
     runs = merge_short_runs(runs, min_duration)
     runs = split_long_runs(runs, segments, max_static, split_interval)
-    runs = dedup_runs_by_phash(runs, video, phash_threshold)   # ← NEW
+    runs = dedup_runs_by_phash(runs, video, phash_threshold)
     attach_transcripts(runs, segments)
 
     total = len(runs)
     log.info(f"Captioning {total} slides ...")
 
+    # ── load LLaVA once — reused for both author extraction and captioning ────
     processor, model_obj = load_llava(device)
 
+    # ── STEP 7: extract author/org from first 3 slides ────────────────────────
+    log.info("Reading first 3 slides for author/organization ...")
+    author_meta = extract_author_from_early_slides(
+        runs       = runs,
+        video_path = video,
+        processor  = processor,
+        model      = model_obj,
+        device     = device,
+        max_slides = 3,
+    )
+    log.info(f"  Author : {author_meta['author'] or '(not found)'}")
+    log.info(f"  Org    : {author_meta['organization'] or '(not found)'}")
+
+    # ── STEP 8: caption all slides ────────────────────────────────────────────
     frame_queue: queue.Queue = queue.Queue(maxsize=PREFETCH_SIZE)
     prefetch_thread = threading.Thread(
         target=prefetch_worker, args=(video, runs, frame_queue, fdir), daemon=True
@@ -687,28 +783,30 @@ def run(
     flush()
     prefetch_thread.join()
 
-    # ── embed captions ────────────────────────────────────────────────────────
+    # ── STEP 9: embed captions ────────────────────────────────────────────────
     if not skip_embeddings:
-        results = embed_captions(results)   # ← NEW
+        results = embed_captions(results)
 
+    # ── save output ───────────────────────────────────────────────────────────
     elapsed_total = time.time() - t_start
     output_data = {
         "metadata": {
-            "video":                    str(video),
-            "transcript":               str(transc),
-            "model":                    "llava-hf/llava-v1.6-mistral-7b-hf",
-            "device":                   device,
-            "sample_interval_sec":      SAMPLE_INTERVAL,
-            "diff_threshold":           DIFF_THRESHOLD,
-            "min_slide_duration_sec":   min_duration,
-            "max_static_duration_sec":  max_static,
-            "split_interval_sec":       split_interval,
-            "phash_threshold":          phash_threshold,
-            "batch_size":               batch_size,
-            "num_transcript_segments":  len(segments),
-            "num_unique_slides":        len(results),
-            "processing_time_sec":      round(elapsed_total, 2),
+            "video":                   str(video),
+            "transcript":              str(transc),
+            "model":                   "llava-hf/llava-v1.6-mistral-7b-hf",
+            "device":                  device,
+            "sample_interval_sec":     SAMPLE_INTERVAL,
+            "diff_threshold":          DIFF_THRESHOLD,
+            "min_slide_duration_sec":  min_duration,
+            "max_static_duration_sec": max_static,
+            "split_interval_sec":      split_interval,
+            "phash_threshold":         phash_threshold,
+            "batch_size":              batch_size,
+            "num_transcript_segments": len(segments),
+            "num_unique_slides":       len(results),
+            "processing_time_sec":     round(elapsed_total, 2),
         },
+        "video_metadata": author_meta,   # ← author + organization from first 3 slides
         "slides": results,
     }
 
@@ -717,6 +815,8 @@ def run(
         json.dump(output_data, f, indent=2, ensure_ascii=False)
 
     log.info(f"Saved {len(results)} slide captions -> {out}")
+    log.info(f"  Author : {author_meta['author'] or '(not found)'}")
+    log.info(f"  Org    : {author_meta['organization'] or '(not found)'}")
     _preview(results)
     return results
 
@@ -725,9 +825,14 @@ def _preview(results: list[dict], n: int = 5) -> None:
     sep = "-" * 80
     print(f"\n{sep}\n  PREVIEW -- first {min(n, len(results))} slides\n{sep}")
     for r in results[:n]:
-        split_note = f"  [split from slide {r['split_from_slide']}]" if r.get("split_from_slide", -1) >= 0 else ""
-        print(f"  Slide {r['slide_id']:>3}  {r['slide_start_str']} -> {r['slide_end_str']}  "
-              f"({r['duration_sec']:.1f}s)  rep@{r['representative_timestamp_str']}{split_note}")
+        split_note = (
+            f"  [split from slide {r['split_from_slide']}]"
+            if r.get("split_from_slide", -1) >= 0 else ""
+        )
+        print(
+            f"  Slide {r['slide_id']:>3}  {r['slide_start_str']} -> {r['slide_end_str']}  "
+            f"({r['duration_sec']:.1f}s)  rep@{r['representative_timestamp_str']}{split_note}"
+        )
         print(f"    Caption   : {r['caption'][:90]}{'...' if len(r['caption'])>90 else ''}")
         print(f"    Transcript: {r['transcript'][:90]}{'...' if len(r['transcript'])>90 else ''}")
         print()
@@ -739,25 +844,25 @@ def _preview(results: list[dict], n: int = 5) -> None:
 # ── CLI ───────────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(
-        description="Slide captioning with pHash dedup, transcript splitting, and caption embeddings.",
+        description="Slide captioning with author extraction, pHash dedup, and caption embeddings.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    ap.add_argument("--video",            required=True)
-    ap.add_argument("--transcript",       required=True)
-    ap.add_argument("--output",           default=None)
-    ap.add_argument("--device",           default="auto", choices=["auto", "cuda", "cpu"])
-    ap.add_argument("--save-frames",      action="store_true")
-    ap.add_argument("--frames-dir",       default=None)
-    ap.add_argument("--batch-size",       type=int,   default=BATCH_SIZE)
-    ap.add_argument("--sample-interval",  type=float, default=SAMPLE_INTERVAL)
-    ap.add_argument("--threshold",        type=float, default=DIFF_THRESHOLD)
-    ap.add_argument("--min-duration",     type=float, default=MIN_SLIDE_DURATION)
-    ap.add_argument("--max-static",       type=float, default=MAX_STATIC_DURATION)
-    ap.add_argument("--split-interval",   type=float, default=SPLIT_INTERVAL)
-    ap.add_argument("--phash-threshold",  type=int,   default=PHASH_THRESHOLD,
+    ap.add_argument("--video",           required=True)
+    ap.add_argument("--transcript",      required=True)
+    ap.add_argument("--output",          default=None)
+    ap.add_argument("--device",          default="auto", choices=["auto", "cuda", "cpu"])
+    ap.add_argument("--save-frames",     action="store_true")
+    ap.add_argument("--frames-dir",      default=None)
+    ap.add_argument("--batch-size",      type=int,   default=BATCH_SIZE)
+    ap.add_argument("--sample-interval", type=float, default=SAMPLE_INTERVAL)
+    ap.add_argument("--threshold",       type=float, default=DIFF_THRESHOLD)
+    ap.add_argument("--min-duration",    type=float, default=MIN_SLIDE_DURATION)
+    ap.add_argument("--max-static",      type=float, default=MAX_STATIC_DURATION)
+    ap.add_argument("--split-interval",  type=float, default=SPLIT_INTERVAL)
+    ap.add_argument("--phash-threshold", type=int,   default=PHASH_THRESHOLD,
                     help="Hamming distance threshold for pHash dedup (default 8).")
-    ap.add_argument("--skip-embeddings",  action="store_true",
-                    help="Skip caption embedding step (chaptering will fall back to time-based split).")
+    ap.add_argument("--skip-embeddings", action="store_true",
+                    help="Skip caption embedding step.")
     args = ap.parse_args()
 
     SAMPLE_INTERVAL     = args.sample_interval

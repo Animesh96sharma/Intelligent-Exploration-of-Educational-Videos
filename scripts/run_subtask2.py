@@ -26,8 +26,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-STEPS = ["chapters", "videos", "embeddings", "collection", "evaluate", "all"]
-
+STEPS = ["chapters", "videos", "embeddings", "collection", "evaluate", "visual", "all"]
 
 def banner(title: str):
     logger.info("\n" + "="*60)
@@ -73,6 +72,12 @@ def run_evaluate():
     logger.info(f"  Avg concept coverage: {agg.get('avg_concept_coverage', 0):.1%}")
     logger.info(f"  Avg coherence score:  {agg.get('avg_coherence_score', 0):.1f}/5")
 
+def run_visual_integration():
+    from backend.app.subtask2_summarization.visual_integration.visual_textual_integration import run_all
+    banner("STEP 6 — Visual-Textual Integration")
+    results = run_all()
+    logger.info(f"  Visual integration done: {len(results)} videos")
+
 
 def main():
     parser = argparse.ArgumentParser(description="Subtask 2 — Multi-Level Video Summarization Pipeline")
@@ -103,6 +108,10 @@ def main():
     if step in ("all", "evaluate"):
         run_evaluate()
 
+    if step in ("all", "visual"):
+        run_visual_integration()
+
+
     logger.info("\n" + "="*60)
     logger.info("  Pipeline complete!")
     logger.info("="*60)
@@ -113,8 +122,8 @@ def main():
     logger.info("  data/processed/subtask2_summarization/collection_analysis/")
     logger.info("")
     logger.info("Start API server:")
-    logger.info("  uvicorn backend.app.main:app --reload --port 8000")
-    logger.info("  Then open: http://localhost:8000/docs")
+    logger.info("  uvicorn backend.app.main:app --reload --port 8001")
+    logger.info("  Then open: http://localhost:8001/docs")
 
 
 if __name__ == "__main__":
