@@ -2,140 +2,64 @@ import { useMemo, useState } from 'react'
 import type { VideoRecord } from '../types/video'
 import { buildConceptFrequency } from '../lib/analytics'
 
-type ConceptClusterProps = {
-  videos: VideoRecord[]
-  onSelectConcept: (concept: string | null) => void
-  selectedConcept: string | null
-}
-
+type ConceptClusterProps = { videos: VideoRecord[]; onSelectConcept: (c: string | null) => void; selectedConcept: string | null }
 type Circle = { label: string; count: number; x: number; y: number; r: number }
 
-const WIDTH = 900
-const HEIGHT = 520
-const MIN_RADIUS = 18
-const MAX_RADIUS = 90
+const W = 900, H = 520, MIN_R = 18, MAX_R = 90
 
 function packCircles(items: { label: string; count: number }[]): Circle[] {
-  const maxCount = Math.max(...items.map((i) => i.count), 1)
-  const scale = (count: number) =>
-    MIN_RADIUS + (MAX_RADIUS - MIN_RADIUS) * Math.sqrt(count / maxCount)
-
+  const max = Math.max(...items.map((i) => i.count), 1)
+  const scale = (c: number) => MIN_R + (MAX_R - MIN_R) * Math.sqrt(c / max)
   const circles: Circle[] = []
-
   items.forEach((item) => {
-    const r = scale(item.count)
-    let placed = false
-    let attempts = 0
-
+    const r = scale(item.count); let placed = false; let attempts = 0
     while (!placed && attempts < 400) {
-      attempts += 1
-      const x = r + Math.random() * (WIDTH - 2 * r)
-      const y = r + Math.random() * (HEIGHT - 2 * r)
-
-      const overlaps = circles.some((c) => {
-        const dx = c.x - x
-        const dy = c.y - y
-        const dist = Math.sqrt(dx * dx + dy * dy)
-        return dist < c.r + r + 3
-      })
-
-      if (!overlaps) {
-        circles.push({ label: item.label, count: item.count, x, y, r })
-        placed = true
-      }
+      attempts++
+      const x = r + Math.random() * (W - 2 * r); const y = r + Math.random() * (H - 2 * r)
+      if (!circles.some((c) => Math.sqrt((c.x-x)**2+(c.y-y)**2) < c.r+r+3)) { circles.push({...item,x,y,r}); placed=true }
     }
-
-    if (!placed) {
-      circles.push({
-        label: item.label,
-        count: item.count,
-        x: r + Math.random() * (WIDTH - 2 * r),
-        y: r + Math.random() * (HEIGHT - 2 * r),
-        r,
-      })
-    }
+    if (!placed) circles.push({...item, x: r+Math.random()*(W-2*r), y: r+Math.random()*(H-2*r), r})
   })
-
   return circles
 }
 
-export default function ConceptCluster({
-  videos,
-  onSelectConcept,
-  selectedConcept,
-}: ConceptClusterProps) {
+export default function ConceptCluster({ videos, onSelectConcept, selectedConcept }: ConceptClusterProps) {
   const [search, setSearch] = useState('')
   const [hovered, setHovered] = useState<string | null>(null)
+  const freq = useMemo(() => buildConceptFrequency(videos), [videos])
+  const items = useMemo(() => Array.from(freq.values()).sort((a,b)=>b.count-a.count).slice(0,120), [freq])
+  const filtered = useMemo(() => { const q=search.trim().toLowerCase(); return q ? items.filter(i=>i.label.toLowerCase().includes(q)) : items }, [items,search])
+  const circles = useMemo(() => packCircles(filtered), [filtered])
 
-  const conceptFrequency = useMemo(() => buildConceptFrequency(videos), [videos])
-
-  const items = useMemo(
-    () =>
-      Array.from(conceptFrequency.values())
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 120),
-    [conceptFrequency],
-  )
-
-  const filteredItems = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    if (!q) return items
-    return items.filter((item) => item.label.toLowerCase().includes(q))
-  }, [items, search])
-
-  const circles = useMemo(() => packCircles(filteredItems), [filteredItems])
-
-  if (items.length === 0) {
-    return <p>No concepts are available for the current filtered set.</p>
-  }
+  if (items.length === 0) return <p className="text-slate-400">No concepts available.</p>
 
   return (
-    <div className="concept-cluster-shell">
-      <div className="concept-cluster-controls">
-        <input
-          type="text"
-          placeholder="Search concepts..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="similarity-search"
-        />
-        <span>{filteredItems.length} of {items.length} concepts</span>
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
+        <input type="text" placeholder="Search concepts..." value={search} onChange={(e)=>setSearch(e.target.value)}
+          className="border border-slate-200 rounded-[12px] bg-white px-3 py-2.5 text-slate-900 outline-none focus:border-slate-400 text-sm flex-1 min-w-[160px]" />
+        <span className="text-slate-400 text-sm">{filtered.length} of {items.length} concepts</span>
       </div>
 
-      <svg viewBox={`0 0 ${WIDTH} ${HEIGHT}`} className="concept-cluster-svg" role="img" aria-label="Concept cluster">
-        {circles.map((circle) => {
-          const isActive = selectedConcept === circle.label
-          const isHovered = hovered === circle.label
-          const fontSize = Math.max(9, Math.min(circle.r * 0.5, 20))
-
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-[18px] bg-slate-50 border border-slate-200" role="img" aria-label="Concept cluster">
+        {circles.map((c) => {
+          const active = selectedConcept === c.label; const hov = hovered === c.label
+          const fontSize = Math.max(9, Math.min(c.r * 0.5, 20))
           return (
-            <g
-              key={circle.label}
-              transform={`translate(${circle.x}, ${circle.y})`}
-              className={`concept-bubble ${isActive ? 'active' : ''} ${isHovered ? 'hovered' : ''}`}
-              onClick={() => onSelectConcept(isActive ? null : circle.label)}
-              onMouseEnter={() => setHovered(circle.label)}
-              onMouseLeave={() => setHovered(null)}
-              style={{ cursor: 'pointer' }}
-            >
-              <circle r={circle.r} />
-              <text textAnchor="middle" dominantBaseline="middle" fontSize={fontSize}>
-                {circle.label.length > 18 && circle.r < 40 ? `${circle.label.slice(0, 16)}...` : circle.label}
+            <g key={c.label} transform={`translate(${c.x},${c.y})`} onClick={()=>onSelectConcept(active?null:c.label)}
+              onMouseEnter={()=>setHovered(c.label)} onMouseLeave={()=>setHovered(null)} style={{cursor:'pointer'}}>
+              <circle r={c.r} fill={active?'#111':'#e2e8f0'} stroke={active?'none':'#cbd5e1'} strokeWidth="1.5"
+                style={{filter: hov ? 'brightness(0.9)' : undefined}} />
+              <text textAnchor="middle" dominantBaseline="middle" fontSize={fontSize} fill={active?'#fff':'#334155'} fontWeight="600">
+                {c.label.length>18&&c.r<40?`${c.label.slice(0,16)}…`:c.label}
               </text>
-              {isHovered ? (
-                <text textAnchor="middle" y={circle.r + 14} fontSize={11} className="concept-bubble-count">
-                  {circle.count} video{circle.count === 1 ? '' : 's'}
-                </text>
-              ) : null}
+              {hov && <text textAnchor="middle" y={c.r+14} fontSize={11} fill="#64748b">{c.count} video{c.count===1?'':'s'}</text>}
             </g>
           )
         })}
       </svg>
 
-      <p className="section-note">
-        Bubble size reflects how many videos reference each concept. Click a bubble to filter the
-        collection by that concept, or search to locate a specific one.
-      </p>
+      <p className="text-slate-400 text-sm">Bubble size reflects how many videos reference each concept. Click a bubble to filter.</p>
     </div>
   )
 }
