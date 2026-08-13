@@ -9,25 +9,15 @@ type ConceptWeightClusterProps = {
   selectedConcept: string | null
 }
 
-export default function ConceptWeightCluster({
-  videos,
-  onSelectConcept,
-  selectedConcept,
-}: ConceptWeightClusterProps) {
+export default function ConceptWeightCluster({ videos, onSelectConcept, selectedConcept }: ConceptWeightClusterProps) {
   const occurrenceCounts = useMemo(() => buildConceptOccurrenceCounts(videos), [videos])
-
   const entries: WordEntry[] = useMemo(
-    () =>
-      Array.from(occurrenceCounts.values()).map((entry) => ({
-        label: entry.label,
-        weight: entry.occurrences,
-        meta: `${entry.videoCount} video${entry.videoCount === 1 ? '' : 's'}`,
-      })),
+    () => Array.from(occurrenceCounts.values()).map((e) => ({ label: e.label, weight: e.occurrences, meta: `${e.videoCount} video${e.videoCount === 1 ? '' : 's'}` })),
     [occurrenceCounts],
   )
 
   return (
-    <div className="concept-cluster-shell">
+    <div className="flex flex-col gap-3">
       <LiveWordCloud
         entries={entries}
         onSelectConcept={onSelectConcept}

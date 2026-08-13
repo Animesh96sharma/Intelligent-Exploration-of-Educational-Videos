@@ -15,145 +15,73 @@ type InVideoPanelProps = {
   onSelectTranscriptSegment: (segment: TranscriptSegment) => void
 }
 
-function formatTimeLabel(totalSeconds: number) {
-  const safe = Math.max(0, Math.floor(totalSeconds || 0))
-  const hours = Math.floor(safe / 3600)
-  const minutes = Math.floor((safe % 3600) / 60)
-  const seconds = safe % 60
-
-  if (hours > 0) {
-    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-  }
-
-  return `${minutes}:${String(seconds).padStart(2, '0')}`
+function fmt(s: number) {
+  const safe = Math.max(0, Math.floor(s || 0))
+  const h = Math.floor(safe / 3600); const m = Math.floor((safe % 3600) / 60); const sec = safe % 60
+  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`
+  return `${m}:${String(sec).padStart(2,'0')}`
 }
 
-function isTranscriptActive(
-  segment: TranscriptSegment,
-  currentTime: number,
-  nextSegment?: TranscriptSegment,
-) {
-  const start = segment.startTime ?? 0
-  const end = segment.endTime ?? nextSegment?.startTime ?? Number.POSITIVE_INFINITY
-  return currentTime >= start && currentTime < end
+function isTranscriptActive(seg: TranscriptSegment, t: number, next?: TranscriptSegment) {
+  const start = seg.startTime ?? 0; const end = seg.endTime ?? next?.startTime ?? Infinity
+  return t >= start && t < end
 }
 
-export default function InVideoPanel({
-  open,
-  tab,
-  onChangeTab,
-  onClose,
-  chapters,
-  transcript,
-  currentTime,
-  activeChapterId,
-  onSelectChapter,
-  onSelectTranscriptSegment,
-}: InVideoPanelProps) {
+export default function InVideoPanel({ open, tab, onChangeTab, onClose, chapters, transcript, currentTime, activeChapterId, onSelectChapter, onSelectTranscriptSegment }: InVideoPanelProps) {
   if (!open) return null
 
   return (
-    <aside className="in-video-panel" aria-label="In this video panel">
-      <div className="in-video-panel__head">
+    <aside
+      className="w-[min(480px,38vw)] max-[900px]:w-full max-[900px]:h-[min(42vh,320px)] h-full bg-[rgba(7,10,18,0.96)] text-white border-l border-white/12 max-[900px]:border-l-0 max-[900px]:border-t flex flex-col items-center"
+      aria-label="In this video panel"
+    >
+      {/* Head */}
+      <div className="w-full flex items-start justify-between gap-3 px-3.5 pt-4 pb-2">
         <div>
-          <p className="eyebrow">In this video</p>
-          <h3>{tab === 'chapters' ? 'Chapters' : 'Transcript'}</h3>
+          <p className="m-0 text-[0.75rem] font-extrabold tracking-[0.12em] uppercase text-white">In this video</p>
+          <h3 className="m-0 text-[1.05rem] tracking-[-0.02em] text-white">{tab === 'chapters' ? 'Chapters' : 'Transcript'}</h3>
         </div>
-
-        <button
-          type="button"
-          className="in-video-panel__close"
-          onClick={onClose}
-          aria-label="Close in-video panel"
-        >
-          ×
-        </button>
+        <button type="button" className="border-none bg-white/8 text-white rounded-[10px] p-2 text-xl leading-none hover:bg-white/16" onClick={onClose} aria-label="Close">×</button>
       </div>
 
-      <div
-        className="in-video-panel__tabs"
-        role="tablist"
-        aria-label="Switch between chapters and transcript"
-      >
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'chapters'}
-          className={tab === 'chapters' ? 'active' : ''}
-          onClick={() => onChangeTab('chapters')}
-        >
-          Chapters
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={tab === 'transcript'}
-          className={tab === 'transcript' ? 'active' : ''}
-          onClick={() => onChangeTab('transcript')}
-        >
-          Transcript
-        </button>
+      {/* Tabs */}
+      <div className="flex p-2.5 gap-2 border-b border-white/10 w-full" role="tablist">
+        {(['chapters','transcript'] as InVideoPanelTab[]).map((t) => (
+          <button key={t} type="button" role="tab" aria-selected={tab === t}
+            className={`border-none rounded-[10px] px-2.5 py-2 text-white capitalize ${ tab === t ? 'bg-white/20' : 'bg-white/8' }`}
+            onClick={() => onChangeTab(t)}>{t}</button>
+        ))}
       </div>
 
-      <div className="in-video-panel__body">
+      {/* Body */}
+      <div className="overflow-auto p-2.5 w-full flex-1">
         {tab === 'chapters' ? (
-          chapters.length === 0 ? (
-            <p className="in-video-panel__empty">No chapters available for this video.</p>
-          ) : (
-            <div className="in-video-panel__list">
-              {chapters.map((chapter) => {
-                const isActive = activeChapterId === chapter.id
-
-                return (
-                  <button
-                    key={chapter.id}
-                    type="button"
-                    className={`in-video-panel__item ${isActive ? 'active' : ''}`}
-                    onClick={() => onSelectChapter(chapter)}
-                  >
-                    <div className="in-video-panel__item-meta">
-                      <span className="in-video-panel__timestamp">
-                        {formatTimeLabel(chapter.startTime)}
-                      </span>
-                      <span className="in-video-panel__duration">
-                        {formatTimeLabel(Math.max(0, chapter.endTime - chapter.startTime))}
-                      </span>
-                    </div>
-
-                    <div className="in-video-panel__item-copy">
-                      <strong>{chapter.index}. {chapter.title}</strong>
-                      {chapter.summaryShort ? <p>{chapter.summaryShort}</p> : null}
-                    </div>
-                  </button>
-                )
-              })}
+          chapters.length === 0 ? <p className="text-white/60 text-sm px-2">No chapters available.</p> : (
+            <div className="flex flex-col gap-2">
+              {chapters.map((ch) => (
+                <button key={ch.id} type="button"
+                  className={`flex justify-between gap-3 text-left border-none px-3 py-2.5 rounded-[12px] text-white ${ activeChapterId === ch.id ? 'bg-white/16' : 'bg-white/6 hover:bg-white/10' }`}
+                  onClick={() => onSelectChapter(ch)}>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[0.72rem] text-white/60">{fmt(ch.startTime)}</span>
+                    <strong className="text-sm">{ch.index}. {ch.title}</strong>
+                    {ch.summaryShort && <p className="m-0 text-[0.78rem] text-white/70 leading-snug">{ch.summaryShort}</p>}
+                  </div>
+                  <span className="text-[0.72rem] text-white/50 shrink-0">{fmt(Math.max(0, ch.endTime - ch.startTime))}</span>
+                </button>
+              ))}
             </div>
           )
-        ) : transcript.length === 0 ? (
-          <p className="in-video-panel__empty">No transcript available for this video.</p>
-        ) : (
-          <div className="in-video-panel__list">
-            {transcript.map((segment, index) => {
-              const isActive = isTranscriptActive(segment, currentTime, transcript[index + 1])
-
+        ) : transcript.length === 0 ? <p className="text-white/60 text-sm px-2">No transcript available.</p> : (
+          <div className="flex flex-col gap-2">
+            {transcript.map((seg, i) => {
+              const active = isTranscriptActive(seg, currentTime, transcript[i + 1])
               return (
-                <button
-                  key={segment.id}
-                  type="button"
-                  className={`in-video-panel__item in-video-panel__item--transcript ${
-                    isActive ? 'active' : ''
-                  }`}
-                  onClick={() => onSelectTranscriptSegment(segment)}
-                >
-                  <div className="in-video-panel__item-meta">
-                    <span className="in-video-panel__timestamp">
-                      {formatTimeLabel(segment.startTime)}
-                    </span>
-                  </div>
-
-                  <div className="in-video-panel__item-copy">
-                    <p>{segment.text}</p>
-                  </div>
+                <button key={seg.id} type="button"
+                  className={`flex gap-3 text-left border-none px-3 py-2.5 rounded-[12px] text-white ${ active ? 'bg-white/16' : 'bg-white/6 hover:bg-white/10' }`}
+                  onClick={() => onSelectTranscriptSegment(seg)}>
+                  <span className="text-[0.72rem] text-white/60 shrink-0 pt-0.5">{fmt(seg.startTime)}</span>
+                  <p className="m-0 text-sm text-white/90 leading-relaxed">{seg.text}</p>
                 </button>
               )
             })}
