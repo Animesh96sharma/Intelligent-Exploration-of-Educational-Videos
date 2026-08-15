@@ -1001,7 +1001,7 @@ Keep this block at the very end of App.css
 
 .home-hero,
 .page-intro-copy,
-.page-intro-metadata,
+
 .collection-hero,
 .page-intro-network,
 .comparison-hero,
@@ -1015,7 +1015,7 @@ Keep this block at the very end of App.css
 
 .home-hero,
 .page-intro-copy,
-.page-intro-metadata,
+
 .collection-hero,
 .page-intro-network,
 .comparison-hero {
@@ -1027,7 +1027,7 @@ Keep this block at the very end of App.css
 
 .home-hero,
 .page-intro-copy,
-.page-intro-metadata,
+
 .collection-hero,
 .page-intro-network,
 .video-explorer__header {
@@ -1036,7 +1036,6 @@ Keep this block at the very end of App.css
 
 .home-hero h2,
 .page-intro-copy h2,
-.page-intro-metadata h2,
 .collection-hero h2,
 .page-intro-network h2,
 .comparison-hero h2,
@@ -1050,7 +1049,7 @@ Keep this block at the very end of App.css
 
 .home-hero p,
 .page-intro-copy p,
-.page-intro-metadata p,
+
 .collection-hero p,
 .page-intro-network p,
 .comparison-hero p,
@@ -4357,7 +4356,7 @@ input[type="range"]:focus {
 /* 2) Hero identity per page */
 .home-hero,
 .page-intro-copy,
-.page-intro-metadata,
+
 .collection-hero,
 .page-intro-network,
 .comparison-hero,
@@ -4374,7 +4373,6 @@ input[type="range"]:focus {
 
 .home-hero::before,
 .page-intro-copy::before,
-.page-intro-metadata::before,
 .collection-hero::before,
 .page-intro-network::before,
 .comparison-hero::before,
@@ -4388,7 +4386,6 @@ input[type="range"]:focus {
 
 .home-hero > *,
 .page-intro-copy > *,
-.page-intro-metadata > *,
 .collection-hero > *,
 .page-intro-network > *,
 .comparison-hero > *,
@@ -4422,13 +4419,6 @@ input[type="range"]:focus {
   background:
     radial-gradient(circle at 100% 0%, rgba(245, 158, 11, 0.14), transparent 28%),
     radial-gradient(circle at 0% 100%, rgba(239, 68, 68, 0.09), transparent 26%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96));
-}
-
-.page-intro-metadata::before {
-  background:
-    radial-gradient(circle at 100% 0%, rgba(245, 158, 11, 0.12), transparent 28%),
-    radial-gradient(circle at 0% 100%, rgba(59, 130, 246, 0.08), transparent 24%),
     linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.96));
 }
 
@@ -4766,7 +4756,7 @@ input[type="range"]:focus {
 
   .home-hero,
   .page-intro-copy,
-  .page-intro-metadata,
+  
   .collection-hero,
   .page-intro-network,
   .comparison-hero,
@@ -4830,7 +4820,7 @@ input[type="range"]:focus {
   .landing-detail-card,
   .home-hero,
   .page-intro-copy,
-  .page-intro-metadata,
+  
   .collection-hero,
   .page-intro-network,
   .comparison-hero,
@@ -5542,7 +5532,6 @@ input[type="range"]:focus {
 @media (max-width: 640px) {
   .home-hero p,
   .page-intro-copy p,
-  .page-intro-metadata p,
   .collection-hero p,
   .page-intro-network p,
   .comparison-hero p,
@@ -5554,7 +5543,7 @@ input[type="range"]:focus {
 @media (max-width: 640px) {
   .home-hero,
   .page-intro-copy,
-  .page-intro-metadata,
+  
   .collection-hero,
   .page-intro-network,
   .comparison-hero,
@@ -5578,7 +5567,7 @@ input[type="range"]:focus {
 @media (max-width: 640px) {
   .home-hero,
   .page-intro-copy,
-  .page-intro-metadata,
+  
   .collection-hero,
   .page-intro-network,
   .comparison-hero,
@@ -5591,7 +5580,6 @@ input[type="range"]:focus {
 
   .home-hero > p,
   .page-intro-copy > p,
-  .page-intro-metadata > p,
   .collection-hero > p,
   .page-intro-network > p,
   .comparison-hero > p,
@@ -5601,7 +5589,6 @@ input[type="range"]:focus {
 
   .home-hero h2,
   .page-intro-copy h2,
-  .page-intro-metadata h2,
   .collection-hero h2,
   .page-intro-network h2,
   .comparison-hero h2,
