@@ -350,26 +350,19 @@ function downloadVideo(video: VideoRecord) {
   }
 
   function handleToggleCompareVideo(videoId: string) {
-    setComparisonVideoIds((current) => {
-      let next: string[]
-
-      if (current.includes(videoId)) {
-        next = current.filter((id) => id !== videoId)
-      } else if (current.length >= 2) {
-        next = [current[1], videoId]
-      } else {
-        next = [...current, videoId]
-      }
-
-      if (next.length >= 2) {
-        setView('compare')
-      } else if (view === 'compare') {
-        setView('browse')
-      }
-
-      return next
-    })
-  }
+  setComparisonVideoIds((current) => {
+    let next: string[]
+    if (current.includes(videoId)) {
+      next = current.filter((id) => id !== videoId)
+    } else if (current.length >= 2) {
+      next = [current[1], videoId]
+    } else {
+      next = [...current, videoId]
+    }
+    if (next.length === 2) setView('compare')
+    return next
+  })
+}
 
   function handleOpenComparison(videoId?: string) {
     if (!videoId) {
@@ -473,7 +466,7 @@ function downloadVideo(video: VideoRecord) {
                   type="button"
                   className={isActive ? 'active' : ''}
                   onClick={() => handleNavSelect(item.key)}
-                  disabled={item.key === 'compare' && comparisonVideos.length < 2}
+                  // disabled={item.key === 'compare' && comparisonVideos.length < 2}
                 >
                   <span>
                     {item.label}
@@ -627,6 +620,7 @@ function downloadVideo(video: VideoRecord) {
               onSelectConcept={handleSelectConcept}
               selectedConcept={selectedConcept}
               onOpenComparison={handleOpenComparison}
+              comparisonVideoIds={comparisonVideoIds}
             />
           )}
 

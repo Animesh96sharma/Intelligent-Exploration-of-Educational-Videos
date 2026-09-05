@@ -341,120 +341,134 @@ export default function VideoExplorer({
     return <div className="video-explorer">No video data available.</div>
   }
 
+  if (!video) {
+    return <div className="w-full max-w-full mx-auto py-10 text-center text-slate-500">No video data available.</div>
+  }
+
   return (
-    <section className="video-explorer">
-      <div className="video-explorerlayout">
-        <div className="video-explorermain">
-          <section className="video-watch-card">
-            <VideoPlayer
-              videoId={video.id}
-              src={getVideoSource(video)}
-              title={video.title}
-              currentTime={currentTime}
-              chapters={chapters}
-              transcript={(video.transcript?.segments ?? []).map((segment) => ({
-                id: segment.id,
-                text: segment.text,
-                startTime: segment.startTime,
-              }))}
-              summary={{
-                short: video.summaryShort,
-                medium: video.summaryMedium,
-                long: video.summaryLong,
-              }}
-              summaryLevel={summaryLevel}
-              onSummaryLevelChange={setSummaryLevel}
-              playbackRate={playbackRate}
-              onTimeUpdate={(time) => {
-                setCurrentTime(time)
-                onUpdateVideoProgress(video.id, time, video.duration ?? 0)
-              }}
-              onPlaybackRateChange={setPlaybackRate}
-              onChapterSelect={(chapter, index) => {
-                setSelectedChapterIndex(index)
-                seekTo(chapter.startTime)
-              }}
-            />
+    <section className="w-full max-w-full mx-auto flex flex-col gap-5">
+      <div className="flex flex-col lg:flex-row gap-5 w-full items-start">
+        <div className="flex-1 min-w-0 flex flex-col gap-5">
+          <VideoPlayer
+            videoId={video.id}
+            src={getVideoSource(video)}
+            title={video.title}
+            currentTime={currentTime}
+            chapters={chapters}
+            transcript={(video.transcript?.segments ?? []).map((segment) => ({
+              id: segment.id,
+              text: segment.text,
+              startTime: segment.startTime,
+            }))}
+            summary={{
+              short: video.summaryShort,
+              medium: video.summaryMedium,
+              long: video.summaryLong,
+            }}
+            summaryLevel={summaryLevel}
+            onSummaryLevelChange={setSummaryLevel}
+            playbackRate={playbackRate}
+            onTimeUpdate={(time) => {
+              setCurrentTime(time)
+              onUpdateVideoProgress(video.id, time, video.duration ?? 0)
+            }}
+            onPlaybackRateChange={setPlaybackRate}
+            onChapterSelect={(chapter, index) => {
+              setSelectedChapterIndex(index)
+              seekTo(chapter.startTime)
+            }}
+          />
 
-            <div className="video-watch-meta">
-              <div className="video-watch-meta__main">
-                <h2>{video.title ?? 'Untitled video'}</h2>
-              </div>
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-4 flex-wrap">
+            <div className="min-w-0">
+              <h2 className="m-0 text-[clamp(1.35rem,2vw,2rem)] leading-tight tracking-tight text-slate-900">
+                {video.title ?? 'Untitled video'}
+              </h2>
+            </div>
 
-              <div className="video-watch-meta__actions">
+            <div className="flex items-center justify-end gap-2.5 flex-wrap">
+              <button
+                type="button"
+                className={`inline-flex items-center justify-center rounded-full border px-4 py-2 font-semibold transition-colors ${
+                  isVideoCompared
+                    ? 'bg-black text-white border-black'
+                    : 'bg-white text-black border-black hover:bg-neutral-50'
+                }`}
+                onClick={() => onToggleCompareVideo(video.id)}
+              >
+                {isVideoCompared ? 'Remove' : 'Add to compare'}
+              </button>
+
+              {isVideoCompared ? (
                 <button
                   type="button"
-                  className={isVideoCompared ? 'secondary-btn compare-toggle-btn is-selected' : 'secondary-btn compare-toggle-btn'}
-                  onClick={() => onToggleCompareVideo(video.id)}
+                  className="inline-flex items-center justify-center rounded-full bg-black text-white border border-black px-4 py-2 font-bold shadow-[0_16px_28px_rgba(0,0,0,0.14)] hover:bg-neutral-800"
+                  onClick={() => onOpenComparison(video.id)}
                 >
-                  {isVideoCompared ? 'Remove' : 'Add to compare'}
+                  Open comparison
                 </button>
+              ) : null}
 
-                {isVideoCompared ? (
-                  <button
-                    type="button"
-                    className="primary-btn"
-                    onClick={() => onOpenComparison(video.id)}
-                  >
-                    Open comparison
-                  </button>
-                ) : null}
-
-                <div className="video-watch-quick-actions" aria-label="Video quick actions">
-                  <button type="button" className={`video-utility-btn ${currentReaction === 'like' ? 'active' : ''}`}
-                    aria-label="Like video"
-                    onClick={() => onSetReaction(video.id, 'like')}
-                  >
-                    <ThumbsUp size={18} />
-                    <span>Like</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={`video-utility-btn ${currentReaction === 'dislike' ? 'active' : ''}`}
-                    aria-label="Dislike video"
-                    onClick={() => onSetReaction(video.id, 'dislike')}
-                  >
-                    <ThumbsDown size={18} />
-                    <span>Dislike</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="video-utility-btn"
-                    aria-label="Share video"
-                    onClick={() => onShareVideo(video.id)}
-                  >
-                    <Share2 size={18} />
-                    <span>Share</span>
-                  </button>
-
-                  {/* <button type="button" className="video-utility-btn" aria-label="Save to playlist">
-                    <ListPlus size={18} />
-                    <span>Playlist</span>
-                  </button> */}
-                
+              <div className="flex items-center gap-2.5 flex-wrap" aria-label="Video quick actions">
+                <button
+                  type="button"
+                  className={`inline-flex items-center gap-2 min-h-[42px] px-3.5 rounded-full border font-semibold transition-transform hover:-translate-y-0.5 ${
+                    currentReaction === 'like'
+                      ? 'bg-black border-black text-white shadow-[0_12px_24px_rgba(0,0,0,0.14)]'
+                      : 'bg-slate-50/90 border-slate-900/10 text-slate-900 shadow-[0_8px_18px_rgba(15,23,42,0.05)] hover:bg-white'
+                  }`}
+                  aria-label="Like video"
+                  onClick={() => onSetReaction(video.id, 'like')}
+                >
+                  <ThumbsUp size={18} className={currentReaction === 'like' ? 'text-white' : 'text-slate-500'} />
+                  <span>Like</span>
+                </button>
+                <button
+                  type="button"
+                  className={`inline-flex items-center gap-2 min-h-[42px] px-3.5 rounded-full border font-semibold transition-transform hover:-translate-y-0.5 ${
+                    currentReaction === 'dislike'
+                      ? 'bg-black border-black text-white shadow-[0_12px_24px_rgba(0,0,0,0.14)]'
+                      : 'bg-slate-50/90 border-slate-900/10 text-slate-900 shadow-[0_8px_18px_rgba(15,23,42,0.05)] hover:bg-white'
+                  }`}
+                  aria-label="Dislike video"
+                  onClick={() => onSetReaction(video.id, 'dislike')}
+                >
+                  <ThumbsDown size={18} className={currentReaction === 'dislike' ? 'text-white' : 'text-slate-500'} />
+                  <span>Dislike</span>
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-2 min-h-[42px] px-3.5 rounded-full border border-slate-900/10 bg-slate-50/90 text-slate-900 font-semibold shadow-[0_8px_18px_rgba(15,23,42,0.05)] transition-transform hover:-translate-y-0.5 hover:bg-white"
+                  aria-label="Share video"
+                  onClick={() => onShareVideo(video.id)}
+                >
+                  <Share2 size={18} className="text-slate-500" />
+                  <span>Share</span>
+                </button>
 
                 <div
                   ref={videoMenuRef}
-                  className="video-tile-menu-wrap video-tile-menu-wrap--end"
+                  className="relative flex-shrink-0"
                 >
                   <button
                     type="button"
-                    className="video-tile-menu-trigger video-tile-menu-trigger--icon"
+                    className="w-[42px] h-[42px] p-0 inline-flex items-center justify-center rounded-full border border-slate-900/10 bg-slate-50/90 text-slate-500 shadow-[0_8px_18px_rgba(15,23,42,0.05)] hover:bg-white hover:text-slate-900"
                     aria-label="More actions"
                     aria-expanded={videoMenuOpen}
                     onClick={() => setVideoMenuOpen((prev) => !prev)}
                   >
-                    <span className="video-kebab-icon" aria-hidden="true">
-                      <span />
-                      <span />
-                      <span />
+                    <span className="inline-flex flex-col items-center justify-center gap-[3px]" aria-hidden="true">
+                      <span className="block w-1 h-1 rounded-full bg-current" />
+                      <span className="block w-1 h-1 rounded-full bg-current" />
+                      <span className="block w-1 h-1 rounded-full bg-current" />
                     </span>
                   </button>
 
                   {videoMenuOpen ? (
-                    <div className="video-tile-menu-popover">
+                    <div className="absolute top-[calc(100%+6px)] right-0 z-20 w-[220px] p-2 rounded-2xl border border-slate-900/10 bg-white/96 backdrop-blur-md shadow-[0_18px_38px_rgba(15,23,42,0.16)] flex flex-col gap-1">
                       <button
                         type="button"
+                        className="flex items-center gap-2.5 w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-slate-900 hover:bg-slate-50"
                         onClick={() => {
                           handleAddBookmark()
                           setVideoMenuOpen(false)
@@ -465,6 +479,7 @@ export default function VideoExplorer({
 
                       <button
                         type="button"
+                        className="flex items-center gap-2.5 w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-slate-900 hover:bg-slate-50"
                         onClick={() => {
                           handleCaptureScreenshot()
                           setVideoMenuOpen(false)
@@ -475,6 +490,7 @@ export default function VideoExplorer({
 
                       <button
                         type="button"
+                        className="flex items-center gap-2.5 w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-slate-900 hover:bg-slate-50"
                         onClick={() => {
                           onToggleCompareVideo(video.id)
                           setVideoMenuOpen(false)
@@ -486,6 +502,7 @@ export default function VideoExplorer({
                       {isVideoCompared ? (
                         <button
                           type="button"
+                          className="flex items-center gap-2.5 w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-slate-900 hover:bg-slate-50"
                           onClick={() => {
                             onOpenComparison(video.id)
                             setVideoMenuOpen(false)
@@ -496,30 +513,27 @@ export default function VideoExplorer({
                       ) : null}
                     </div>
                   ) : null}
-                  </div>
                 </div>
               </div>
             </div>
-          </section>
+          </div>
 
-          
-
-          <section className="video-details-collapsible">
-            <div className="video-details-collapsible__summary-row">
+          <div className="flex flex-col gap-3.5">
+            <div className="flex flex-col gap-2">
               {chapters.length > 0 && activePlaybackChapter ? (
-                <article className="chapter-panel">
-                  <div className="chapter-panelheader">
+                <article className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
+                  <div className="flex justify-between items-start gap-3 flex-wrap">
                     <div>
-                      <h3>
+                      <h3 className="m-0 text-[1.08rem] leading-tight tracking-tight text-slate-900">
                         {activePlaybackChapter.index ?? chapters.indexOf(activePlaybackChapter) + 1}. {activePlaybackChapter.title ?? 'Untitled chapter'}
                       </h3>
-                      <p>{getBestChapterSummary(activePlaybackChapter, summaryLevel)}</p>
+                      <p className="text-slate-600">{getBestChapterSummary(activePlaybackChapter, summaryLevel)}</p>
                     </div>
                   </div>
 
                   <button
                     type="button"
-                    className="video-mobile-more-link chapter-panel__more-link"
+                    className=" self-start border-none bg-transparent text-black font-semibold p-0"
                     onClick={() => setDetailsExpanded((open) => !open)}
                     aria-expanded={detailsExpanded}
                   >
@@ -527,18 +541,18 @@ export default function VideoExplorer({
                   </button>
                 </article>
               ) : (
-                <article className="chapter-panel">
-                  <div className="chapter-panelheader">
+                <article className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
+                  <div className="flex justify-between items-start gap-3 flex-wrap">
                     <div>
-                      <p className="eyebrow">Selected chapter</p>
-                      <h3>No chapter data available</h3>
+                      <p className="inline-flex items-center gap-2 m-0 text-xs font-extrabold tracking-widest uppercase text-black">Selected chapter</p>
+                      <h3 className="m-0 text-[1.08rem] leading-tight tracking-tight text-slate-900">No chapter data available</h3>
                     </div>
                   </div>
-                  <p>This video does not currently have usable chapter information.</p>
+                  <p className="text-slate-600">This video does not currently have usable chapter information.</p>
 
                   <button
                     type="button"
-                    className="video-mobile-more-link chapter-panel__more-link"
+                    className="sm:hidden self-start border-none bg-transparent text-black font-semibold p-0"
                     onClick={() => setDetailsExpanded((open) => !open)}
                     aria-expanded={detailsExpanded}
                   >
@@ -548,100 +562,112 @@ export default function VideoExplorer({
               )}
             </div>
 
-  {detailsExpanded ? (
-    <div className="video-details-collapsiblecontent">
-      <section className="sidebar-card">
+            {detailsExpanded ? (
+              <div className="flex flex-col gap-4">
+                <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3.5">
+                  {selectedChapterObjectives.length > 0 ? (
+                    <div className="flex flex-col gap-2.5">
+                      <h4 className="m-0 text-[0.96rem] tracking-tight text-slate-900">Learning objectives</h4>
+                      <ul className="m-0 pl-4.5 text-slate-600 list-disc">
+                        {selectedChapterObjectives.map((objective) => (
+                          <li key={objective}>{objective}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
 
-        {selectedChapterObjectives.length > 0 ? (
-          <div className="info-block">
-            <h4>✦Learning objectives</h4>
-            <ul className="clean-list">
-              {selectedChapterObjectives.map((objective) => (
-                <li key={objective}>{objective}</li>
-              ))}
-            </ul>
+                  {selectedChapterConcepts.length > 0 ? (
+                    <div className="flex flex-col gap-2.5">
+                      <h4 className="m-0 text-[0.96rem] tracking-tight text-slate-900">Important chapter concepts</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedChapterConcepts.map((concept) => (
+                          <button
+                            key={concept}
+                            type="button"
+                            className={`inline-flex items-center rounded-full border px-2.5 py-1.5 text-xs font-bold ${
+                              selectedConcept === concept
+                                ? 'bg-black text-white border-black'
+                                : 'bg-white text-black border-black'
+                            }`}
+                            onClick={() => onSelectConcept(concept)}
+                          >
+                            {concept}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="flex flex-col gap-2.5">
+                    <h4 className="m-0 text-[0.96rem] tracking-tight text-slate-900">Important concepts</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {videoConcepts.length === 0 ? (
+                        <p className="text-slate-600">No concepts available.</p>
+                      ) : (
+                        videoConcepts.map((concept) => (
+                          <button
+                            key={concept}
+                            type="button"
+                            className={`inline-flex items-center rounded-full border px-2.5 py-1.5 text-xs font-bold ${
+                              selectedConcept === concept
+                                ? 'bg-black text-white border-black'
+                                : 'bg-white text-black border-black'
+                            }`}
+                            onClick={() => onSelectConcept(concept)}
+                          >
+                            {concept}
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">Domain: {video.domain ?? 'Educational video'}</h4>
+                    <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">Speaker: {video.speaker ?? 'Unknown speaker'}</h4>
+                    <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">Total Chapters: {video.totalChapters ?? chapters.length}</h4>
+                    <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">Duration: {formatDurationMinutes(video.duration)}</h4>
+                    {video.difficultyLevel ? (
+                      <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">Difficulty: {video.difficultyLevel}</h4>
+                    ) : null}
+                  </div>
+                </section>
+              </div>
+            ) : null}
           </div>
-        ) : null}
 
-        {selectedChapterConcepts.length > 0 ? (
-          <div className="info-block">
-            <h4>↗Important chapter concepts</h4>
-            <div className="chip-group">
-              {selectedChapterConcepts.map((concept) => (
-                <button
-                  key={concept}
-                  type="button"
-                  className={`chip ${selectedConcept === concept ? 'active' : ''}`}
-                  onClick={() => onSelectConcept(concept)}
-                >
-                  {concept}
-                </button>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        <div className="info-block">
-          <h4>↗Important concepts</h4>
-          <div className="chip-group">
-            {videoConcepts.length === 0 ? (
-              <p>✗No concepts available.</p>
-            ) : (
-              videoConcepts.map((concept) => (
-                <button
-                  key={concept}
-                  type="button"
-                  className={`chip ${selectedConcept === concept ? 'active' : ''}`}
-                  onClick={() => onSelectConcept(concept)}
-                >
-                  {concept}
-                </button>
-              ))
-            )}
-          </div>
-        </div>
-
-        <div className="video-meta-list">
-          <h4>📖Domain: {video.domain ?? 'Educational video'}</h4>
-          <h4>🗣Speaker: {video.speaker ?? 'Unknown speaker'}</h4>
-          <h4>📚Total Chapters: {video.totalChapters ?? chapters.length}</h4>
-          <h4>ⴵ Duration: {formatDurationMinutes(video.duration)}</h4>
-          {video.difficultyLevel ? (
-            <h4>🚩Difficulty: {video.difficultyLevel}</h4>
-          ) : null}
-        </div>
-      </section>
-    </div>
-  ) : null}
-</section>
-          <section className="sidebar-card">
-            <h3>Related videos</h3>
+          <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3.5">
+            <h3 className="m-0 text-[1.05rem] tracking-tight text-slate-900">Related videos</h3>
             {relatedVideos.length === 0 ? (
-              <p>No related videos found yet.</p>
+              <p className="text-slate-600">No related videos found yet.</p>
             ) : (
-              <div className="related-list">
+              <div className="flex flex-col gap-3">
                 {relatedVideos.map(({ video: related, overlap }) => {
                   const isRelatedCompared = comparisonVideoIds.includes(related.id)
                   return (
-                    <article key={related.id} className="related-card related-card--actions">
-                      <div>
-                        <strong>{related.title}</strong>
-                        <span>{related.domain ?? 'General'}</span>
-                        <small>
+                    <article key={related.id} className="w-full text-left bg-slate-50/90 border border-slate-200 rounded-2xl p-4 grid gap-3 items-stretch">
+                      <div className="grid gap-1.5">
+                        <strong className="text-slate-900">{related.title}</strong>
+                        <span className="text-slate-600">{related.domain ?? 'General'}</span>
+                        <small className="text-slate-600">
                           {overlap.length > 0 ? overlap.slice(0, 4).join(', ') : 'No shared concepts'}
                         </small>
                       </div>
-                      <div className="related-cardactions">
+                      <div className="flex gap-2 flex-wrap">
                         <button
                           type="button"
-                          className={`secondary-btn ${isRelatedCompared ? 'is-selected' : ''}`}
+                          className={`inline-flex items-center justify-center rounded-full border px-4 py-2 font-semibold ${
+                            isRelatedCompared
+                              ? 'bg-black text-white border-black'
+                              : 'bg-white text-black border-black hover:bg-neutral-50'
+                          }`}
                           onClick={() => onToggleCompareVideo(related.id)}
                         >
                           {isRelatedCompared ? 'Remove' : 'Compare'}
                         </button>
                         <button
                           type="button"
-                          className="primary-btn"
+                          className="inline-flex items-center justify-center rounded-full bg-black text-white border border-black px-4 py-2 font-bold hover:bg-neutral-800"
                           onClick={() => onOpenVideo(related.id)}
                         >
                           Open
@@ -655,42 +681,47 @@ export default function VideoExplorer({
           </section>
         </div>
 
-        <aside className="video-explorersidebar">
-          <section className="sidebar-card">
-            <div className="results-head">
-              <h3>📝Notes & annotations</h3>
-              <span>{videoNotes.length} saved</span>
+        <aside className="w-full lg:w-[380px] flex-shrink-0 flex flex-col gap-5">
+          <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3.5">
+            <div className="flex items-start justify-between gap-3">
+              <h3 className="m-0 text-[1.05rem] tracking-tight text-slate-900">Notes & annotations</h3>
+              <span className="text-slate-500">{videoNotes.length} saved</span>
             </div>
 
-            <div className="note-composer">
+            <div className="flex flex-col gap-2.5">
               <textarea
+                className="w-full border border-slate-200 rounded-xl bg-white p-3 text-slate-900 resize-y"
                 value={noteText}
                 placeholder={`Write a note at ${formatClock(currentTime)}`}
                 onChange={(event) => setNoteText(event.target.value)}
                 rows={4}
               />
-              <button type="button" className="primary-btn" onClick={handleAddTimestampNote}>
+              <button
+                type="button"
+                className="inline-flex items-center justify-center rounded-full bg-black text-white border border-black px-4 py-2 font-bold hover:bg-neutral-800"
+                onClick={handleAddTimestampNote}
+              >
                 Save note at current time
               </button>
             </div>
 
             {videoNotes.length === 0 ? (
-              <p>No notes yet.</p>
+              <p className="text-slate-600">No notes yet.</p>
             ) : (
-              <div className="note-list">
+              <div className="flex flex-col gap-3">
                 {videoNotes.map((note) => (
-                  <article key={note.id} className="note-card">
-                    <div className="note-card-head">
+                  <article key={note.id} className="border border-slate-200 bg-slate-50/90 rounded-2xl p-3.5">
+                    <div className="flex justify-between gap-3 items-start mb-2">
                       <button
                         type="button"
-                        className="inline-link"
+                        className="border-none bg-transparent text-black font-bold p-0"
                         onClick={() => seekTo(note.timestampSeconds)}
                       >
                         Jump to {formatClock(note.timestampSeconds)}
                       </button>
                       <button
                         type="button"
-                        className="secondary-btn"
+                        className="inline-flex items-center justify-center rounded-full bg-white text-black border border-black px-3 py-1.5 text-sm font-semibold hover:bg-neutral-50"
                         onClick={() => onRemoveNote(note.id)}
                       >
                         Delete
@@ -698,6 +729,7 @@ export default function VideoExplorer({
                     </div>
 
                     <textarea
+                      className="w-full border border-slate-200 rounded-xl bg-white p-3 text-slate-900 resize-y"
                       value={note.text}
                       onChange={(event) => onUpdateNote(note.id, event.target.value)}
                       rows={3}
@@ -707,17 +739,20 @@ export default function VideoExplorer({
               </div>
             )}
           </section>
-          <section className="sidebar-card">
-            <div className="results-head">
-              <h3>🔖Bookmarks</h3>
-               <span>Current Time: {formatClock(currentTime)}</span>
-              <span>{videoBookmarks.length} saved</span>
+
+          <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3.5">
+            <div className="flex items-start justify-between gap-3 flex-wrap">
+              <h3 className="m-0 text-[1.05rem] tracking-tight text-slate-900">Bookmarks</h3>
+              <span className="text-slate-500">Current Time: {formatClock(currentTime)}</span>
+              <span className="text-slate-500">{videoBookmarks.length} saved</span>
             </div>
 
-
-
-            <div className="info-block">
-              <button type="button" className="secondary-btn" onClick={handleAddBookmark}>
+            <div className="flex flex-col gap-2.5">
+              <button
+                type="button"
+                className="inline-flex items-center justify-center rounded-full bg-white text-black border border-black px-4 py-2 font-semibold hover:bg-neutral-50"
+                onClick={handleAddBookmark}
+              >
                 Add bookmark at current time
               </button>
             </div>
@@ -728,27 +763,23 @@ export default function VideoExplorer({
               preload="metadata"
               style={{ display: 'none' }}
             />
-            <div className="results-head">
-              <h3>Bookmarks</h3>
-              <span>{videoBookmarks.length} saved</span>
-            </div>
 
             {videoBookmarks.length === 0 ? (
-              <p>No bookmarks yet.</p>
+              <p className="text-slate-600">No bookmarks yet.</p>
             ) : (
-              <div className="bookmark-list">
+              <div className="flex flex-col gap-2.5">
                 {videoBookmarks.map((bookmark) => (
-                  <div key={bookmark.id} className="bookmark-row">
+                  <div key={bookmark.id} className="flex justify-between gap-3 items-center border border-slate-200 bg-slate-50/90 rounded-xl px-3.5 py-2.5">
                     <button
                       type="button"
-                      className="inline-link"
+                      className="border-none bg-transparent text-black font-bold p-0"
                       onClick={() => seekTo(bookmark.timestampSeconds)}
                     >
                       {bookmark.label ?? formatClock(bookmark.timestampSeconds)}
                     </button>
                     <button
                       type="button"
-                      className="secondary-btn"
+                      className="inline-flex items-center justify-center rounded-full bg-white text-black border border-black px-3 py-1.5 text-sm font-semibold hover:bg-neutral-50"
                       onClick={() => onRemoveBookmark(bookmark.id)}
                     >
                       Remove
@@ -759,7 +790,6 @@ export default function VideoExplorer({
             )}
           </section>
 
-    
           <PlaylistPanel
             video={video}
             playlists={userState.playlists as Playlist[]}
@@ -770,39 +800,41 @@ export default function VideoExplorer({
             onRemoveVideoFromPlaylist={onRemoveVideoFromPlaylist}
           />
 
-          <section className="sidebar-card">
-            <div className="results-head">
-              <h3>More videos</h3>
-              <span>{moreVideos.length} shown</span>
+          <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3.5">
+            <div className="flex items-start justify-between gap-3">
+              <h3 className="m-0 text-[1.05rem] tracking-tight text-slate-900">More videos</h3>
+              <span className="text-slate-500">{moreVideos.length} shown</span>
             </div>
 
             {moreVideos.length === 0 ? (
-              <p>No additional videos are available.</p>
+              <p className="text-slate-600">No additional videos are available.</p>
             ) : (
-              <div className="more-videos-list">
+              <div className="grid gap-3.5">
                 {moreVideos.map((item) => (
-                  <article key={item.id} className="more-video-card">
+                  <article key={item.id} className="grid gap-3 w-full border border-slate-200 bg-slate-50/90 rounded-2xl p-3">
                     <button
                       type="button"
-                      className="more-video-card-preview"
+                      className="border-none p-0 bg-transparent w-full text-left"
                       onClick={() => onSelectVideo(item.id)}
                     >
                       {getVideoSource(item) ? (
                         <video
-                          className="more-video-card__player"
+                          className="w-full rounded-xl bg-black"
                           src={getVideoSource(item)}
                           preload="metadata"
                           muted
                           playsInline
                         />
                       ) : (
-                        <div className="more-video-card-fallback">No preview available</div>
+                        <div className="w-full min-h-[140px] grid place-items-center rounded-xl bg-gradient-to-br from-slate-50 to-slate-100 text-slate-600 text-center p-4">
+                          No preview available
+                        </div>
                       )}
                     </button>
 
-                    <div className="more-video-card__body">
-                      <strong>{item.title ?? 'Untitled video'}</strong>
-                      <span>
+                    <div className="grid gap-1">
+                      <strong className="text-slate-900">{item.title ?? 'Untitled video'}</strong>
+                      <span className="text-slate-500">
                         {item.domain ?? 'General'} · {formatDurationMinutes(item.duration)}
                       </span>
                     </div>
@@ -813,7 +845,7 @@ export default function VideoExplorer({
 
             <button
               type="button"
-              className="secondary-btn more-videos-browse-btn"
+              className="w-full inline-flex items-center justify-center rounded-full bg-white text-black border border-black px-4 py-2 font-semibold mt-3 hover:bg-neutral-50"
               onClick={onBrowseMoreVideos}
             >
               Browse more videos

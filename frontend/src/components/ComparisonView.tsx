@@ -33,9 +33,7 @@ function getNextRecommendedVideo(video: VideoRecord, allVideos: VideoRecord[]): 
   let bestScore = 0
   for (const candidate of allVideos) {
     if (candidate.id === video.id) continue
-    const shared = candidate.keyConcepts.filter((c) =>
-      video.keyConcepts.some((vc) => vc.toLowerCase() === c.toLowerCase())
-    ).length
+    const shared = candidate.keyConcepts.filter((c) => video.keyConcepts.some((vc) => vc.toLowerCase() === c.toLowerCase())).length
     if (shared > bestScore) {
       bestScore = shared
       best = candidate
@@ -49,16 +47,22 @@ function renderPills(
   emptyLabel: string,
   selectedConcept: string | null,
   onSelectConcept: (concept: string | null) => void,
-  muted = false
+  muted = false,
 ) {
-  if (!concepts.length) return <p className="comparison-empty">{emptyLabel}</p>
+  if (!concepts.length) return <p className="text-[#94a3b8] text-sm m-0">{emptyLabel}</p>
   return (
-    <div className="chip-group">
+    <div className="flex flex-wrap gap-2">
       {concepts.map((concept) => (
         <button
           key={concept}
           type="button"
-          className={`chip ${muted ? 'muted' : ''} ${selectedConcept === concept ? 'active' : ''}`}
+          className={`inline-flex items-center px-3 py-1.5 rounded-full text-[0.78rem] font-semibold border transition-all duration-[180ms] ${
+            selectedConcept === concept
+              ? 'bg-black text-white border-black'
+              : muted
+                ? 'bg-[#f8fafc] text-[#64748b] border-[#e8eef5]'
+                : 'bg-[#f3f4f6] text-[#0f172a] border-[#d9e2ec] hover:-translate-y-px'
+          }`}
           onClick={() => onSelectConcept(selectedConcept === concept ? null : concept)}
         >
           {concept}
@@ -69,9 +73,9 @@ function renderPills(
 }
 
 function renderBulletList(items: string[], emptyLabel: string) {
-  if (!items.length) return <p className="comparison-empty">{emptyLabel}</p>
+  if (!items.length) return <p className="text-[#94a3b8] text-sm m-0">{emptyLabel}</p>
   return (
-    <ul className="comparison-bullet-list">
+    <ul className="list-disc pl-5 flex flex-col gap-1.5 text-[#334155] text-sm m-0">
       {items.map((item, idx) => (
         <li key={`${item}-${idx}`}>{item}</li>
       ))}
@@ -81,27 +85,27 @@ function renderBulletList(items: string[], emptyLabel: string) {
 
 function renderQualityBlock(video: VideoRecord) {
   const q = video.llmQuality
-  if (!q) return <p className="comparison-empty">No quality evaluation available.</p>
+  if (!q) return <p className="text-[#94a3b8] text-sm m-0">No quality evaluation available.</p>
   return (
-    <div className="llm-quality-block">
-      <div className="llm-quality-scores">
-        <span className="quality-pill">
-          Coherence: <strong>{q.coherenceScore ?? '\u2014'}</strong>
+    <div className="flex flex-col gap-2">
+      <div className="flex flex-wrap gap-2">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.78rem] font-semibold border border-[#d9e2ec] bg-[#f3f4f6] text-[#0f172a]">
+          Coherence <strong>{q.coherenceScore ?? '—'}</strong>
         </span>
-        <span className="quality-pill">
-          Informativeness: <strong>{q.informativenessScore ?? '\u2014'}</strong>
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.78rem] font-semibold border border-[#d9e2ec] bg-[#f3f4f6] text-[#0f172a]">
+          Informativeness <strong>{q.informativenessScore ?? '—'}</strong>
         </span>
-        <span className="quality-pill">
-          Conciseness: <strong>{q.concisenessScore ?? '\u2014'}</strong>
+        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[0.78rem] font-semibold border border-[#d9e2ec] bg-[#f3f4f6] text-[#0f172a]">
+          Conciseness <strong>{q.concisenessScore ?? '—'}</strong>
         </span>
       </div>
-      {q.feedback ? <p className="llm-quality-feedback">{q.feedback}</p> : null}
+      {q.feedback ? <p className="text-[#334155] text-sm m-0 italic">{q.feedback}</p> : null}
     </div>
   )
 }
 
 function formatSyncTime(totalSeconds: number) {
-  const safe = Math.max(0, Math.floor(totalSeconds || 0))
+  const safe = Math.max(0, Math.floor(totalSeconds))
   const minutes = Math.floor(safe / 60)
   const seconds = safe % 60
   return `${minutes}:${String(seconds).padStart(2, '0')}`
@@ -117,7 +121,7 @@ type SyncedVideoCellProps = {
 
 function SyncedVideoCell({ video, registerVideoRef, isAudioSource, onSetAudioSource, onDuration }: SyncedVideoCellProps) {
   return (
-    <div className="sync-video-cell">
+    <div className="flex flex-col gap-2">
       <video
         ref={registerVideoRef(video.id)}
         src={video.videoSrc}
@@ -125,14 +129,16 @@ function SyncedVideoCell({ video, registerVideoRef, isAudioSource, onSetAudioSou
         muted={!isAudioSource}
         playsInline
         onLoadedMetadata={(e) => onDuration(e.currentTarget.duration || 0)}
-        className="sync-player-video"
+        className="w-full rounded-[14px] bg-black aspect-video"
       />
       <button
         type="button"
-        className={`sync-audio-btn ${isAudioSource ? 'active' : ''}`}
+        className={`self-start border rounded-full px-3 py-1.5 text-[0.78rem] font-semibold transition-all duration-[180ms] ${
+          isAudioSource ? 'bg-black text-white border-black' : 'bg-white text-black border-black hover:bg-[#f8f8f8]'
+        }`}
         onClick={() => onSetAudioSource(video.id)}
       >
-        {isAudioSource ? 'Audio: On' : 'Audio: Off'}
+        {isAudioSource ? 'Audio On' : 'Audio Off'}
       </button>
     </div>
   )
@@ -148,11 +154,14 @@ type SyncedControlsProps = {
 
 function SyncedControls({ isPlaying, masterTime, masterDuration, onPlayPause, onSeek }: SyncedControlsProps) {
   return (
-    <div className="sync-player-controls">
-      <button type="button" className="secondary-btn" onClick={onPlayPause}>
+    <div className="flex items-center gap-3 flex-wrap">
+      <button
+        type="button"
+        className="border border-black rounded-[10px] bg-white text-black px-3 py-1.5 text-[0.8rem] font-semibold hover:bg-[#f8f8f8] transition-all duration-[180ms]"
+        onClick={onPlayPause}
+      >
         {isPlaying ? 'Pause all' : 'Play all'}
       </button>
-
       <input
         type="range"
         min={0}
@@ -160,10 +169,9 @@ function SyncedControls({ isPlaying, masterTime, masterDuration, onPlayPause, on
         step={0.1}
         value={masterTime}
         onChange={(e) => onSeek(Number(e.target.value))}
-        className="sync-player-seek"
+        className="accent-black flex-1 min-w-[160px]"
       />
-
-      <span className="sync-player-time">
+      <span className="text-[0.82rem] font-semibold text-[#0f172a] whitespace-nowrap">
         {formatSyncTime(masterTime)} / {formatSyncTime(masterDuration)}
       </span>
     </div>
@@ -179,7 +187,6 @@ export default function ComparisonView({
   onToggleCompareVideo,
 }: ComparisonViewProps) {
   const [leftVideo, rightVideo] = videos
-
   const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({})
   const [isPlaying, setIsPlaying] = useState(false)
   const [masterTime, setMasterTime] = useState(0)
@@ -192,19 +199,11 @@ export default function ComparisonView({
     return buildVideoComparison(leftVideo, rightVideo)
   }, [leftVideo, rightVideo])
 
-  const nextLeft = useMemo(
-    () => (leftVideo ? getNextRecommendedVideo(leftVideo, allVideos) : null),
-    [leftVideo, allVideos]
-  )
-  const nextRight = useMemo(
-    () => (rightVideo ? getNextRecommendedVideo(rightVideo, allVideos) : null),
-    [rightVideo, allVideos]
-  )
+  const nextLeft = useMemo(() => (leftVideo ? getNextRecommendedVideo(leftVideo, allVideos) : null), [leftVideo, allVideos])
+  const nextRight = useMemo(() => (rightVideo ? getNextRecommendedVideo(rightVideo, allVideos) : null), [rightVideo, allVideos])
 
   useEffect(() => {
-    if (leftVideo && !audioSourceId) {
-      setAudioSourceId(leftVideo.id)
-    }
+    if (leftVideo && !audioSourceId) setAudioSourceId(leftVideo.id)
   }, [leftVideo, audioSourceId])
 
   function registerVideoRef(id: string) {
@@ -224,7 +223,6 @@ export default function ComparisonView({
   async function handleSyncPlayPause() {
     const entries = Object.values(videoRefs.current).filter(Boolean) as HTMLVideoElement[]
     if (!entries.length) return
-
     if (isPlaying) {
       entries.forEach((v) => v.pause())
       setIsPlaying(false)
@@ -248,68 +246,82 @@ export default function ComparisonView({
 
   useEffect(() => {
     if (!isPlaying) return
-
     const interval = setInterval(() => {
       const entries = Object.entries(videoRefs.current).filter(([, v]) => v) as [string, HTMLVideoElement][]
       if (entries.length < 2) return
-
       const referenceTime = entries[0][1].currentTime
-
       entries.forEach(([, v]) => {
-        if (Math.abs(v.currentTime - referenceTime) > 0.3) {
-          v.currentTime = referenceTime
-        }
+        if (Math.abs(v.currentTime - referenceTime) > 0.3) v.currentTime = referenceTime
       })
-
       setMasterTime(referenceTime)
     }, 1000)
-
     return () => clearInterval(interval)
   }, [isPlaying])
 
+  // Picker state- shown by default when fewer than 2 valid videos are selected.
   if (!leftVideo || !rightVideo || leftVideo.id === rightVideo.id) {
     return (
-      <section className="comparison-page">
-        <div className="page-intro">
-          <div className="page-intro-copy">
-            <p className="eyebrow">Comparison View</p>
-            <h2>
-              Side-by-Side Comparison <span>of Educational Videos</span>
-            </h2>
-            <p>
-              Compare summaries, chapter structure, learning objectives, and concept overlap
-              across two selected videos in one workspace.
-            </p>
+      <section className="w-full max-w-full mx-auto flex flex-col gap-4 sm:gap-5 px-4 sm:px-0">
+        <div className="bg-gradient-to-br from-white to-[#f8fafc] border border-[#d9e2ec] shadow-[0_18px_40px_rgba(15,23,42,0.08)] rounded-[24px] sm:rounded-[30px] p-5 sm:p-7 text-[#0f172a]">
+          <p className="text-[0.78rem] font-bold uppercase tracking-[0.08em] text-[#0f172a] m-0 mb-2">Comparison View</p>
+          <h2 className="text-[#0f172a] my-2 text-[clamp(1.5rem,4vw,2.5rem)] leading-[1.1] tracking-[-0.03em]">
+            Side-by-side comparison <span className="text-[#64748b]">of educational videos</span>
+          </h2>
+          <p className="text-[#334155] text-sm sm:text-base">
+            Compare summaries, chapter structure, learning objectives, and concept overlap across two selected videos in one workspace.
+          </p>
+        </div>
+
+        <section className="bg-white border border-[#e8eef5] rounded-[16px] sm:rounded-[18px] p-4 sm:p-[18px] shadow-[0_8px_20px_rgba(15,23,42,0.05)]">
+          <div className="flex justify-between items-center gap-3 mb-4">
+            <h3 className="m-0 text-[0.95rem] sm:text-[1.05rem] font-bold tracking-[-0.02em]">Available videos for comparison</h3>
+            <span className="text-[0.8rem] text-[#64748b] whitespace-nowrap">{allVideos.length} videos</span>
           </div>
-        </div>
 
-        <div className="results-head">
-          <h3>Available videos for comparison</h3>
-          <span>{allVideos.length} videos</span>
-        </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {allVideos.map((video) => {
+              const isSelected = videos.some((item) => item.id === video.id)
+              return (
+                <article
+                  key={video.id}
+                  className={`text-left border rounded-[18px] p-4 flex flex-col gap-2 transition-all duration-[180ms] ${
+                    isSelected ? 'border-black shadow-[0_0_0_1px_rgba(0,0,0,0.14)]' : 'border-[#e8eef5]'
+                  }`}
+                >
+                  <p className="text-[0.72rem] font-extrabold tracking-[0.1em] uppercase text-[#0f172a] m-0">{video.domain ?? 'General'}</p>
+                  <h3 className="m-0 text-[0.95rem] font-bold leading-snug">{video.title}</h3>
+                  <p className="text-[#334155] m-0 text-sm">{video.summaryShort}</p>
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-[0.78rem] text-[#64748b] mt-1">
+                    <span>{video.speaker ?? 'Unknown speaker'}</span>
+                    <span>{Math.round((video.duration ?? 0) / 60)} min</span>
+                    <span>{video.totalChapters} chapters</span>
+                  </div>
 
-        <div className="video-grid">
-          {allVideos.map((video) => {
-            const isSelected = videos.some((item) => item.id === video.id)
-            return (
-              <button
-                key={video.id}
-                type="button"
-                className={`video-card ${isSelected ? 'selected' : ''}`}
-                onClick={() => onToggleCompareVideo(video.id)}
-              >
-                <p className="eyebrow">{video.domain ?? 'General'}</p>
-                <h3>{video.title}</h3>
-                <p>{video.summaryShort}</p>
-                <div className="video-card-meta">
-                  <span>{video.speaker ?? 'Unknown speaker'}</span>
-                  <span>{Math.round(video.duration / 60)} min</span>
-                  <span>{video.totalChapters} chapters</span>
-                </div>
-              </button>
-            )
-          })}
-        </div>
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      type="button"
+                      className={`flex-1 border rounded-[10px] px-3 py-1.5 text-[0.78rem] font-semibold transition-all duration-[180ms] ${
+                        isSelected
+                          ? 'border-black bg-black text-white hover:bg-[#111]'
+                          : 'border-black bg-white text-black hover:bg-[#f8f8f8]'
+                      }`}
+                      onClick={() => onToggleCompareVideo(video.id)}
+                    >
+                      {isSelected ? 'Remove' : 'Add to compare'}
+                    </button>
+                    <button
+                      type="button"
+                      className="border border-black rounded-[10px] bg-white text-black px-3 py-1.5 text-[0.78rem] font-semibold hover:bg-[#f8f8f8] transition-all duration-[180ms]"
+                      onClick={() => onOpenVideo(video.id)}
+                    >
+                      Open
+                    </button>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        </section>
       </section>
     )
   }
@@ -317,43 +329,19 @@ export default function ComparisonView({
   const rows: { label: string; left: ReactNode; right: ReactNode }[] = [
     {
       label: 'Video Title',
-      left: (
-        <button className="comparison-link" onClick={() => onOpenVideo(leftVideo.id)}>
-          {leftVideo.title}
-        </button>
-      ),
-      right: (
-        <button className="comparison-link" onClick={() => onOpenVideo(rightVideo.id)}>
-          {rightVideo.title}
-        </button>
-      ),
+      left: <button className="text-[#0f172a] font-semibold underline" onClick={() => onOpenVideo(leftVideo.id)}>{leftVideo.title}</button>,
+      right: <button className="text-[#0f172a] font-semibold underline" onClick={() => onOpenVideo(rightVideo.id)}>{rightVideo.title}</button>,
     },
-    {
-      label: 'Author',
-      left: leftVideo.author ?? leftVideo.speaker ?? 'Unknown',
-      right: rightVideo.author ?? rightVideo.speaker ?? 'Unknown',
-    },
+    { label: 'Author', left: leftVideo.author ?? leftVideo.speaker ?? 'Unknown', right: rightVideo.author ?? rightVideo.speaker ?? 'Unknown' },
     { label: 'Domain', left: leftVideo.domain ?? 'General', right: rightVideo.domain ?? 'General' },
-    {
-      label: 'Video Duration',
-      left: formatDuration(leftVideo.duration),
-      right: formatDuration(rightVideo.duration),
-    },
+    { label: 'Video Duration', left: formatDuration(leftVideo.duration), right: formatDuration(rightVideo.duration) },
     {
       label: 'Main Topics',
       left: renderPills(leftVideo.mainTopics ?? [], 'No main topics listed.', selectedConcept, onSelectConcept),
       right: renderPills(rightVideo.mainTopics ?? [], 'No main topics listed.', selectedConcept, onSelectConcept),
     },
-    {
-      label: 'Description',
-      left: leftVideo.description ?? 'No description available.',
-      right: rightVideo.description ?? 'No description available.',
-    },
-    {
-      label: 'Organization',
-      left: leftVideo.organization ?? 'Not specified',
-      right: rightVideo.organization ?? 'Not specified',
-    },
+    { label: 'Description', left: leftVideo.description ?? 'No description available.', right: rightVideo.description ?? 'No description available.' },
+    { label: 'Organization', left: leftVideo.organization ?? 'Not specified', right: rightVideo.organization ?? 'Not specified' },
     {
       label: 'Language',
       left: leftVideo.processingStats?.language ?? 'Not specified',
@@ -379,86 +367,72 @@ export default function ComparisonView({
       left: renderBulletList(leftVideo.prerequisites ?? [], 'No prerequisites listed.'),
       right: renderBulletList(rightVideo.prerequisites ?? [], 'No prerequisites listed.'),
     },
-    {
-      label: 'Target Audience',
-      left: inferTargetAudience(leftVideo),
-      right: inferTargetAudience(rightVideo),
-    },
+    { label: 'Target Audience', left: inferTargetAudience(leftVideo), right: inferTargetAudience(rightVideo) },
     {
       label: 'Next Recommended Video',
-      left: nextLeft ? (
-        <button className="comparison-link" onClick={() => onOpenVideo(nextLeft.id)}>
-          {nextLeft.title}
-        </button>
-      ) : (
-        'No recommendation available.'
-      ),
-      right: nextRight ? (
-        <button className="comparison-link" onClick={() => onOpenVideo(nextRight.id)}>
-          {nextRight.title}
-        </button>
-      ) : (
-        'No recommendation available.'
-      ),
+      left: nextLeft ? <button className="text-[#0f172a] font-semibold underline" onClick={() => onOpenVideo(nextLeft.id)}>{nextLeft.title}</button> : 'No recommendation available.',
+      right: nextRight ? <button className="text-[#0f172a] font-semibold underline" onClick={() => onOpenVideo(nextRight.id)}>{nextRight.title}</button> : 'No recommendation available.',
     },
-    {
-      label: 'LLM Quality Evaluation',
-      left: renderQualityBlock(leftVideo),
-      right: renderQualityBlock(rightVideo),
-    },
+    { label: 'LLM Quality Evaluation', left: renderQualityBlock(leftVideo), right: renderQualityBlock(rightVideo) },
   ]
 
   return (
-    <section className="comparison-page">
-      <div className="page-intro">
-        <div className="page-intro-copy">
-          <h2>Side-by-Side comparison of Educational videos</h2>
-          <p>
-            Inspect overlap, unique concepts, chapter structure, and summary differences across
-            two selected educational videos.
-          </p>
-        </div>
-        <div className="hero-actions">
-          {selectedConcept ? (
-            <div className="active-concept-banner">
-              <span>
-                Filtering by concept <strong>{selectedConcept}</strong>
-              </span>
-              <button className="secondary-btn" onClick={() => onSelectConcept(null)}>
-                Clear concept
-              </button>
-            </div>
-          ) : null}
-        </div>
+    <section className="w-full max-w-full mx-auto flex flex-col gap-4 sm:gap-5 px-4 sm:px-0">
+
+      {/* Page intro */}
+      <div className="bg-gradient-to-br from-white to-[#f8fafc] border border-[#d9e2ec] shadow-[0_18px_40px_rgba(15,23,42,0.08)] rounded-[24px] sm:rounded-[30px] p-5 sm:p-7 text-[#0f172a]">
+        <h2 className="text-[#0f172a] my-2 text-[clamp(1.5rem,4vw,2.5rem)] leading-[1.1] tracking-[-0.03em]">
+          Side-by-side comparison of educational videos
+        </h2>
+        <p className="text-[#334155] text-sm sm:text-base">
+          Inspect overlap, unique concepts, chapter structure, and summary differences across two selected educational videos.
+        </p>
+
+        {selectedConcept ? (
+          <div className="mt-3 flex items-center gap-3 flex-wrap">
+            <span className="text-[0.85rem] sm:text-[0.92rem] text-[#334155]">
+              Filtering by concept: <strong className="text-[#0f172a]">{selectedConcept}</strong>
+            </span>
+            <button
+              type="button"
+              className="border border-black rounded-[14px] bg-white text-black px-4 py-2 text-sm font-semibold shadow-[0_8px_20px_rgba(15,23,42,0.05)] hover:bg-[#f8f8f8] transition-all duration-[180ms]"
+              onClick={() => onSelectConcept(null)}
+            >
+              Clear concept
+            </button>
+          </div>
+        ) : null}
       </div>
 
-      <div className="stats-grid">
-        <article className="stat-card">
-          <span className="stat-label">Shared concepts</span>
-          <strong>{comparison?.sharedConcepts.length ?? 0}</strong>
+      {/* Stats grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-[14px]">
+        <article className="bg-gradient-to-b from-[#f8fafc] to-white border border-[#e8eef5] rounded-[16px] sm:rounded-[18px] p-4 flex flex-col gap-2">
+          <span className="text-[0.72rem] font-extrabold tracking-[0.1em] uppercase text-[#0f172a]">Shared concepts</span>
+          <strong className="text-[1.4rem] sm:text-[1.6rem] leading-tight tracking-tight">{comparison?.sharedConcepts.length ?? 0}</strong>
         </article>
-        <article className="stat-card">
-          <span className="stat-label">Similarity</span>
-          <strong>{Math.round((comparison?.similarityScore ?? 0) * 100)}%</strong>
+        <article className="bg-gradient-to-b from-[#f8fafc] to-white border border-[#e8eef5] rounded-[16px] sm:rounded-[18px] p-4 flex flex-col gap-2">
+          <span className="text-[0.72rem] font-extrabold tracking-[0.1em] uppercase text-[#0f172a]">Similarity</span>
+          <strong className="text-[1.4rem] sm:text-[1.6rem] leading-tight tracking-tight">{Math.round((comparison?.similarityScore ?? 0) * 100)}%</strong>
         </article>
-        <article className="stat-card">
-          <span className="stat-label">Left chapters</span>
-          <strong>{leftVideo.totalChapters}</strong>
+        <article className="bg-gradient-to-b from-[#f8fafc] to-white border border-[#e8eef5] rounded-[16px] sm:rounded-[18px] p-4 flex flex-col gap-2">
+          <span className="text-[0.72rem] font-extrabold tracking-[0.1em] uppercase text-[#0f172a]">Left chapters</span>
+          <strong className="text-[1.4rem] sm:text-[1.6rem] leading-tight tracking-tight">{leftVideo.totalChapters}</strong>
         </article>
-        <article className="stat-card">
-          <span className="stat-label">Right chapters</span>
-          <strong>{rightVideo.totalChapters}</strong>
+        <article className="bg-gradient-to-b from-[#f8fafc] to-white border border-[#e8eef5] rounded-[16px] sm:rounded-[18px] p-4 flex flex-col gap-2">
+          <span className="text-[0.72rem] font-extrabold tracking-[0.1em] uppercase text-[#0f172a]">Right chapters</span>
+          <strong className="text-[1.4rem] sm:text-[1.6rem] leading-tight tracking-tight">{rightVideo.totalChapters}</strong>
         </article>
       </div>
 
-      <div className="comparison-table-wrapper">
-        <table className="comparison-table">
+      {/* Comparison table */}
+      <section className="bg-white border border-[#e8eef5] rounded-[16px] sm:rounded-[18px] p-4 sm:p-[18px] shadow-[0_8px_20px_rgba(15,23,42,0.05)] overflow-x-auto">
+        <table className="w-full border-collapse text-sm min-w-[720px]">
           <thead>
-            <tr>
-              <th className="comparison-table-label-col">Synchronized playback</th>
-              <th>
-                <div className="comparison-video-header">
-                  <span>{leftVideo.title}</span>
+            <tr className="border-b border-[#e8eef5]">
+              <th className="text-left py-2 pr-3 font-bold text-[#0f172a] w-[180px]">Synchronized playback</th>
+              <th className="text-left py-2 px-3 align-top">
+                <div className="flex flex-col gap-2">
+                  <span className="font-bold text-[#0f172a]">{leftVideo.title}</span>
                   <SyncedVideoCell
                     video={leftVideo}
                     registerVideoRef={registerVideoRef}
@@ -466,19 +440,27 @@ export default function ComparisonView({
                     onSetAudioSource={handleSetAudioSource}
                     onDuration={setMasterDuration}
                   />
-                  <div className="comparison-actions">
-                    <button className="secondary-btn" onClick={() => onToggleCompareVideo(leftVideo.id)}>
+                  <div className="flex gap-2 flex-wrap">
+                    <button
+                      type="button"
+                      className="border border-black rounded-[10px] bg-white text-black px-3 py-1.5 text-[0.78rem] font-semibold hover:bg-[#f8f8f8] transition-all duration-[180ms]"
+                      onClick={() => onToggleCompareVideo(leftVideo.id)}
+                    >
                       Remove
                     </button>
-                    <button className="primary-btn" onClick={() => onOpenVideo(leftVideo.id)}>
+                    <button
+                      type="button"
+                      className="border border-black rounded-[10px] bg-black text-white px-3 py-1.5 text-[0.78rem] font-bold hover:bg-[#111] transition-all duration-[180ms]"
+                      onClick={() => onOpenVideo(leftVideo.id)}
+                    >
                       Open video
                     </button>
                   </div>
                 </div>
               </th>
-              <th>
-                <div className="comparison-video-header">
-                  <span>{rightVideo.title}</span>
+              <th className="text-left py-2 pl-3 align-top">
+                <div className="flex flex-col gap-2">
+                  <span className="font-bold text-[#0f172a]">{rightVideo.title}</span>
                   <SyncedVideoCell
                     video={rightVideo}
                     registerVideoRef={registerVideoRef}
@@ -486,20 +468,28 @@ export default function ComparisonView({
                     onSetAudioSource={handleSetAudioSource}
                     onDuration={setMasterDuration}
                   />
-                  <div className="comparison-actions">
-                    <button className="secondary-btn" onClick={() => onToggleCompareVideo(rightVideo.id)}>
+                  <div className="flex gap-2 flex-wrap">
+                    <button
+                      type="button"
+                      className="border border-black rounded-[10px] bg-white text-black px-3 py-1.5 text-[0.78rem] font-semibold hover:bg-[#f8f8f8] transition-all duration-[180ms]"
+                      onClick={() => onToggleCompareVideo(rightVideo.id)}
+                    >
                       Remove
                     </button>
-                    <button className="primary-btn" onClick={() => onOpenVideo(rightVideo.id)}>
+                    <button
+                      type="button"
+                      className="border border-black rounded-[10px] bg-black text-white px-3 py-1.5 text-[0.78rem] font-bold hover:bg-[#111] transition-all duration-[180ms]"
+                      onClick={() => onOpenVideo(rightVideo.id)}
+                    >
                       Open video
                     </button>
                   </div>
                 </div>
               </th>
             </tr>
-            <tr className="sync-controls-row">
-              <td className="comparison-table-label-col">Playback</td>
-              <td colSpan={2}>
+            <tr className="border-b border-[#e8eef5]">
+              <td className="py-3 pr-3 font-semibold text-[#0f172a]">Playback</td>
+              <td colSpan={2} className="py-3 px-3">
                 <SyncedControls
                   isPlaying={isPlaying}
                   masterTime={masterTime}
@@ -512,15 +502,15 @@ export default function ComparisonView({
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.label}>
-                <td className="comparison-table-label-col">{row.label}</td>
-                <td>{row.left}</td>
-                <td>{row.right}</td>
+              <tr key={row.label} className="border-b border-[#f1f5f9] align-top">
+                <td className="py-3 pr-3 font-semibold text-[#0f172a] w-[180px]">{row.label}</td>
+                <td className="py-3 px-3 text-[#334155]">{row.left}</td>
+                <td className="py-3 pl-3 text-[#334155]">{row.right}</td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </section>
     </section>
   )
 }

@@ -1,35 +1,11 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type MouseEvent, type PointerEvent } from 'react'
-import {
-  Play,
-  Pause,
-  Camera,
-  Expand,
-  Shrink,
-  ChevronRight,
-  Captions,
-  RotateCcw, 
-  RotateCw,
-} from 'lucide-react'
+import { Play, Pause, Camera, Expand, Shrink, ChevronRight, Captions, RotateCcw, RotateCw } from 'lucide-react'
 import type { SummaryDetailLevel } from '../types/video'
+import InVideoPanel from './InVideoPanel'
 
-type ChapterItem = {
-  id: string
-  title: string
-  startTime: number
-  endTime: number
-}
-
-type TranscriptItem = {
-  id: string
-  text: string
-  startTime: number
-}
-
-type VideoSummaryContent = {
-  short?: string
-  medium?: string
-  long?: string
-}
+type ChapterItem = { id: string; title: string; startTime: number; endTime: number }
+type TranscriptItem = { id: string; text: string; startTime: number; endTime?: number }
+type VideoSummaryContent = { short?: string; medium?: string; long?: string }
 
 type VideoPlayerProps = {
   videoId: string
@@ -38,7 +14,7 @@ type VideoPlayerProps = {
   currentTime: number
   chapters?: ChapterItem[]
   transcript?: TranscriptItem[]
-  captionsSrc?: string 
+  captionsSrc?: string
   summary?: VideoSummaryContent
   summaryLevel?: SummaryDetailLevel
   onSummaryLevelChange?: (level: SummaryDetailLevel) => void
@@ -49,18 +25,13 @@ type VideoPlayerProps = {
 }
 
 const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2]
-const SUMMARY_LEVELS: SummaryDetailLevel[] = ['short', 'medium', 'long']
 
 function formatTime(totalSeconds: number) {
   const safe = Math.max(0, Math.floor(totalSeconds || 0))
   const hours = Math.floor(safe / 3600)
   const minutes = Math.floor((safe % 3600) / 60)
   const seconds = safe % 60
-
-  if (hours > 0) {
-    return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-  }
-
+  if (hours > 0) return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
   return `${minutes}:${String(seconds).padStart(2, '0')}`
 }
 
@@ -75,15 +46,8 @@ function downloadBlob(blob: Blob, filename: string) {
 
 function getSummaryText(summary: VideoSummaryContent | undefined, level: SummaryDetailLevel) {
   if (!summary) return 'No summary available.'
-
-  if (level === 'long') {
-    return summary.long ?? summary.medium ?? summary.short ?? 'No summary available.'
-  }
-
-  if (level === 'medium') {
-    return summary.medium ?? summary.short ?? 'No summary available.'
-  }
-
+  if (level === 'long') return summary.long ?? summary.medium ?? summary.short ?? 'No summary available.'
+  if (level === 'medium') return summary.medium ?? summary.short ?? 'No summary available.'
   return summary.short ?? 'No summary available.'
 }
 
@@ -117,45 +81,37 @@ export default function VideoPlayer({
   const [isScrubbing, setIsScrubbing] = useState(false)
   const [subtitlesEnabled, setSubtitlesEnabled] = useState(true)
 
-  const resolvedSummary = useMemo(
-    () => getSummaryText(summary, summaryLevel),
-    [summary, summaryLevel]
-  )
-
+  const resolvedSummary = useMemo(() => getSummaryText(summary, summaryLevel), [summary, summaryLevel])
   const resolvedCaptionsSrc = useMemo(
-    () =>
-      captionsSrc ??
-      `/data/processed/subtask1_segmentation/transcripts/${videoId}_transcripts.vtt`,
-    [captionsSrc, videoId]
+    () => captionsSrc ?? `/data/processed/subtask1_segmentation/transcripts/${videoId}_transcripts.vtt`,
+    [captionsSrc, videoId],
   )
-
   const trackRef = useRef<HTMLTrackElement | null>(null)
 
   useEffect(() => {
   const video = videoRef.current
   const trackEl = trackRef.current
   if (!video || !trackEl) return
-
   const textTrack = trackEl.track
   if (!textTrack) return
 
   const repositionCues = () => {
-  const cues = textTrack.cues
-  if (!cues) return
-  for (let i = 0; i < cues.length; i += 1) {
-    const cue = cues[i] as VTTCue
-    cue.snapToLines = false
-    cue.line = 85
-    cue.position = 70
-    cue.align = 'center'
-    cue.size = 90
+    const cues = textTrack.cues
+    if (!cues) return
+    const isMobile = window.innerWidth < 640
+    for (let i = 0; i < cues.length; i += 1) {
+      const cue = cues[i] as VTTCue
+      cue.snapToLines = false
+      cue.align = 'center'
+      cue.line = 90
+      cue.position = 50
+      cue.size = isMobile ? 92 : 80
+    }
   }
-}
 
   const forceRender = () => {
     textTrack.mode = subtitlesEnabled ? 'showing' : 'hidden'
     repositionCues()
-
     if (subtitlesEnabled) {
       textTrack.mode = 'hidden'
       requestAnimationFrame(() => {
@@ -164,21 +120,22 @@ export default function VideoPlayer({
     }
   }
 
-  // ✅ removed the nested useState/useEffect — they're gone from here now
-
   const handleTrackLoad = () => {
     repositionCues()
     forceRender()
   }
 
   trackEl.addEventListener('load', handleTrackLoad)
+  window.addEventListener('resize', repositionCues)
+  window.addEventListener('orientationchange', repositionCues)
   forceRender()
 
   return () => {
     trackEl.removeEventListener('load', handleTrackLoad)
+    window.removeEventListener('resize', repositionCues)
+    window.removeEventListener('orientationchange', repositionCues)
   }
 }, [subtitlesEnabled, src])
-
 
   useEffect(() => {
     const video = videoRef.current
@@ -193,19 +150,13 @@ export default function VideoPlayer({
   }, [playbackRate])
 
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(document.fullscreenElement === playerRef.current)
-    }
-
+    const handleFullscreenChange = () => setIsFullscreen(document.fullscreenElement === playerRef.current)
     document.addEventListener('fullscreenchange', handleFullscreenChange)
-    return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange)
-    }
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
   }, [])
 
   const activeChapterIndex = useMemo(() => {
     if (!chapters.length) return -1
-
     return chapters.findIndex((chapter, index) => {
       const next = chapters[index + 1]
       const start = chapter.startTime ?? 0
@@ -219,7 +170,6 @@ export default function VideoPlayer({
   async function handlePlayPause() {
     const video = videoRef.current
     if (!video) return
-
     try {
       if (video.paused) {
         await video.play()
@@ -243,7 +193,6 @@ export default function VideoPlayer({
   function handleSeek(nextTime: number) {
     const video = videoRef.current
     if (!video) return
-
     const safeTime = Math.max(0, Math.min(nextTime, duration || 0))
     video.currentTime = safeTime
     onTimeUpdate(safeTime)
@@ -252,7 +201,6 @@ export default function VideoPlayer({
   function handleSeekFromPointer(clientX: number) {
     const seek = seekRef.current
     if (!seek || duration <= 0) return
-
     const rect = seek.getBoundingClientRect()
     const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width))
     handleSeek(ratio * duration)
@@ -278,32 +226,26 @@ export default function VideoPlayer({
 
   function handlePointerUp(event: PointerEvent<HTMLDivElement>) {
     if (activePointerIdRef.current !== event.pointerId) return
-
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId)
     }
-
     activePointerIdRef.current = null
     setIsScrubbing(false)
   }
 
   function handlePointerCancel(event: PointerEvent<HTMLDivElement>) {
     if (activePointerIdRef.current !== event.pointerId) return
-
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId)
     }
-
     activePointerIdRef.current = null
     setIsScrubbing(false)
   }
 
   function handleTimelineKeyDown(event: KeyboardEvent<HTMLDivElement>) {
     if (duration <= 0) return
-
     const smallStep = 5
     const largeStep = 15
-
     switch (event.key) {
       case 'ArrowRight':
         event.preventDefault()
@@ -337,12 +279,10 @@ export default function VideoPlayer({
   async function handleToggleFullscreen() {
     const player = playerRef.current
     if (!player) return
-
     if (document.fullscreenElement) {
       await document.exitFullscreen?.()
       return
     }
-
     await player.requestFullscreen?.()
   }
 
@@ -350,16 +290,12 @@ export default function VideoPlayer({
     const video = videoRef.current
     if (!video) return
     if (!video.videoWidth || !video.videoHeight) return
-
     const canvas = document.createElement('canvas')
     canvas.width = video.videoWidth
     canvas.height = video.videoHeight
-
     const context = canvas.getContext('2d')
     if (!context) return
-
     context.drawImage(video, 0, 0, canvas.width, canvas.height)
-
     canvas.toBlob((blob) => {
       if (!blob) return
       downloadBlob(blob, `${videoId}-frame-${Math.floor(video.currentTime)}.png`)
@@ -374,26 +310,33 @@ export default function VideoPlayer({
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
-
     const delta = Math.abs(video.currentTime - currentTime)
-    if (delta > 0.25) {
-      video.currentTime = currentTime
-    }
+    if (delta > 0.25) video.currentTime = currentTime
   }, [currentTime])
 
   return (
     <div
       ref={playerRef}
-      className={`video-player-shell ${isFullscreen ? 'is-fullscreen' : ''} ${panelOpen ? 'panel-open' : ''}`}
+      className={`relative w-full bg-[#0b1020] rounded-[18px] overflow-hidden flex flex-col ${
+        isFullscreen ? 'w-screen h-screen rounded-none bg-black' : ''
+      }`}
     >
-      <div className="video-stage">
-        <div className="video-media-area">
+      <div
+        className={`relative w-full flex flex-col sm:flex-row sm:items-stretch flex-1 min-h-0 ${
+          isFullscreen ? '' : 'sm:h-[calc(100vh-220px)] sm:max-h-[640px]'
+        }`}
+      >
+        <div
+          className={`relative min-w-0 bg-black flex flex-col aspect-video sm:aspect-auto ${
+            isFullscreen ? 'flex-1 aspect-auto w-full' : 'w-full sm:flex-[1.6] '
+          }`}
+        >
           <video
             key={videoId}
             ref={videoRef}
             src={src}
             preload="metadata"
-            className="video-element"
+            className="video-element w-full h-full block object-contain bg-black"
             onClick={handlePlayPause}
             onLoadedMetadata={(event) => setDuration(event.currentTarget.duration || 0)}
             onPlay={() => setIsPlaying(true)}
@@ -411,30 +354,28 @@ export default function VideoPlayer({
             Your browser does not support the video tag for {title}.
           </video>
 
-          <div className="video-center-controls">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-7 z-[5] opacity-0 transition-opacity duration-200 pointer-events-none group-hover:opacity-100 group-focus-within:opacity-100 hover:opacity-100 focus-within:opacity-100">
             <button
               type="button"
-              className="video-control-btn video-skip-btn"
+              className="w-[46px] h-[46px] bg-white/10 border-none rounded-full text-black inline-flex items-center justify-center cursor-pointer hover:bg-white/10 pointer-events-auto"
               onClick={() => handleSkip(-10)}
               aria-label="Rewind 10 seconds"
               title="Rewind 10s"
             >
               <RotateCcw size={26} />
             </button>
-
             <button
               type="button"
-              className="video-control-btn video-center-play-btn"
+              className="w-16 h-16 bg-white/10 border-none rounded-full text-black inline-flex items-center justify-center cursor-pointer hover:bg-white/10 pointer-events-auto"
               onClick={handlePlayPause}
               aria-label={isPlaying ? 'Pause' : 'Play'}
               title={isPlaying ? 'Pause' : 'Play'}
             >
               {isPlaying ? <Pause size={34} /> : <Play size={34} />}
             </button>
-
             <button
               type="button"
-              className="video-control-btn video-skip-btn"
+              className="w-[46px] h-[46px] bg-white/10 border-none rounded-full text-black inline-flex items-center justify-center cursor-pointer hover:bg-white/10 pointer-events-auto"
               onClick={() => handleSkip(10)}
               aria-label="Forward 10 seconds"
               title="Forward 10s"
@@ -443,10 +384,11 @@ export default function VideoPlayer({
             </button>
           </div>
 
-          <div className="video-controls">
+          {/* Controls overlay - always rendered on top of the video, inside this same wrapper */}
+          <div className="absolute inset-x-0 bottom-0 p-2 sm:p-3.5 bg-gradient-to-t from-black/[0.82] to-black/[0.08] text-white z-[5] flex flex-col gap-1.5 sm:gap-2">
             <div
               ref={seekRef}
-              className={`video-progress ${isScrubbing ? 'is-scrubbing' : ''}`}
+              className={`relative w-full h-5 cursor-pointer ${isScrubbing ? 'cursor-grabbing' : ''}`}
               role="slider"
               aria-label="Video timeline"
               aria-valuemin={0}
@@ -461,85 +403,87 @@ export default function VideoPlayer({
               onPointerLeave={handlePointerUp}
               onKeyDown={handleTimelineKeyDown}
             >
-              <div className="video-progress-track" />
+              <div className="absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 rounded-full bg-white/[0.724] pointer-events-none" />
               <div
-                className="video-progress-fill"
+                className="absolute top-1/2 left-0 h-2 -translate-y-1/2 rounded-full bg-[#bc0404e0] pointer-events-none"
                 style={{ width: `${progressPercent}%` }}
               />
-
               {chapters.map((chapter, index) => {
                 const left = duration > 0 ? (chapter.startTime / duration) * 100 : 0
                 const isActive = index === activeChapterIndex
-
                 return (
                   <button
                     key={chapter.id}
                     type="button"
-                    className={`video-progress-marker ${isActive ? 'active' : ''}`}
+                    className={`absolute top-1/2 w-[10px] h-2 -translate-x-1/2 -translate-y-1/2 border-none rounded-full pointer-events-auto ${
+                      isActive ? 'bg-white' : 'bg-[rgba(0,0,0,0.9)]'
+                    }`}
                     style={{ left: `${left}%` }}
                     onClick={(event) => {
                       event.stopPropagation()
                       handleChapterJump(chapter, index)
                     }}
-                    aria-label={`Jump to chapter: ${chapter.title}`}
-                    title={`${chapter.title} · ${formatTime(chapter.startTime)}`}
+                    aria-label={`Jump to chapter ${chapter.title}`}
+                    title={`${chapter.title} — ${formatTime(chapter.startTime)}`}
                   />
                 )
               })}
-
               <div
-                className="video-progress-thumb"
+                className="absolute top-1/2 w-2.5 h-2.5 rounded-full bg-[#bc0404e0] -translate-x-1/2 -translate-y-1/2 shadow-[0_0_0_2px_#bc0404e0] pointer-events-none"
                 style={{ left: `${progressPercent}%` }}
               />
             </div>
 
-            <div className="video-controls-row">
-              <div className="video-controls-left">
+            <div className="flex items-center justify-between gap-2 sm:gap-3">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                 <button
                   type="button"
-                  className="video-control-btn icon-only"
+                  className="w-9 h-9 sm:w-10 sm:h-10 inline-flex items-center justify-center gap-2 border border-white/[0.16] bg-white/[0.12] text-white rounded-full flex-shrink-0"
                   onClick={handlePlayPause}
                   aria-label={isPlaying ? 'Pause video' : 'Play video'}
                   title={isPlaying ? 'Pause' : 'Play'}
                 >
-                  {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+                  {isPlaying ? <Pause size={16} /> : <Play size={16} />}
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => setPanelOpen((current) => !current)}
                   aria-label={panelOpen ? 'Close video details panel' : 'Open video details panel'}
                   title="Video details panel"
-                  className="video-control-btn video-more-btn"
+                  className="inline-flex items-center gap-1 min-h-[36px] sm:min-h-[40px] border border-white/[0.16] bg-white/[0.12] text-white px-2 sm:px-3 rounded-full flex-shrink-0"
                 >
-                  <span className="video-more-btn__label">More</span>
+                  <span className="hidden sm:inline text-sm">More</span>
                   <ChevronRight size={16} />
                 </button>
 
-                <div className="video-time-readout">
+                <div className="flex gap-1 text-[0.72rem] sm:text-sm whitespace-nowrap truncate">
                   <span>{formatTime(currentTime)}</span>
                   <span>/</span>
                   <span>{formatTime(duration)}</span>
                 </div>
               </div>
 
-              <div className="video-controls-right">
-                <div className="video-speed-menu-wrap">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                <div className="relative">
                   <button
-                    className="video-control-btn video-speed-btn"
+                    type="button"
+                    className="inline-flex items-center justify-center min-h-[36px] sm:min-h-[40px] border border-white/[0.16] bg-white/[0.12] text-white px-2.5 sm:px-3 rounded-full text-[0.8rem] sm:text-sm"
                     onClick={() => setSpeedMenuOpen((current) => !current)}
                     aria-label="Playback speed"
                     title="Playback speed"
                   >
                     {playbackRate}x
                   </button>
-
                   {speedMenuOpen ? (
-                    <div className="video-speed-menu">
+                    <div className="absolute right-0 bottom-[calc(100%+8px)] flex flex-col gap-1.5 min-w-[88px] p-2 bg-[rgba(10,10,16,0.96)] border border-white/[0.12] rounded-xl z-10">
                       {SPEED_OPTIONS.map((speed) => (
                         <button
                           key={speed}
                           type="button"
-                          className={speed === playbackRate ? 'active' : ''}
+                          className={`border-none rounded-lg px-2.5 py-1.5 text-sm ${
+                            playbackRate === speed ? 'bg-white/20 text-white' : 'bg-white/[0.08] text-white'
+                          }`}
                           onClick={() => {
                             onPlaybackRateChange?.(speed)
                             setSpeedMenuOpen(false)
@@ -558,13 +502,16 @@ export default function VideoPlayer({
                   aria-pressed={subtitlesEnabled}
                   aria-label={subtitlesEnabled ? 'Turn off subtitles' : 'Turn on subtitles'}
                   title="Subtitles (CC)"
-                  className={`video-control-btn icon-only video-subtitle-btn${subtitlesEnabled ? ' active' : ''}`}
+                  className={`w-9 h-9 sm:w-10 sm:h-10 inline-flex items-center justify-center border border-white/[0.16] rounded-full flex-shrink-0 ${
+                    subtitlesEnabled ? 'bg-white/[0.24]' : 'bg-white/[0.12]'
+                  } text-white`}
                 >
-                  <Captions size={18} />
+                  <Captions size={16} />
                 </button>
 
                 <button
-                  className="video-control-btn video-screenshot-btn"
+                  type="button"
+                  className="w-9 h-9 hidden sm:inline-flex items-center justify-center border border-white/[0.16] bg-white/[0.12] text-white rounded-full flex-shrink-0"
                   onClick={handleScreenshot}
                   aria-label="Capture screenshot"
                   title="Capture screenshot"
@@ -574,103 +521,33 @@ export default function VideoPlayer({
 
                 <button
                   type="button"
-                  className="video-control-btn icon-only"
+                  className="w-9 h-9 sm:w-10 sm:h-10 inline-flex items-center justify-center border border-white/[0.16] bg-white/[0.12] text-white rounded-full flex-shrink-0"
                   onClick={handleToggleFullscreen}
                   aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
                   title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
                 >
-                  {isFullscreen ? <Shrink size={18} /> : <Expand size={18} />}
+                  {isFullscreen ? <Shrink size={16} /> : <Expand size={16} />}
                 </button>
               </div>
             </div>
           </div>
         </div>
 
-        {panelOpen ? (
-          <aside className="video-side-panel" aria-label="Video side panel">
-            <div className="video-side-panel-tabs">
-              <button
-                type="button"
-                className={panelTab === 'chapters' ? 'active' : ''}
-                onClick={() => setPanelTab('chapters')}
-              >
-                Chapters
-              </button>
-              <button
-                type="button"
-                className={panelTab === 'transcript' ? 'active' : ''}
-                onClick={() => setPanelTab('transcript')}
-              >
-                Transcript
-              </button>
-              <button
-                type="button"
-                className={panelTab === 'summary' ? 'active' : ''}
-                onClick={() => setPanelTab('summary')}
-              >
-                Summary
-              </button>
-            </div>
-
-            <div className="video-side-panel-body">
-              {panelTab === 'chapters' ? (
-                chapters.length > 0 ? (
-                  <div className="video-panel-list">
-                    {chapters.map((chapter, index) => (
-                      <button
-                        key={chapter.id}
-                        type="button"
-                        className={`video-panel-item ${index === activeChapterIndex ? 'active' : ''}`}
-                        onClick={() => handleChapterJump(chapter, index)}
-                      >
-                        <span>{chapter.title}</span>
-                        <strong>{formatTime(chapter.startTime)}</strong>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="video-panel-empty">No chapters available.</p>
-                )
-              ) : panelTab === 'transcript' ? (
-                transcript.length > 0 ? (
-                  <div className="video-panel-list">
-                    {transcript.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        className={`video-panel-item ${Math.abs(currentTime - item.startTime) < 3 ? 'active' : ''}`}
-                        onClick={() => handleSeek(item.startTime)}
-                      >
-                        <span>{item.text}</span>
-                        <strong>{formatTime(item.startTime)}</strong>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="video-panel-empty">No transcript available.</p>
-                )
-              ) : (
-                <div className="video-panel-summary">
-                  <div className="video-panel-summary__header">
-                    <div className="summary-toggle" role="tablist" aria-label="Summary detail level">
-                      {SUMMARY_LEVELS.map((level) => (
-                        <button
-                          key={level}
-                          type="button"
-                          className={summaryLevel === level ? 'active' : ''}
-                          onClick={() => onSummaryLevelChange?.(level)}
-                        >
-                          {level}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <p>{resolvedSummary}</p>
-                </div>
-              )}
-            </div>
-          </aside>
-        ) : null}
+        <InVideoPanel
+          open={panelOpen}
+          tab={panelTab}
+          onChangeTab={setPanelTab}
+          chapters={chapters}
+          transcript={transcript}
+          currentTime={currentTime}
+          activeChapterIndex={activeChapterIndex}
+          onSelectChapter={(chapter, index) => handleChapterJump(chapter, index)}
+          onSelectTranscriptSegment={(segment) => handleSeek(segment.startTime)}
+          summaryContent={resolvedSummary}
+          summaryLevel={summaryLevel}
+          onSummaryLevelChange={onSummaryLevelChange}
+          isFullscreen={isFullscreen}
+        />
       </div>
     </div>
   )
