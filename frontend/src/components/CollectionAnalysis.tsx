@@ -533,7 +533,7 @@ export default function CollectionAnalysis({
                   (item: { video_id?: string; reason?: string }, index: number) => {
                     const video = safeVideos.find((v) => v.id === item.video_id)
 
-                    const isCompared = comparisonVideoIds.includes(item.video_id)
+                    const isCompared = comparisonVideoIds.includes(item.video_id || '')
 
                     return (
                       <article key={item.video_id} className="flex gap-3 items-start">

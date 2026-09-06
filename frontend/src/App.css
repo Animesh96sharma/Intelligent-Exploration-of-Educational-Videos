@@ -723,8 +723,8 @@ a {
 }
 
 .home-hero p,
-.page-intro-copy p
-.panel p, {
+.page-intro-copy p,
+.panel p {
   color: var(--text-soft);
 }
 
@@ -1169,7 +1169,7 @@ a {
 .results-head,
 .panel-head,
 .video-explorer__header,
-.concept-card__head,
+.concept-card__head
  {
   display: flex;
   align-items: flex-start;
@@ -1188,7 +1188,7 @@ a {
 .results-head span,
 .stat-label,
 .meta,
-.time-range, {
+.time-range {
   color: var(--text-faint);
 }
 
@@ -1357,7 +1357,7 @@ a {
   box-shadow: var(--shadow-md);
 }
 
-.video-card.selected, {
+.video-card.selected {
   border-color: rgba(0, 0, 0, 0.3);
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
 }
@@ -1379,7 +1379,7 @@ a {
   gap: 10px;
 }
 
-.video-card__meta span,
+.video-card__meta span
  {
   background: var(--surface-soft);
   border: 1px solid var(--border);
@@ -1800,7 +1800,7 @@ a {
 .unique-video-card,
 .concept-board-card,
 .matrix-wrap,
-.heatmap-wrap,
+.heatmap-wrap
  {
   position: relative;
   overflow: hidden;
@@ -1823,7 +1823,7 @@ a {
 .sidebar-card:hover,
 .insight-tile:hover,
 .unique-video-card:hover,
-.concept-board-card:hover, {
+.concept-board-card:hover {
   transform: translateY(-3px);
   border-color: rgba(15, 23, 42, 0.14);
   box-shadow:
@@ -1845,7 +1845,7 @@ a {
 
 .insight-tile strong,
 .unique-video-card h4,
-.concept-board-card strong, {
+.concept-board-card strong {
   color: var(--text);
   letter-spacing: -0.02em;
 }
@@ -1956,7 +1956,7 @@ a {
 @media (max-width: 1024px) {
   .collection-layout,
   .video-explorer__layout,
-  .filters-bar, {
+  .filters-bar {
     grid-template-columns: 1fr;
   }
 
@@ -2020,7 +2020,7 @@ a {
   .landing-detail-card,
   .home-hero,
   .page-intro-copy,
-  .panel,{
+  .panel{
     padding: 16px;
     border-radius: 18px;
   }
@@ -2039,7 +2039,7 @@ a {
   }
 
   .summary-toggle,
-  .hero-actions, {
+  .hero-actions {
     width: 100%;
   }
 

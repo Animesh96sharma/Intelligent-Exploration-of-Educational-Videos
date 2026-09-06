@@ -622,6 +622,7 @@ function downloadVideo(video: VideoRecord) {
             <CollectionAnalysis
               analysis={dataset.collectionAnalysis}
               videos={filteredVideos}
+              comparisonVideoIds={comparisonVideoIds || []}
               onOpenVideo={handleOpenVideo}
               onToggleCompareVideo={handleToggleCompareVideo}
               onSelectConcept={handleSelectConcept}
