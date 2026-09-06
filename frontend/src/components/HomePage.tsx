@@ -452,7 +452,7 @@ export default function HomePage({
                     <div className="video-card-tile-content">
                       <h3>{video.title}</h3>
                       <p className="video-card-tile-meta">
-                        {video.speaker ? `${video.speaker} | ` : ""}
+                        {video.author ? `${video.author} | ` : ""}
                         {topicsLabel}
                       </p>
                     </div>

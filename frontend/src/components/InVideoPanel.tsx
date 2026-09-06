@@ -51,7 +51,6 @@ export default function InVideoPanel({
   summaryContent,
   summaryLevel,
   onSummaryLevelChange,
-  isFullscreen,
 }: InVideoPanelProps) {
   const bodyRef = useRef<HTMLDivElement | null>(null)
   const itemRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map())

@@ -533,7 +533,7 @@ export default function VideoExplorer({
 
                   <button
                     type="button"
-                    className=" self-start border-none bg-transparent text-black font-semibold p-0"
+                    className=" self-start border-none bg-transparent text-black text-align-right font-semibold p-0"
                     onClick={() => setDetailsExpanded((open) => !open)}
                     aria-expanded={detailsExpanded}
                   >
@@ -552,7 +552,7 @@ export default function VideoExplorer({
 
                   <button
                     type="button"
-                    className="sm:hidden self-start border-none bg-transparent text-black font-semibold p-0"
+                    className="sm:hidden self-start border-none bg-transparent text-black text-align-right font-semibold "
                     onClick={() => setDetailsExpanded((open) => !open)}
                     aria-expanded={detailsExpanded}
                   >
@@ -578,7 +578,7 @@ export default function VideoExplorer({
 
                   {selectedChapterConcepts.length > 0 ? (
                     <div className="flex flex-col gap-2.5">
-                      <h4 className="m-0 text-[0.96rem] tracking-tight text-slate-900">Important chapter concepts</h4>
+                      <h4 className="m-0 text-[0.96rem] tracking-tight text-slate-900">↗Important chapter concepts</h4>
                       <div className="flex flex-wrap gap-2">
                         {selectedChapterConcepts.map((concept) => (
                           <button
@@ -599,7 +599,7 @@ export default function VideoExplorer({
                   ) : null}
 
                   <div className="flex flex-col gap-2.5">
-                    <h4 className="m-0 text-[0.96rem] tracking-tight text-slate-900">Important concepts</h4>
+                    <h4 className="m-0 text-[0.96rem] tracking-tight text-slate-900">↗Important concepts</h4>
                     <div className="flex flex-wrap gap-2">
                       {videoConcepts.length === 0 ? (
                         <p className="text-slate-600">No concepts available.</p>
@@ -623,12 +623,12 @@ export default function VideoExplorer({
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">Domain: {video.domain ?? 'Educational video'}</h4>
-                    <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">Speaker: {video.speaker ?? 'Unknown speaker'}</h4>
-                    <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">Total Chapters: {video.totalChapters ?? chapters.length}</h4>
-                    <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">Duration: {formatDurationMinutes(video.duration)}</h4>
+                    <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">📖Domain: {video.domain ?? 'Educational video'}</h4>
+                    <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">🗣Speaker: {video.author ?? 'Unknown speaker'}</h4>
+                    <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">📚Total Chapters: {video.totalChapters ?? chapters.length}</h4>
+                    <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">ⴵDuration: {formatDurationMinutes(video.duration)}</h4>
                     {video.difficultyLevel ? (
-                      <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">Difficulty: {video.difficultyLevel}</h4>
+                      <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">🚩Difficulty: {video.difficultyLevel}</h4>
                     ) : null}
                   </div>
                 </section>
@@ -684,8 +684,8 @@ export default function VideoExplorer({
         <aside className="w-full lg:w-[380px] flex-shrink-0 flex flex-col gap-5">
           <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3.5">
             <div className="flex items-start justify-between gap-3">
-              <h3 className="m-0 text-[1.05rem] tracking-tight text-slate-900">Notes & annotations</h3>
-              <span className="text-slate-500">{videoNotes.length} saved</span>
+              <h3 className="m-0 text-[1.05rem] tracking-tight text-slate-900">📝Notes & annotations</h3>
+              <span className="text-slate-500 text-align-right">{videoNotes.length} saved</span>
             </div>
 
             <div className="flex flex-col gap-2.5">
@@ -742,9 +742,9 @@ export default function VideoExplorer({
 
           <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3.5">
             <div className="flex items-start justify-between gap-3 flex-wrap">
-              <h3 className="m-0 text-[1.05rem] tracking-tight text-slate-900">Bookmarks</h3>
+              <h3 className="m-0 text-[1.05rem] tracking-tight text-slate-900">🔖Bookmarks</h3>
               <span className="text-slate-500">Current Time: {formatClock(currentTime)}</span>
-              <span className="text-slate-500">{videoBookmarks.length} saved</span>
+              <span className="text-slate-500 text-align-right">{videoBookmarks.length} saved</span>
             </div>
 
             <div className="flex flex-col gap-2.5">
