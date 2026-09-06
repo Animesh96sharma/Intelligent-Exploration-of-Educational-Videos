@@ -364,7 +364,7 @@ function downloadVideo(video: VideoRecord) {
       if (next.length >= 2) {
         setView('compare')
       } else if (view === 'compare') {
-        setView('browse')
+        setView('compare')
       }
 
       return next
@@ -473,7 +473,7 @@ function downloadVideo(video: VideoRecord) {
                   type="button"
                   className={isActive ? 'active' : ''}
                   onClick={() => handleNavSelect(item.key)}
-                  disabled={item.key === 'compare' && comparisonVideos.length < 2}
+                  // disabled={item.key === 'compare' && comparisonVideos.length < 2}
                 >
                   <span>
                     {item.label}

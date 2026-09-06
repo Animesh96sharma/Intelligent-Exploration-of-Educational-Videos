@@ -21,7 +21,7 @@ type HomePageProps = {
   playlist: Playlist[]
 }
 
-const TOP_CONCEPT_LIMIT = 10;
+const TOP_CONCEPT_LIMIT = 20;
 
 function formatDuration(seconds: number) {
   return `${Math.round(seconds / 60)} min`;
@@ -330,7 +330,7 @@ export default function HomePage({
             const isInComparison = comparisonVideoIds.includes(video.id);
             const videoSrc = video.videoSrc;
             const topicsLabel =
-              video.keyConcepts.slice(0, 2).join(", ") || video.domain || "General";
+              video.keyConcepts.slice(0, 5).join(", ") || video.domain || "General";
             const isHovered = hoveredId === video.id;
             const isUnmuted = unmutedIds.has(video.id);
             const progress = progressMap[video.id] ?? 0;
@@ -452,8 +452,10 @@ export default function HomePage({
                     <div className="video-card-tile-content">
                       <h3>{video.title}</h3>
                       <p className="video-card-tile-meta">
-                        {video.author ? `${video.author} | ` : ""}
-                        {topicsLabel}
+                        Author: {video.author ? `${video.author} ` : ""}
+                      </p>
+                      <p className="video-card-tile-meta">
+                        Topics: {topicsLabel}
                       </p>
                     </div>
 
