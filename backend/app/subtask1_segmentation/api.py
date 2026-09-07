@@ -99,6 +99,14 @@ def get_frames(video_id: str):
         "frames":     frames,
     }
 
+@app.get("/videos/{video_id}/chapters_vtt", tags=["Videos"])
+def get_chapter_vtt(video_id: str):
+    """Serve the chapter VTT file for native browser chapter navigation."""
+    vtt_path = TRANSCRIPTS_DIR / f"{video_id}_chapters.vtt"
+    if not vtt_path.exists():
+        raise HTTPException(status_code=404, detail=f"Chapter VTT not found for {video_id}")
+    return FileResponse(vtt_path, media_type="text/vtt")
+
 @app.get("/videos/{video_id}/stream", tags=["Videos"])
 def stream_video(video_id: str, request: Request):
     """
