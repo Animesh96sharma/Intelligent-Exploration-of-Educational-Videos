@@ -83,6 +83,7 @@ export default function VideoPlayer({
   const [isScrubbing, setIsScrubbing] = useState(false)
   const [subtitlesEnabled, setSubtitlesEnabled] = useState(true)
   const [controlsVisible, setControlsVisible] = useState(true)
+  const [activeCaption, setActiveCaption] = useState("");
 
   const resolvedSummary = useMemo(() => getSummaryText(summary, summaryLevel), [summary, summaryLevel])
   const resolvedCaptionsSrc = useMemo(
@@ -91,53 +92,35 @@ export default function VideoPlayer({
   )
 
   useEffect(() => {
-    const video = videoRef.current
-    const trackEl = trackRef.current
-    if (!video || !trackEl) return
-    const textTrack = trackEl.track
-    if (!textTrack) return
+  const trackEl = trackRef.current;
+  if (!trackEl) return;
+  const textTrack = trackEl.track;
 
-    const repositionCues = () => {
-      const cues = textTrack.cues
-      if (!cues) return
-      const isMobile = window.innerWidth < 640
-      for (let i = 0; i < cues.length; i += 1) {
-        const cue = cues[i] as VTTCue
-        cue.snapToLines = false
-        cue.align = 'center'
-        cue.line = 90
-        cue.position = 50
-        cue.size = isMobile ? 92 : 80
-      }
+  // "hidden" keeps cues loading and firing events, but the browser doesn't draw them
+  textTrack.mode = "hidden";
+
+  const handleCueChange = () => {
+    if (!subtitlesEnabled) {
+      setActiveCaption("");
+      return;
     }
+    const active = Array.from(textTrack.activeCues ?? []) as VTTCue[];
+    const text = active
+      .map((cue) => cue.text.replace(/<[^>]+>/g, "").trim())
+      .filter(Boolean)
+      .join("\n");
+    setActiveCaption(text);
+  };
 
-    const forceRender = () => {
-      textTrack.mode = subtitlesEnabled ? 'showing' : 'hidden'
-      repositionCues()
-      if (subtitlesEnabled) {
-        textTrack.mode = 'hidden'
-        requestAnimationFrame(() => {
-          textTrack.mode = 'showing'
-        })
-      }
-    }
+  textTrack.addEventListener("cuechange", handleCueChange);
+  trackEl.addEventListener("load", handleCueChange);
+  handleCueChange();
 
-    const handleTrackLoad = () => {
-      repositionCues()
-      forceRender()
-    }
-
-    trackEl.addEventListener('load', handleTrackLoad)
-    window.addEventListener('resize', repositionCues)
-    window.addEventListener('orientationchange', repositionCues)
-    forceRender()
-
-    return () => {
-      trackEl.removeEventListener('load', handleTrackLoad)
-      window.removeEventListener('resize', repositionCues)
-      window.removeEventListener('orientationchange', repositionCues)
-    }
-  }, [subtitlesEnabled, src])
+  return () => {
+    textTrack.removeEventListener("cuechange", handleCueChange);
+    trackEl.removeEventListener("load", handleCueChange);
+  };
+}, [subtitlesEnabled, resolvedCaptionsSrc, videoId, src]);
 
   useEffect(() => {
     const video = videoRef.current
@@ -400,6 +383,26 @@ export default function VideoPlayer({
             />
             Your browser does not support the video tag for {title}.
           </video>
+
+          {subtitlesEnabled && activeCaption ? (
+  <div
+    className={`pointer-events-none absolute inset-x-0 z-[4] flex justify-center px-2 sm:px-4 transition-all duration-200 ${
+      controlsVisible
+        ? "bottom-[40px] sm:bottom-[80px]"
+        : isFullscreen
+        ? "bottom-12"
+        : "bottom-2 sm:bottom-6"
+    }`}
+  >
+    <span
+      className={`max-w-[94%] sm:max-w-[90%] whitespace-pre-line break-words rounded-md bg-black/75 px-2 py-1 sm:px-3 sm:py-1.5 text-center font-medium leading-snug text-white ${
+        isFullscreen ? "text-lg sm:text-2xl" : "text-xs sm:text-lg"
+      }`}
+    >
+      {activeCaption}
+    </span>
+  </div>
+) : null}
 
           {/* Play/Pause and Rewind/Forward controls */}
           <div

@@ -86,6 +86,29 @@ export default function CollectionAnalysis({
     [analysis, visibleVideoIds],
   )
 
+  const MIN_SHARED_CONCEPTS = 3; // video must share MORE than this many concepts
+
+// How many shared concepts each video takes part in
+const sharedCountByVideo = useMemo(() => {
+  const counts = new Map<string, number>();
+  commonConceptEntries.forEach(([, videoIds]) => {
+    videoIds.forEach((id) => counts.set(id, (counts.get(id) ?? 0) + 1));
+  });
+  return counts;
+}, [commonConceptEntries]);
+
+// Board data: keep only strongly-overlapping videos, then drop concepts left with < 2 videos
+const boardEntries = useMemo(
+  () =>
+    commonConceptEntries
+      .map(([concept, videoIds]) => [
+        concept,
+        videoIds.filter((id) => (sharedCountByVideo.get(id) ?? 0) > MIN_SHARED_CONCEPTS),
+      ] as const)
+      .filter(([, videoIds]) => videoIds.length > 1),
+  [commonConceptEntries, sharedCountByVideo]
+);
+
   const uniqueConceptEntries = useMemo(
     () =>
       Object.entries(analysis.uniqueConcepts ?? {})
@@ -328,113 +351,6 @@ export default function CollectionAnalysis({
               selectedConcept={selectedConcept}
             />
           </section>
-
-          {/* Shared concept board (hidden on mobile) */}
-          <section className="hidden sm:block bg-white border border-[#e8eef5] rounded-[16px] sm:rounded-[18px] p-4 sm:p-[18px] shadow-[0_8px_20px_rgba(15,23,42,0.05)]">
-            <div className="flex justify-between items-center gap-3 mb-4">
-              <h3 className="m-0 text-[0.95rem] sm:text-[1.05rem] font-bold tracking-[-0.02em]">
-                Shared concept board
-              </h3>
-              <span className="text-[0.8rem] text-[#64748b]">Concept-to-video mapping</span>
-            </div>
-
-            {commonConceptEntries.length === 0 ? (
-              <p className="text-[#334155] m-0 text-sm">
-                No shared concepts with more than one video are available for the currently visible videos.
-              </p>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-sm">
-                  <thead>
-                    <tr className="border-b border-[#e8eef5]">
-                      <th className="text-left py-2 pr-3 font-bold text-[#0f172a] w-[220px]">
-                        Shared concept
-                      </th>
-                      <th className="text-left py-2 px-3 font-bold text-[#0f172a]">
-                        Video
-                      </th>
-                      <th className="text-right py-2 pl-3 font-bold text-[#0f172a] w-[200px]">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {commonConceptEntries.map(([concept, videoIds]) =>
-                      videoIds.map((videoId, idx) => {
-                        const video = safeVideos.find((item) => item.id === videoId)
-                        if (!video) return null
-
-                        const isCompared = comparisonVideoIds.includes(videoId)
-
-                        return (
-                          <tr
-                            key={`${concept}-${videoId}`}
-                            className="border-b border-[#f1f5f9] hover:bg-[#f8fafc]"
-                          >
-                            {idx === 0 ? (
-                              <td
-                                className="py-3 pr-3 align-top"
-                                rowSpan={videoIds.length}
-                              >
-                                <button
-                                  type="button"
-                                  className={`inline-flex items-center px-3 py-1.5 rounded-full text-[0.78rem] font-semibold border transition-all duration-[180ms] cursor-pointer ${
-                                    selectedConcept === concept
-                                      ? 'bg-black text-white border-black'
-                                      : 'bg-[#f3f4f6] text-[#0f172a] border-[#d9e2ec] hover:-translate-y-px'
-                                  }`}
-                                  onClick={() =>
-                                    onSelectConcept(selectedConcept === concept ? null : concept)
-                                  }
-                                >
-                                  {concept}
-                                </button>
-                                <div className="text-[0.72rem] text-[#64748b] mt-1">
-                                  {videoIds.length} videos
-                                </div>
-                              </td>
-                            ) : null}
-
-                            <td className="py-3 px-3 align-top">
-                              <div className="flex flex-col gap-0.5 min-w-0">
-                                <strong className="text-[0.85rem] text-[#0f172a]">
-                                  {video.title}
-                                </strong>
-                                <span className="text-[0.75rem] text-[#64748b]">
-                                  {video.domain ?? 'General'}
-                                </span>
-                              </div>
-                            </td>
-
-                            <td className="py-3 pl-3 align-top text-right">
-                              <div className="flex gap-2 justify-end flex-wrap">
-                                <button
-                                  className={`border rounded-[12px] px-3 py-1.5 text-[0.78rem] font-semibold shadow-[0_8px_20px_rgba(15,23,42,0.05)] transition-all duration-[180ms] ${
-                                    isCompared
-                                      ? 'border-black bg-black text-white hover:bg-[#111]'
-                                      : 'border-black bg-white text-black hover:bg-[#f8f8f8]'
-                                  }`}
-                                  onClick={() => onToggleCompareVideo(videoId)}
-                                >
-                                  {isCompared ? 'Remove' : 'Compare'}
-                                </button>
-                                <button
-                                  className="border border-black rounded-[12px] bg-black text-white px-3 py-1.5 text-[0.78rem] font-bold shadow-[0_16px_28px_rgba(0,0,0,0.14)] hover:bg-[#111] transition-all duration-[180ms]"
-                                  onClick={() => onOpenVideo(videoId)}
-                                >
-                                  Open
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        )
-                      }),
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
          </div> 
 
         {/* Sidebar */}
@@ -569,6 +485,92 @@ export default function CollectionAnalysis({
                     )
                   },
                 )}
+              </div>
+            )}
+          </section>
+
+
+          {/* Shared concept board */}
+          <section className="bg-white border border-[#e8eef5] rounded-[16px] sm:rounded-[18px] p-4 sm:p-[18px] shadow-[0_8px_20px_rgba(15,23,42,0.05)]">
+            <div className="flex flex-col gap-1 mb-4">
+              <h3 className="m-0 text-[0.95rem] sm:text-[1.05rem] font-bold tracking-[-0.02em]">Shared concept board</h3>
+              <span className="text-[0.8rem] text-[#64748b]">
+                Videos sharing more than {MIN_SHARED_CONCEPTS} concepts
+              </span>
+            </div>
+
+            {boardEntries.length === 0 ? (
+              <p className="text-[#334155] m-0 text-sm">
+                No videos share more than {MIN_SHARED_CONCEPTS} concepts in the current selection.
+              </p>
+            ) : (
+              <div className="flex flex-col gap-4">
+                {boardEntries.map(([concept, videoIds]) => (
+                  <div key={concept} className="border border-[#e8eef5] rounded-[12px] overflow-hidden">
+                    <table className="w-full border-collapse text-sm">
+                      <thead>
+                        <tr className="bg-[#f8fafc] border-b border-[#e8eef5]">
+                          <th colSpan={2} className="text-left py-2.5 px-3 font-bold text-[#0f172a]">
+                            <div className="flex items-center justify-between gap-2">
+                              <span>
+                                <span className="text-[#64748b] font-semibold">Concept: </span>
+                                <button
+                                  type="button"
+                                  className={`inline-flex items-center px-2.5 py-1 rounded-full text-[0.78rem] font-semibold border transition-all duration-[180ms] cursor-pointer ${
+                                    selectedConcept === concept
+                                      ? "bg-black text-white border-black"
+                                      : "bg-white text-[#0f172a] border-[#d9e2ec] hover:-translate-y-px"
+                                  }`}
+                                  onClick={() => onSelectConcept(selectedConcept === concept ? null : concept)}
+                                >
+                                  {concept}
+                                </button>
+                              </span>
+                              <span className="text-[0.72rem] font-medium text-[#64748b]">{videoIds.length} videos</span>
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {videoIds.map((videoId) => {
+                          const video = safeVideos.find((item) => item.id === videoId);
+                          if (!video) return null;
+                          const isCompared = comparisonVideoIds.includes(videoId);
+                          return (
+                            <tr key={`${concept}-${videoId}`} className="border-b border-[#f1f5f9] last:border-b-0 hover:bg-[#f8fafc]">
+                              <td className="py-2.5 pl-3 pr-2 align-middle">
+                                <div className="flex flex-col gap-0.5 min-w-0">
+                                  <strong className="text-[0.85rem] text-[#0f172a] leading-snug">{video.title}</strong>
+                                  <span className="text-[0.75rem] text-[#64748b]">{video.domain ?? "General"}</span>
+                                </div>
+                              </td>
+                              <td className="py-2.5 pl-2 pr-3 align-middle text-right whitespace-nowrap">
+                                <div className="flex gap-2 justify-end">
+                                  <button
+                                    type="button"
+                                    className={`border rounded-[12px] px-3 py-1.5 text-[0.78rem] font-semibold transition-all duration-[180ms] ${
+                                      isCompared ? "border-black bg-black text-white hover:bg-[#111]" : "border-black bg-white text-black hover:bg-[#f8f8f8]"
+                                    }`}
+                                    onClick={() => onToggleCompareVideo(videoId)}
+                                  >
+                                    {isCompared ? "Remove" : "Compare"}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="border border-black rounded-[12px] bg-black text-white px-3 py-1.5 text-[0.78rem] font-bold hover:bg-[#111] transition-all duration-[180ms]"
+                                    onClick={() => onOpenVideo(videoId)}
+                                  >
+                                    Open
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ))}
               </div>
             )}
           </section>

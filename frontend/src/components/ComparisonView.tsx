@@ -178,6 +178,73 @@ function SyncedControls({ isPlaying, masterTime, masterDuration, onPlayPause, on
   )
 }
 
+const CONCEPT_PREVIEW_LIMIT = 8;
+
+function ExpandableConceptList({
+  concepts,
+  emptyLabel,
+  selectedConcept,
+  onSelectConcept,
+  limit = CONCEPT_PREVIEW_LIMIT,
+}: {
+  concepts: string[];
+  emptyLabel: string;
+  selectedConcept: string | null;
+  onSelectConcept: (concept: string | null) => void;
+  limit?: number;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  // Selected concept first, then the rest in original order
+  const ordered = useMemo(() => {
+    if (!selectedConcept) return concepts;
+    const target = selectedConcept.trim().toLowerCase();
+    return [
+      ...concepts.filter((c) => c.trim().toLowerCase() === target),
+      ...concepts.filter((c) => c.trim().toLowerCase() !== target),
+    ];
+  }, [concepts, selectedConcept]);
+
+  if (!ordered.length) {
+    return <p className="text-[#94a3b8] text-sm m-0">{emptyLabel}</p>;
+  }
+
+  const visible = expanded ? ordered : ordered.slice(0, limit);
+  const hiddenCount = ordered.length - limit;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="m-0 text-[0.82rem] leading-relaxed text-[#334155]">
+        {visible.map((concept, index, list) => (
+          <span key={concept}>
+            <button
+              type="button"
+              className={`border-none bg-transparent p-0 text-[0.82rem] underline underline-offset-2 cursor-pointer hover:text-black ${
+                selectedConcept === concept ? "font-bold text-black" : "font-medium text-[#334155]"
+              }`}
+              onClick={() => onSelectConcept(selectedConcept === concept ? null : concept)}
+            >
+              {concept}
+            </button>
+            {index < list.length - 1 ? ", " : ""}
+          </span>
+        ))}
+      </p>
+
+      {hiddenCount > 0 ? (
+        <button
+          type="button"
+          className="self-end border-none bg-transparent p-0 text-[0.82rem] cursor-pointer hover:text-black"
+          onClick={() => setExpanded((open) => !open)}
+          aria-expanded={expanded}
+        >
+          {expanded ? "Show less" : `Show remaining (${hiddenCount})`}
+        </button>
+      ) : null}
+    </div>
+  );
+}
+
 export default function ComparisonView({
   videos,
   allVideos,
@@ -353,9 +420,23 @@ export default function ComparisonView({
       right: renderPills(comparison?.sharedConcepts ?? [], 'No shared concepts detected.', selectedConcept, onSelectConcept),
     },
     {
-      label: 'Unique Concepts',
-      left: renderPills(comparison?.leftUniqueConcepts ?? [], 'No unique concepts listed.', selectedConcept, onSelectConcept, true),
-      right: renderPills(comparison?.rightUniqueConcepts ?? [], 'No unique concepts listed.', selectedConcept, onSelectConcept, true),
+      label: "Unique Concepts",
+      left: (
+        <ExpandableConceptList
+          concepts={comparison?.leftUniqueConcepts ?? []}
+          emptyLabel="No unique concepts listed."
+          selectedConcept={selectedConcept}
+          onSelectConcept={onSelectConcept}
+        />
+      ),
+      right: (
+        <ExpandableConceptList
+          concepts={comparison?.rightUniqueConcepts ?? []}
+          emptyLabel="No unique concepts listed."
+          selectedConcept={selectedConcept}
+          onSelectConcept={onSelectConcept}
+        />
+      ),
     },
     {
       label: 'Learning Objectives',

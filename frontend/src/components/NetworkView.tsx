@@ -1,6 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { VideoRecord } from '../types/video'
 import { normalizeConceptLabel } from '../lib/analytics'
+import { forceCenter, forceCollide, forceLink, forceManyBody, forceSimulation } from 'd3-force'
+import type { SimulationLinkDatum, SimulationNodeDatum } from 'd3-force'
+
+const GRAPH_WIDTH = 400
+const GRAPH_HEIGHT = 200
 
 type NetworkViewProps = {
   videos: VideoRecord[]
@@ -19,6 +24,13 @@ type VideoEdge = {
 
 type ViewMode = 'graph' | 'nodes' | 'relationships'
 
+type LayoutNode = SimulationNodeDatum & { id: string }
+type LayoutLink = SimulationLinkDatum<LayoutNode> & {
+  source: string | LayoutNode
+  target: string | LayoutNode
+  weight: number
+}
+
 type GraphNode = {
   video: VideoRecord
   x: number
@@ -30,7 +42,47 @@ type GraphNode = {
   isSelected: boolean
 }
 
-{/* Builds every pairwise edge between videos that share at least one concept. */}
+// Simulate positions once per graph change.
+function getForcePositions(
+  videos: VideoRecord[],
+  edges: VideoEdge[],
+): Map<string, { x: number; y: number }> {
+  const nodes: LayoutNode[] = videos.map((video) => ({ id: video.id }))
+  const ids = new Set(nodes.map((node) => node.id))
+  const links: LayoutLink[] = edges
+    .filter((edge) => ids.has(edge.sourceId) && ids.has(edge.targetId))
+    .map((edge) => ({
+      source: edge.sourceId,
+      target: edge.targetId,
+      weight: edge.weight,
+    }))
+
+  if (nodes.length === 0) return new Map()
+
+  const simulation = forceSimulation<LayoutNode>(nodes)
+    .force(
+      'link',
+      forceLink<LayoutNode, LayoutLink>(links)
+        .id((node) => node.id)
+        .distance((link) => Math.max(65, 105 - (link.weight - 1) * 10))
+        .strength((link) => Math.min(0.55, 0.22 + (link.weight - 1) * 0.06)),
+    )
+    .force('charge', forceManyBody<LayoutNode>().strength(-250))
+    .force('collision', forceCollide<LayoutNode>().radius(26).strength(0.9))
+    .force('center', forceCenter(GRAPH_WIDTH / 2, GRAPH_HEIGHT / 2))
+    .stop()
+
+  for (let i = 0; i < 300; i += 1) simulation.tick()
+
+  return new Map(
+    nodes.map((node) => [
+      node.id,
+      { x: node.x ?? GRAPH_WIDTH / 2, y: node.y ?? GRAPH_HEIGHT / 2 },
+    ]),
+  )
+}
+
+// All shared-concept relationships remain available in the list.
 function buildEdges(videos: VideoRecord[], selectedConcept: string | null): VideoEdge[] {
   const normalizedSelectedConcept = selectedConcept ? normalizeConceptLabel(selectedConcept) : null
   const edges: VideoEdge[] = []
@@ -61,8 +113,6 @@ function getVideoById(videos: VideoRecord[], id: string) {
   return videos.find((video) => video.id === id) ?? null
 }
 
-
-// Maps a video's domain string to a fixed hex color for the graph legend/nodes.
 function getDomainColor(domain?: string) {
   const value = (domain ?? 'general').toLowerCase()
   if (['mathematics', 'functions', 'complex', 'holomorphic', 'integrals', 'matrix', 'jacobian'].some((k) => value.includes(k))) return '#0f766e'
@@ -75,33 +125,22 @@ function getDomainColor(domain?: string) {
   return '#475569'
 }
 
-// Distributes videos evenly around a circular orbit (basic radial layout algorithm).
-function getNodePositions(
+function getGraphNodes(
   videos: VideoRecord[],
+  positions: Map<string, { x: number; y: number }>,
   connectionCounts: Map<string, number>,
   focusedVideoId: string | null,
   selectedVideoId: string | null,
   focusNeighborIds: Set<string>,
 ): GraphNode[] {
-  const width = 920
-  const height = 520
-  const centerX = width / 2
-  const centerY = height / 2
-  const total = videos.length
-  const radiusBase = Math.min(width, height) * 0.34
-
-  return videos.map((video, index) => {
-    const angle = ((Math.PI * 2) / Math.max(total, 1)) * index - Math.PI / 2
-    const orbitScale = total <= 2 ? 0.55 : total <= 4 ? 0.72 : 1
-    const x = centerX + Math.cos(angle) * radiusBase * orbitScale
-    const y = centerY + Math.sin(angle) * radiusBase * orbitScale
+  return videos.map((video) => {
     const connectionCount = connectionCounts.get(video.id) ?? 0
-
+    const position = positions.get(video.id)
     return {
       video,
-      x,
-      y,
-      radius: 18 + Math.min(connectionCount, 6) * 3,
+      x: position?.x ?? GRAPH_WIDTH / 2,
+      y: position?.y ?? GRAPH_HEIGHT / 2,
+      radius: 10 + Math.min(connectionCount, 8) * 1.2,
       connectionCount,
       isFocused: video.id === focusedVideoId,
       isNeighbor: focusNeighborIds.has(video.id),
@@ -118,8 +157,13 @@ export default function NetworkView({
   selectedConcept,
 }: NetworkViewProps) {
   const [minimumOverlap, setMinimumOverlap] = useState(1)
-  const [focusedVideoId, setFocusedVideoId] = useState<string | null>(selectedVideoId)
+  const [focusedVideoId, setFocusedVideoId] = useState<string | null>(null)
+  const [hoveredVideoId, setHoveredVideoId] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<ViewMode>('graph')
+  const FOCUS_CONCEPT_LIMIT = 5;
+  const [showAllFocusConcepts, setShowAllFocusConcepts] = useState(false);
+  const MIN_NODE_LINKS = 5; // show first: videos with MORE than this many links
+  const [showRemainingVideos, setShowRemainingVideos] = useState(false);
 
   const edges = useMemo(() => buildEdges(videos, selectedConcept), [videos, selectedConcept])
   const maxOverlap = useMemo(() => (edges.length === 0 ? 1 : Math.max(...edges.map((edge) => edge.weight))), [edges])
@@ -171,15 +215,27 @@ export default function NetworkView({
     return counts
   }, [visibleVideos, filteredEdges])
 
+  const positions = useMemo(() => getForcePositions(visibleVideos, filteredEdges), [visibleVideos, filteredEdges])
+
   const graphNodes = useMemo(
-    () => getNodePositions(visibleVideos, connectionCounts, focusedVideoId, selectedVideoId, focusNeighborIds),
-    [visibleVideos, connectionCounts, focusedVideoId, selectedVideoId, focusNeighborIds],
+    () => getGraphNodes(visibleVideos, positions, connectionCounts, focusedVideoId, selectedVideoId, focusNeighborIds),
+    [visibleVideos, positions, connectionCounts, focusedVideoId, selectedVideoId, focusNeighborIds],
   )
 
   const nodeMap = useMemo(() => new Map(graphNodes.map((node) => [node.video.id, node])), [graphNodes])
-
   const displayedEdges = focusedVideoId ? focusEdges : filteredEdges
   const conceptSummaryEdges = focusedVideoId ? focusEdges : filteredEdges
+
+  // ViewBox is calculated to ensure all nodes are visible with some padding, even if they are outside the default graph area.
+  const graphViewBox = useMemo(() => {
+    if (graphNodes.length === 0) return `0 0 ${GRAPH_WIDTH} ${GRAPH_HEIGHT}`
+    const padding = 90
+    const left = Math.min(0, ...graphNodes.map((node) => node.x - node.radius - padding))
+    const top = Math.min(0, ...graphNodes.map((node) => node.y - node.radius - padding))
+    const right = Math.max(GRAPH_WIDTH, ...graphNodes.map((node) => node.x + node.radius + padding))
+    const bottom = Math.max(GRAPH_HEIGHT, ...graphNodes.map((node) => node.y + node.radius + padding))
+    return `${left} ${top} ${right - left} ${bottom - top}`
+  }, [graphNodes])
 
   const topSharedConcepts = useMemo(() => {
     const counts = new Map<string, number>()
@@ -190,6 +246,52 @@ export default function NetworkView({
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
       .slice(0, 8)
   }, [conceptSummaryEdges])
+
+  // Selected concept first, then the rest in original order
+  const orderedFocusConcepts = useMemo(() => {
+    const all = focusedVideo?.keyConcepts ?? [];
+    if (!selectedConcept) return all;
+    const target = normalizeConceptLabel(selectedConcept);
+    const matching = all.filter((c) => normalizeConceptLabel(c) === target);
+    const rest = all.filter((c) => normalizeConceptLabel(c) !== target);
+    return [...matching, ...rest];
+  }, [focusedVideo, selectedConcept]);
+
+  const visibleFocusConcepts = showAllFocusConcepts
+    ? orderedFocusConcepts
+    : orderedFocusConcepts.slice(0, FOCUS_CONCEPT_LIMIT);
+  const hiddenFocusConceptCount = orderedFocusConcepts.length - FOCUS_CONCEPT_LIMIT;
+
+  // Collapse again whenever a different node is focused
+  useEffect(() => {
+    setShowAllFocusConcepts(false);
+  }, [focusedVideoId]);
+
+  // All visible videos, most-linked first (ties: alphabetical)
+  const sortedNodeVideos = useMemo(
+    () =>
+      [...visibleVideos].sort(
+        (a, b) =>
+          (connectionCounts.get(b.id) ?? 0) - (connectionCounts.get(a.id) ?? 0) ||
+          a.title.localeCompare(b.title)
+      ),
+    [visibleVideos, connectionCounts]
+  );
+  const MIN_NODES_SHOWN = 6;     // never show fewer than this before "Show remaining"
+
+  const strongLinkedVideos = useMemo(
+    () => sortedNodeVideos.filter((v) => (connectionCounts.get(v.id) ?? 0) > MIN_NODE_LINKS),
+    [sortedNodeVideos, connectionCounts]
+  );
+
+  // Fall back to the top N (sorted by links) when too few videos pass the cut-off
+  const usingFallback = strongLinkedVideos.length < MIN_NODES_SHOWN;
+  const topLinkedVideos = usingFallback
+    ? sortedNodeVideos.slice(0, MIN_NODES_SHOWN)
+    : strongLinkedVideos;
+
+  const remainingVideoCount = sortedNodeVideos.length - topLinkedVideos.length;
+  const nodeListVideos = showRemainingVideos ? sortedNodeVideos : topLinkedVideos;
 
   if (videos.length === 0) {
     return (
@@ -212,7 +314,6 @@ export default function NetworkView({
 
   return (
     <section className="w-full max-w-full mx-auto flex flex-col gap-4 sm:gap-5 px-4 sm:px-0">
-
       {/* Page intro */}
       <div className="bg-gradient-to-br from-white to-[#f8fafc] border border-[#d9e2ec] shadow-[0_18px_40px_rgba(15,23,42,0.08)] rounded-[24px] sm:rounded-[30px] p-5 sm:p-7 text-[#0f172a]">
         <h2 className="text-[#0f172a] my-2 text-[clamp(1.5rem,4vw,2.5rem)] leading-[1.1] tracking-[-0.03em]">
@@ -267,7 +368,7 @@ export default function NetworkView({
           <div>
             <h3 className="m-0 mb-1 text-[0.95rem] sm:text-[1.05rem] font-bold tracking-[-0.02em]">Relationship threshold</h3>
             <p className="text-[#334155] m-0 text-sm">
-              Shows only link between videos which share at least {minimumOverlap} concept{minimumOverlap !== 1 ? 's' : '.'}
+              Shows only links between videos that share at least {minimumOverlap} concept{minimumOverlap !== 1 ? 's' : ''}.
             </p>
           </div>
           <div className="flex items-center gap-3 w-full sm:w-auto">
@@ -279,7 +380,7 @@ export default function NetworkView({
               type="range"
               min={1}
               max={maxOverlap}
-              value={minimumOverlap}
+              value={Math.min(minimumOverlap, maxOverlap)}
               onChange={(event) => setMinimumOverlap(Number(event.target.value))}
               className="accent-black flex-1"
             />
@@ -305,16 +406,14 @@ export default function NetworkView({
 
       {/* Main layout */}
       <div className="grid grid-cols-1 lg:grid-cols-[7fr_3fr] gap-4 sm:gap-5 items-start">
-
         <div className="flex flex-col gap-4 sm:gap-5 min-w-0">
-
           {viewMode === 'graph' ? (
-            <section className="bg-white border border-[#e8eef5] rounded-[16px] sm:rounded-[18px] p-4 sm:p-[18px] shadow-[0_8px_20px_rgba(15,23,42,0.05)] overflow-hidden">
+            <section className="w-full min-w-0 mx-auto bg-white border border-[#e8eef5] rounded-[16px] sm:rounded-[18px] p-3 sm:p-4 shadow-[0_8px_20px_rgba(15,23,42,0.05)] overflow-hidden">
               <div className="flex justify-between gap-3 mb-2 flex-wrap">
                 <div>
                   <h3 className="m-0 text-[0.95rem] sm:text-[1.05rem] font-bold tracking-[-0.02em]">Concept graph</h3>
                   <p className="mt-1.5 text-[#94a3b8] text-[0.9rem] leading-[1.55]">
-                    Node size reflects connection count, edge width reflects shared concepts, and colors indicate video domain.
+                    Node size reflects connection count, edge width reflects shared concepts, and colors indicate video domain. Hover for titles; click to focus.
                   </p>
                 </div>
                 <span className="text-[0.8rem] text-[#64748b] whitespace-nowrap">{graphNodes.length} nodes</span>
@@ -374,7 +473,7 @@ export default function NetworkView({
               {/* Legend */}
               <div className="flex flex-wrap gap-x-3.5 gap-y-2.5 text-[#334155] text-[0.84rem] mt-4">
                 {[
-                  ['#e11d48', 'Computer Science'],
+                  ['#dd37b9', 'Computer Science'],
                   ['#2563eb', 'AI / ML'],
                   ['#7c3aed', 'Computer Vision'],
                   ['#db2777', 'NLP'],
@@ -391,13 +490,19 @@ export default function NetworkView({
               </div>
 
               {/* Graph SVG */}
-              <div className="w-full overflow-auto rounded-[18px] border border-[#f1f5f9] bg-gradient-to-b from-[#f8fafc] to-white mt-4">
-                <svg viewBox="0 0 920 520" className="w-full min-w-[760px] min-h-[520px] block" role="img" aria-label="Video relationship graph">
+              <div className="w-full min-w-0 overflow-x-auto rounded-[18px] border border-[#f1f5f9] bg-gradient-to-b from-[#f8fafc] to-white mt-3">
+                <svg
+                  viewBox={graphViewBox}
+                  preserveAspectRatio="xMidYMid meet"
+                  className="block w-full min-w-[400px] h-[280px] sm:min-w-0 sm:h-[860px]"
+                  role="group"
+                  aria-label="Video relationship graph"
+                >
                   {displayedEdges.map((edge) => {
                     const source = nodeMap.get(edge.sourceId)
                     const target = nodeMap.get(edge.targetId)
                     if (!source || !target) return null
-                    const isActive = !focusedVideoId || edge.sourceId === focusedVideoId || edge.targetId === focusedVideoId
+                    const highlighted = hoveredVideoId === edge.sourceId || hoveredVideoId === edge.targetId || !!focusedVideoId
                     return (
                       <line
                         key={`${edge.sourceId}-${edge.targetId}`}
@@ -405,44 +510,63 @@ export default function NetworkView({
                         y1={source.y}
                         x2={target.x}
                         y2={target.y}
-                        stroke={isActive ? 'rgba(15,23,42,0.42)' : 'rgba(15,23,42,0.18)'}
+                        stroke={highlighted ? 'rgba(15,23,42,0.48)' : 'rgba(15,23,42,0.18)'}
                         strokeLinecap="round"
-                        strokeWidth={1.5 + edge.weight * 1.2}
-                        opacity={isActive ? 1 : 0.18}
-                        className="transition-[opacity,stroke] duration-[180ms]"
+                        strokeWidth={highlighted ? Math.min(2.5, 0.9 + edge.weight * 0.35) : Math.min(1.6, 0.6 + edge.weight * 0.2)}
+                        className="pointer-events-none"
                       />
                     )
                   })}
                   {graphNodes.map((node) => {
                     const dimmed = !!focusedVideoId && !node.isFocused && !node.isNeighbor
+                    const showLabel = node.isFocused || node.isSelected || hoveredVideoId === node.video.id
                     return (
                       <g
                         key={node.video.id}
-                        className={`cursor-pointer transition-[opacity,transform] duration-[180ms] ${dimmed ? 'opacity-[0.24]' : ''}`}
+                        className="cursor-pointer"
+                        style={{ opacity: dimmed ? 0.22 : 1 }}
                         transform={`translate(${node.x}, ${node.y})`}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`${node.video.title}, ${node.connectionCount} links. Press Enter to focus.`}
+                        onMouseEnter={() => setHoveredVideoId(node.video.id)}
+                        onMouseLeave={() => setHoveredVideoId(null)}
+                        onFocus={() => setHoveredVideoId(node.video.id)}
+                        onBlur={() => setHoveredVideoId(null)}
                         onClick={() => setFocusedVideoId((current) => (current === node.video.id ? null : node.video.id))}
                         onDoubleClick={() => onOpenVideo(node.video.id)}
+                        onKeyDown={(event) => {
+                          if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault()
+                            setFocusedVideoId((current) => (current === node.video.id ? null : node.video.id))
+                          }
+                        }}
                       >
+                        <title>{node.video.title}</title>
                         <circle
                           r={node.radius}
                           fill={getDomainColor(node.video.domain)}
-                          stroke={node.isFocused || node.isSelected ? '#0f172a' : 'rgba(255,255,255,0.95)'}
-                          strokeWidth={3}
+                          stroke={node.isFocused || node.isSelected ? '#0f172a' : '#ffffff'}
+                          strokeWidth={node.isFocused || node.isSelected ? 3 : 2}
                         />
-                        <circle r={node.radius + 6} fill="none" stroke="rgba(15,23,42,0.28)" strokeWidth={2} />
-                        <text textAnchor="middle" dy={4} fill="#ffffff" fontSize="0.85rem" fontWeight={800} className="pointer-events-none">
-                          {node.connectionCount}
-                        </text>
-                        <text
-                          textAnchor="middle"
-                          y={node.radius + 18}
-                          fill="#0f172a"
-                          fontSize="0.78rem"
-                          fontWeight={700}
-                          className="pointer-events-none"
-                        >
-                          {node.video.title.length > 26 ? `${node.video.title.slice(0, 26)}…` : node.video.title}
-                        </text>
+                        {node.isFocused || node.isSelected ? (
+                          <circle r={node.radius + 5} fill="none" stroke="rgba(15,23,42,0.4)" strokeWidth={1.5} />
+                        ) : null}
+                        {showLabel ? (
+                          <text
+                            textAnchor="middle"
+                            y={node.radius + 19}
+                            fill="#0f172a"
+                            fontSize="12"
+                            fontWeight={700}
+                            stroke="#ffffff"
+                            strokeWidth={3}
+                            paintOrder="stroke"
+                            className="pointer-events-none"
+                          >
+                            {node.video.title.length > 26 ? `${node.video.title.slice(0, 26)}…` : node.video.title}
+                          </text>
+                        ) : null}
                       </g>
                     )
                   })}
@@ -467,12 +591,10 @@ export default function NetworkView({
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {visibleVideos.map((video) => {
+                {nodeListVideos.map((video) => {
                   const isSelected = video.id === selectedVideoId
                   const isFocused = video.id === focusedVideoId
-                  const connectionCount = filteredEdges.filter(
-                    (edge) => edge.sourceId === video.id || edge.targetId === video.id,
-                  ).length
+                  const connectionCount = connectionCounts.get(video.id) ?? 0
 
                   return (
                     <article
@@ -490,22 +612,23 @@ export default function NetworkView({
                       <h4 className="m-0 text-[0.95rem] font-bold leading-snug">{video.title}</h4>
                       <p className="text-[#334155] m-0 text-sm">{video.summaryShort}</p>
 
-                      <div className="flex flex-wrap gap-2">
-                        {video.keyConcepts.slice(0, 4).map((concept) => (
-                          <button
-                            key={concept}
-                            type="button"
-                            className={`inline-flex items-center px-3 py-1.5 rounded-full text-[0.78rem] font-semibold border transition-all duration-[180ms] ${
-                              selectedConcept === concept
-                                ? 'bg-black text-white border-black'
-                                : 'bg-[#f3f4f6] text-[#0f172a] border-[#d9e2ec]'
-                            }`}
-                            onClick={() => onSelectConcept(selectedConcept === concept ? null : concept)}
-                          >
-                            {concept}
-                          </button>
+                      <p className="m-0 text-[0.82rem] leading-relaxed text-[#334155]">
+                        <span className="font-semibold text-[#0f172a]">Key concepts: </span>
+                        {video.keyConcepts.slice(0, 4).map((concept, index, list) => (
+                          <span key={concept}>
+                            <button
+                              type="button"
+                              className={`border-none bg-transparent p-0 text-[0.82rem] underline underline-offset-2 cursor-pointer hover:text-black ${
+                                selectedConcept === concept ? "font-bold text-black" : "font-medium text-[#334155]"
+                              }`}
+                              onClick={() => onSelectConcept(selectedConcept === concept ? null : concept)}
+                            >
+                              {concept}
+                            </button>
+                            {index < list.length - 1 ? ", " : ""}
+                          </span>
                         ))}
-                      </div>
+                      </p>
 
                       <div className="flex justify-between items-center gap-2 mt-1">
                         <span className="text-[0.78rem] text-[#64748b]">{video.totalChapters} chapters</span>
@@ -530,6 +653,21 @@ export default function NetworkView({
                   )
                 })}
               </div>
+
+        {remainingVideoCount > 0 ? (
+          <div className="mt-4 flex justify-center">
+            <button
+              type="button"
+              className="border border-black rounded-[12px] bg-white text-black px-4 py-2 text-sm font-semibold hover:bg-[#f8f8f8] transition-all duration-[180ms]"
+              onClick={() => setShowRemainingVideos((open) => !open)}
+              aria-expanded={showRemainingVideos}
+            >
+              {showRemainingVideos
+                ? "Show fewer videos"
+                : `Show the remaining videos (${remainingVideoCount})`}
+            </button>
+          </div>
+        ) : null}
             </section>
           ) : null}
 
@@ -564,22 +702,23 @@ export default function NetworkView({
                           </span>
                         </div>
 
-                        <div className="flex flex-wrap gap-2">
-                          {edge.sharedConcepts.map((concept) => (
-                            <button
-                              key={concept}
-                              type="button"
-                              className={`inline-flex items-center px-3 py-1.5 rounded-full text-[0.78rem] font-semibold border transition-all duration-[180ms] ${
-                                selectedConcept === concept
-                                  ? 'bg-black text-white border-black'
-                                  : 'bg-[#f3f4f6] text-[#0f172a] border-[#d9e2ec]'
-                              }`}
-                              onClick={() => onSelectConcept(selectedConcept === concept ? null : concept)}
-                            >
-                              {concept}
-                            </button>
+                        <p className="m-0 text-[0.82rem] leading-relaxed text-[#334155]">
+                          <span className="font-semibold text-[#0f172a]">Shared concepts: </span>
+                          {edge.sharedConcepts.map((concept, index) => (
+                            <span key={concept}>
+                              <button
+                                type="button"
+                                className={`border-none bg-transparent p-0 text-[0.82rem] underline underline-offset-2 cursor-pointer hover:text-black ${
+                                  selectedConcept === concept ? "font-bold text-black" : "font-medium text-[#334155]"
+                                }`}
+                                onClick={() => onSelectConcept(selectedConcept === concept ? null : concept)}
+                              >
+                                {concept}
+                              </button>
+                              {index < edge.sharedConcepts.length - 1 ? ", " : ""}
+                            </span>
                           ))}
-                        </div>
+                        </p>
 
                         <div className="flex gap-2 flex-wrap">
                           <button
@@ -621,28 +760,41 @@ export default function NetworkView({
                 </p>
                 <h4 className="m-0 text-[0.95rem] font-bold leading-snug">{focusedVideo.title}</h4>
                 <p className="text-[#334155] m-0 text-sm">{focusedVideo.summaryShort}</p>
-                <div className="flex flex-wrap gap-2">
-                  {focusedVideo.keyConcepts.map((concept) => (
-                    <button
-                      key={concept}
-                      type="button"
-                      className={`inline-flex items-center px-3 py-1.5 rounded-full text-[0.78rem] font-semibold border transition-all duration-[180ms] ${
-                        selectedConcept === concept
-                          ? 'bg-black text-white border-black'
-                          : 'bg-[#f3f4f6] text-[#0f172a] border-[#d9e2ec]'
-                      }`}
-                      onClick={() => onSelectConcept(selectedConcept === concept ? null : concept)}
-                    >
-                      {concept}
-                    </button>
-                  ))}
-                </div>
+                <div className="flex flex-col gap-2">
+                  <p className="m-0 text-[0.82rem] leading-relaxed text-[#334155]">
+                    <span className="font-semibold text-[#0f172a]">Key concepts: </span>
+                    {visibleFocusConcepts.map((concept, index, list) => (
+                      <span key={concept}>
+                        <button
+                          type="button"
+                          className={`border-none bg-transparent p-0 text-[0.82rem] underline underline-offset-2 cursor-pointer hover:text-black ${
+                            selectedConcept === concept ? "font-bold text-black" : "font-medium text-[#334155]"
+                          }`}
+                          onClick={() => onSelectConcept(selectedConcept === concept ? null : concept)}
+                        >
+                          {concept}
+                        </button>
+                        {index < list.length - 1 ? ", " : ""}
+                      </span>
+                    ))}
+                  </p>
+                {hiddenFocusConceptCount > 0 ? (
+                  <button
+                    type="button"
+                    className="self-end border-none bg-transparent p-0 text-[0.82rem] underline underline-offset-2 cursor-pointer hover:text-black"
+                    onClick={() => setShowAllFocusConcepts((open) => !open)}
+                    aria-expanded={showAllFocusConcepts}
+                  >
+                    {showAllFocusConcepts ? "Show less" : `Show more (${hiddenFocusConceptCount})`}
+                  </button>
+                ) : null}
+              </div>
                 <button
                   type="button"
                   className="border border-black rounded-[12px] bg-black text-white px-4 py-2 text-sm font-bold shadow-[0_16px_28px_rgba(0,0,0,0.14)] hover:bg-[#111] transition-all duration-[180ms] mt-1"
                   onClick={() => onOpenVideo(focusedVideo.id)}
                 >
-                  Open video explorer
+                  Open video
                 </button>
               </div>
             )}

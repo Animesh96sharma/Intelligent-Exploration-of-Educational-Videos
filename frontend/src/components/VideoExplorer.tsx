@@ -40,6 +40,26 @@ function shuffleArray<T>(items: T[]) {
   return next
 }
 
+const OBJECTIVE_MARKER = /(After (?:this|the) (?:chapter|lecture|video),?)/gi;
+
+function regroupObjectives(raw: string[]): string[] {
+  // Glue everything back together, then cut at each "After this chapter" marker
+  const joined = raw.join(" ").replace(/\s+/g, " ").trim();
+  const parts = joined.split(OBJECTIVE_MARKER).map((p) => p.trim());
+
+  const result: string[] = [];
+  for (let i = 0; i < parts.length; i++) {
+    if (new RegExp(OBJECTIVE_MARKER.source, "i").test(parts[i])) {
+      const body = (parts[i + 1] ?? "").replace(/^[,;\s]+|[,;\s]+$/g, "");
+      if (body) result.push(`${parts[i].replace(/,$/, "")}, ${body}`);
+      i++;
+    } else if (parts[i] && result.length === 0) {
+      result.push(parts[i]); // text with no marker at all
+    }
+  }
+  return result.length ? result : raw;
+}
+
 function ensureStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return []
   return value.filter((item): item is string => typeof item === 'string' && item.trim().length > 0)
@@ -345,6 +365,47 @@ export default function VideoExplorer({
     return <div className="w-full max-w-full mx-auto py-10 text-center text-slate-500">No video data available.</div>
   }
 
+  const expandedDetails = detailsExpanded ? (
+    <div className="flex flex-col gap-3.5 border-t border-slate-200 pt-4">
+      {selectedChapterObjectives.length > 0 ? (
+        <div className="flex flex-col gap-2.5">
+          <h4 className="m-0 text-[0.95rem] sm:text-[1.05rem] font-bold tracking-[-0.02em]">Learning objectives</h4>
+          <ul className="m-0 pl-4.5 text-slate-600 list-disc">
+            {regroupObjectives(selectedChapterObjectives).map((objective) => (
+              <li key={objective}>{objective}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {selectedChapterConcepts.length > 0 ? (
+        <div className="flex flex-col gap-2.5">
+          <h4 className="m-0 text-[0.95rem] sm:text-[1.05rem] font-bold tracking-[-0.02em]">Chapter-level Key concepts</h4>
+          <p className="m-0 text-[0.95rem] sm:text-[1.05rem] font-normal tracking-[-0.02em]">
+            {selectedChapterConcepts.join(", ")}
+          </p>
+        </div>
+      ) : null}
+
+      <div className="flex flex-col gap-2.5">
+        <h4 className="m-0 text-[0.95rem] sm:text-[1.05rem] font-bold tracking-[-0.02em]">All Key concepts</h4>
+        <p className="m-0 text-[0.95rem] sm:text-[1.05rem] font-normal tracking-[-0.02em]">
+          {videoConcepts.length === 0 ? "No concepts available." : videoConcepts.join(", ")}
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">📖Domain: {video.domain ?? 'Educational video'}</h4>
+        <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">🗣Speaker: {video.author ?? 'Unknown speaker'}</h4>
+        <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">📚Total Chapters: {video.totalChapters ?? chapters.length}</h4>
+        <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">ⴵDuration: {formatDurationMinutes(video.duration)}</h4>
+        {video.difficultyLevel ? (
+          <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">🚩Difficulty: {video.difficultyLevel}</h4>
+        ) : null}
+      </div>
+    </div>
+  ) : null;
+
   return (
     <section className="w-full max-w-full mx-auto flex flex-col gap-5">
       <div className="flex flex-col lg:flex-row gap-5 w-full items-start">
@@ -519,121 +580,46 @@ export default function VideoExplorer({
           </div>
 
           <div className="flex flex-col gap-3.5">
-            <div className="flex flex-col gap-2">
-              {chapters.length > 0 && activePlaybackChapter ? (
-                <article className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
-                  <div className="flex justify-between items-start gap-3 flex-wrap">
-                    <div>
-                      <h3 className="m-0 text-[1.08rem] leading-tight tracking-tight text-slate-900">
-                        {activePlaybackChapter.index ?? chapters.indexOf(activePlaybackChapter) + 1}. {activePlaybackChapter.title ?? 'Untitled chapter'}
-                      </h3>
-                      <p className="text-slate-600">{getBestChapterSummary(activePlaybackChapter, summaryLevel)}</p>
-                    </div>
-                  </div>
+            {chapters.length > 0 && activePlaybackChapter ? (
+              <article className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
+                <div>
+                  <h3 className="m-0 text-[0.95rem] sm:text-[1.05rem] font-bold tracking-[-0.02em]">Chapter{' '}
+                    {activePlaybackChapter.index ?? chapters.indexOf(activePlaybackChapter) + 1}: {activePlaybackChapter.title ?? 'Untitled chapter'}
+                  </h3>
+                  <p className="text-slate-600">{getBestChapterSummary(activePlaybackChapter, summaryLevel)}</p>
+                </div>
 
-                  <button
-                    type="button"
-                    className=" self-start border-none bg-transparent text-black text-align-right font-semibold p-0"
-                    onClick={() => setDetailsExpanded((open) => !open)}
-                    aria-expanded={detailsExpanded}
-                  >
-                    {detailsExpanded ? 'Show less' : 'Show more...'}
-                  </button>
-                </article>
-              ) : (
-                <article className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
-                  <div className="flex justify-between items-start gap-3 flex-wrap">
-                    <div>
-                      <p className="inline-flex items-center gap-2 m-0 text-xs font-extrabold tracking-widest uppercase text-black">Selected chapter</p>
-                      <h3 className="m-0 text-[1.08rem] leading-tight tracking-tight text-slate-900">No chapter data available</h3>
-                    </div>
-                  </div>
-                  <p className="text-slate-600">This video does not currently have usable chapter information.</p>
+                {expandedDetails}
 
-                  <button
-                    type="button"
-                    className="sm:hidden self-start border-none bg-transparent text-black text-align-right font-semibold "
-                    onClick={() => setDetailsExpanded((open) => !open)}
-                    aria-expanded={detailsExpanded}
-                  >
-                    {detailsExpanded ? 'Show less' : 'Show more...'}
-                  </button>
-                </article>
-              )}
-            </div>
+                <button
+                  type="button"
+                  className="self-start border-none bg-transparent text-black font-semibold p-0 underline underline-offset-2"
+                  onClick={() => setDetailsExpanded((open) => !open)}
+                  aria-expanded={detailsExpanded}
+                >
+                  {detailsExpanded ? 'Show less' : 'Show more...'}
+                </button>
+              </article>
+            ) : (
+              <article className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3">
+                <div>
+                  <p className="inline-flex items-center gap-2 m-0 text-xs font-extrabold tracking-widest uppercase text-black">Selected chapter</p>
+                  <h3 className="m-0 text-[1.08rem] leading-tight tracking-tight text-slate-900">No chapter data available</h3>
+                </div>
+                <p className="text-slate-600">This video does not currently have usable chapter information.</p>
 
-            {detailsExpanded ? (
-              <div className="flex flex-col gap-4">
-                <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3.5">
-                  {selectedChapterObjectives.length > 0 ? (
-                    <div className="flex flex-col gap-2.5">
-                      <h4 className="m-0 text-[0.96rem] tracking-tight text-slate-900">Learning objectives</h4>
-                      <ul className="m-0 pl-4.5 text-slate-600 list-disc">
-                        {selectedChapterObjectives.map((objective) => (
-                          <li key={objective}>{objective}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
+                {expandedDetails}
 
-                  {selectedChapterConcepts.length > 0 ? (
-                    <div className="flex flex-col gap-2.5">
-                      <h4 className="m-0 text-[0.96rem] tracking-tight text-slate-900">↗Important chapter concepts</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedChapterConcepts.map((concept) => (
-                          <button
-                            key={concept}
-                            type="button"
-                            className={`inline-flex items-center rounded-full border px-2.5 py-1.5 text-xs font-bold ${
-                              selectedConcept === concept
-                                ? 'bg-black text-white border-black'
-                                : 'bg-white text-black border-black'
-                            }`}
-                            onClick={() => onSelectConcept(concept)}
-                          >
-                            {concept}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-
-                  <div className="flex flex-col gap-2.5">
-                    <h4 className="m-0 text-[0.96rem] tracking-tight text-slate-900">↗Important concepts</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {videoConcepts.length === 0 ? (
-                        <p className="text-slate-600">No concepts available.</p>
-                      ) : (
-                        videoConcepts.map((concept) => (
-                          <button
-                            key={concept}
-                            type="button"
-                            className={`inline-flex items-center rounded-full border px-2.5 py-1.5 text-xs font-bold ${
-                              selectedConcept === concept
-                                ? 'bg-black text-white border-black'
-                                : 'bg-white text-black border-black'
-                            }`}
-                            onClick={() => onSelectConcept(concept)}
-                          >
-                            {concept}
-                          </button>
-                        ))
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">📖Domain: {video.domain ?? 'Educational video'}</h4>
-                    <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">🗣Speaker: {video.author ?? 'Unknown speaker'}</h4>
-                    <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">📚Total Chapters: {video.totalChapters ?? chapters.length}</h4>
-                    <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">ⴵDuration: {formatDurationMinutes(video.duration)}</h4>
-                    {video.difficultyLevel ? (
-                      <h4 className="m-0 italic font-semibold text-[0.95rem] text-slate-900">🚩Difficulty: {video.difficultyLevel}</h4>
-                    ) : null}
-                  </div>
-                </section>
-              </div>
-            ) : null}
+                <button
+                  type="button"
+                  className="self-start border-none bg-transparent text-black font-semibold p-0 underline underline-offset-2"
+                  onClick={() => setDetailsExpanded((open) => !open)}
+                  aria-expanded={detailsExpanded}
+                >
+                  {detailsExpanded ? 'Show less' : 'Show more...'}
+                </button>
+              </article>
+            )}
           </div>
 
           <section className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex flex-col gap-3.5">
